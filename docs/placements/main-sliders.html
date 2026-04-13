@@ -181,6 +181,7 @@ async function loadData() {
 
     render();
   } catch (e) {
+    console.error('loadData error:', e);
     document.getElementById('freshness-text').textContent = 'Error al cargar datos';
     document.getElementById('freshness-dot').className    = 'freshness-dot error';
   }

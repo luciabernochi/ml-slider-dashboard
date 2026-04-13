@@ -72,9 +72,9 @@ export function aggregateByWeek(rows, filter = {}) {
     const key = r.WEEK;
     if (!map.has(key)) map.set(key, { prints: 0, clicks: 0, gmv: 0, year: r.YEAR_FROM_WEEK });
     const acc = map.get(key);
-    acc.prints += r.MKTPLACE_PRINTS || 0;
-    acc.clicks += r.MKTPLACE_CLICKS || 0;
-    acc.gmv    += r.MKTPLACE_GMV    || 0;
+    acc.prints += Number(r.MKTPLACE_PRINTS) || 0;
+    acc.clicks += Number(r.MKTPLACE_CLICKS) || 0;
+    acc.gmv    += Number(r.MKTPLACE_GMV)    || 0;
     acc.year    = r.YEAR_FROM_WEEK;
   }
 
@@ -141,9 +141,9 @@ export function aggregateByCampaign(rows, filter = {}, weekFilter = null) {
       });
     }
     const acc = map.get(key);
-    acc.prints += r.MKTPLACE_PRINTS || 0;
-    acc.clicks += r.MKTPLACE_CLICKS || 0;
-    acc.gmv    += r.MKTPLACE_GMV    || 0;
+    acc.prints += Number(r.MKTPLACE_PRINTS) || 0;
+    acc.clicks += Number(r.MKTPLACE_CLICKS) || 0;
+    acc.gmv    += Number(r.MKTPLACE_GMV)    || 0;
   }
 
   return [...map.values()].map(r => ({

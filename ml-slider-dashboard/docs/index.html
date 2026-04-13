@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML Ads Dashboard</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .placement-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      transition: box-shadow .15s, border-color .15s;
+      display: block;
+    }
+    .placement-card:hover {
+      box-shadow: 0 4px 16px rgba(59,91,219,.12);
+      border-color: var(--accent);
+    }
+    .placement-card.ready .pc-badge { background: var(--up-bg); color: var(--up); }
+    .placement-card.soon  .pc-badge { background: #f1f2f6; color: #888; }
+    .pc-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: 12px;
+    }
+    .pc-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .pc-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-brand"><span>◆</span> ML Ads Dashboard</div>
+  <a class="nav-link active" href="index.html">Inicio</a>
+  <a class="nav-link" href="placements/main-sliders.html">Main Sliders</a>
+  <a class="nav-link" href="placements/landings.html">Landings</a>
+  <a class="nav-link" href="placements/containers.html">Containers</a>
+  <a class="nav-link" href="placements/rabbit-hole.html">Rabbit Hole</a>
+  <a class="nav-link" href="placements/placement-pers.html">Placement Pers.</a>
+  <a class="nav-link" href="placements/tabs.html">Tabs</a>
+</nav>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dashboard Ejecutivo — ML Advertising</div>
+      <div class="page-subtitle">Seguimiento de métricas por placement</div>
+    </div>
+  </div>
+
+  <div class="home-grid">
+    <a class="placement-card ready" href="placements/main-sliders.html">
+      <div class="pc-badge">Disponible</div>
+      <div class="pc-title">Main Sliders</div>
+      <div class="pc-desc">CTR, Impresiones, Clicks y GMV del Main Slider Home. Filtros por segmentación y tipo de campaña.</div>
+    </a>
+    <a class="placement-card soon" href="placements/landings.html">
+      <div class="pc-badge">Próximamente</div>
+      <div class="pc-title">Landings</div>
+      <div class="pc-desc">Métricas de performance de las landing pages publicitarias.</div>
+    </a>
+    <a class="placement-card soon" href="placements/containers.html">
+      <div class="pc-badge">Próximamente</div>
+      <div class="pc-title">Containers</div>
+      <div class="pc-desc">Seguimiento de impresiones y CTR en containers de display.</div>
+    </a>
+    <a class="placement-card soon" href="placements/rabbit-hole.html">
+      <div class="pc-badge">Próximamente</div>
+      <div class="pc-title">Rabbit Hole</div>
+      <div class="pc-desc">Métricas de Rabbit Hole por campaña y segmentación.</div>
+    </a>
+    <a class="placement-card soon" href="placements/placement-pers.html">
+      <div class="pc-badge">Próximamente</div>
+      <div class="pc-title">Placement Personalization</div>
+      <div class="pc-desc">Performance de los placements personalizados.</div>
+    </a>
+    <a class="placement-card soon" href="placements/tabs.html">
+      <div class="pc-badge">Próximamente</div>
+      <div class="pc-title">Tabs</div>
+      <div class="pc-desc">Métricas de tabs publicitarias en navegación.</div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

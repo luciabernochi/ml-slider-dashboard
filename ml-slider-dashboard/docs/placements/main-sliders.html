@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main Sliders — Dashboard Ejecutivo</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+
+<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
+<nav class="top-nav">
+  <div class="nav-brand"><span>◆</span> ML Ads Dashboard</div>
+  <a class="nav-link active" href="main-sliders.html">Main Sliders</a>
+  <a class="nav-link" href="landings.html">Landings</a>
+  <a class="nav-link" href="containers.html">Containers</a>
+  <a class="nav-link" href="rabbit-hole.html">Rabbit Hole</a>
+  <a class="nav-link" href="placement-pers.html">Placement Pers.</a>
+  <a class="nav-link" href="tabs.html">Tabs</a>
+</nav>
+
+<!-- ─── Page ─────────────────────────────────────────────────────────────────── -->
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Main Sliders</div>
+      <div class="page-subtitle" id="subtitle">Métricas semanales · últimas 13 semanas</div>
+    </div>
+    <div id="freshness-badge" class="freshness">
+      <span class="freshness-dot" id="freshness-dot"></span>
+      <span id="freshness-text">Cargando…</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <span class="filter-label">Site</span>
+      <select class="filter-select" id="filter-site">
+        <option value="MLA">MLA</option>
+        <option value="MLB">MLB</option>
+        <option value="MLM">MLM</option>
+        <option value="MLC">MLC</option>
+        <option value="MLU">MLU</option>
+        <option value="MCO">MCO</option>
+        <option value="MPE">MPE</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Segmentación</span>
+      <div class="toggle-group" id="toggle-seg">
+        <button data-val="" class="active">Todos</button>
+        <button data-val="NO SEGMENTADO">No Seg.</button>
+        <button data-val="SEGMENTADO">Seg.</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Tipo</span>
+      <div class="toggle-group" id="toggle-type">
+        <button data-val="">Todos</button>
+        <button data-val="MKTPLACE" class="active">Mktplace</button>
+        <button data-val="PLAY">Play</button>
+        <button data-val="ADS">Ads</button>
+      </div>
+    </div>
+
+    <div class="filter-group" style="margin-left:auto">
+      <span class="filter-label">Gráfico</span>
+      <div class="toggle-group" id="toggle-metric">
+        <button data-val="prints" class="active">Impresiones</button>
+        <button data-val="clicks">Clicks</button>
+        <button data-val="ctr">CTR</button>
+        <button data-val="gmv">GMV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+  </div>
+
+  <!-- Chart + Table -->
+  <div class="content-grid">
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="chart-title">Tendencia semanal</span>
+        <div class="week-nav">
+          <button id="btn-prev" title="Semana anterior">‹</button>
+          <span id="week-label">—</span>
+          <button id="btn-next" title="Semana siguiente">›</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="trend-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Detalle por campaña</span>
+        <span id="table-week-label" style="font-size:11px;color:var(--text-muted)"></span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="data-table-wrap">
+          <table class="data-table" id="main-table">
+            <thead>
+              <tr>
+                <th data-col="campaign" style="min-width:160px">Campaña</th>
+                <th data-col="type">Tipo</th>
+                <th data-col="prints">Impresiones</th>
+                <th data-col="clicks">Clicks</th>
+                <th data-col="ctr">CTR</th>
+                <th data-col="gmv">GMV</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6" class="state-loading">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-grid -->
+</div><!-- /page-wrapper -->
+
+<script type="module">
+import {
+  fmtNum, fmtPct, fmtUSD, calcDelta, deltaBadge, fmtWeekLabel, fmtRefreshed,
+  aggregateByWeek, getWeeks, getWeeklyKPIs, aggregateByCampaign
+} from '../assets/js/utils.js';
+import { buildTrendChart, updateTrendChart } from '../assets/js/charts.js';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let allData       = [];
+let trendChart    = null;
+let sortCol       = 'prints';
+let sortAsc       = false;
+let selectedWeek  = null;  // week string currently highlighted in table
+
+const state = {
+  site: 'MLA',
+  segmentation: '',
+  type: 'MKTPLACE',
+  metric: 'prints',
+};
+
+// ─── Load data ────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch('../data.json');
+    const json = await res.json();
+    allData    = json.data || [];
+
+    // Freshness
+    const ts   = json.refreshed_at;
+    const dot  = document.getElementById('freshness-dot');
+    const txt  = document.getElementById('freshness-text');
+    if (ts) {
+      txt.textContent = 'Actualizado ' + fmtRefreshed(ts);
+      dot.className   = 'freshness-dot';
+    } else {
+      txt.textContent = 'Sin datos';
+      dot.className   = 'freshness-dot error';
+    }
+
+    render();
+  } catch (e) {
+    document.getElementById('freshness-text').textContent = 'Error al cargar datos';
+    document.getElementById('freshness-dot').className    = 'freshness-dot error';
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const rows    = allData.filter(r => r.site === state.site);
+  const filter  = { segmentation: state.segmentation || null, type: state.type || null };
+  const weekMap = aggregateByWeek(rows, filter);
+  const cyWeeks = getWeeks(weekMap, 'CY');
+  const lyWeeks = getWeeks(weekMap, 'LY');
+
+  if (!selectedWeek || !cyWeeks.includes(selectedWeek)) {
+    selectedWeek = cyWeeks[cyWeeks.length - 1] || null;
+  }
+
+  renderKPIs(weekMap);
+  renderChart(weekMap, cyWeeks, lyWeeks);
+  renderTable(rows, filter);
+  renderWeekNav(cyWeeks);
+}
+
+// ─── KPIs ─────────────────────────────────────────────────────────────────────
+function renderKPIs(weekMap) {
+  const { curr, prev } = getWeeklyKPIs(weekMap);
+  const grid           = document.getElementById('kpi-grid');
+
+  if (!curr) {
+    grid.innerHTML = '<div class="kpi-card"><div class="state-empty">Sin datos para los filtros seleccionados</div></div>';
+    return;
+  }
+
+  const kpis = [
+    { label: 'Impresiones', value: fmtNum(curr.prints), delta: calcDelta(curr.prints, prev?.prints), sub: 'semana actual' },
+    { label: 'Clicks',      value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks), sub: 'semana actual' },
+    { label: 'CTR',         value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr),    sub: 'semana actual' },
+    { label: 'GMV',         value: fmtUSD(curr.gmv),    delta: calcDelta(curr.gmv,    prev?.gmv),    sub: 'semana actual' },
+  ];
+
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-footer">
+        ${deltaBadge(k.delta)}
+        <span>vs semana anterior</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Chart ────────────────────────────────────────────────────────────────────
+function getMetricFmt(metric) {
+  if (metric === 'ctr') return fmtPct;
+  if (metric === 'gmv') return fmtUSD;
+  return fmtNum;
+}
+
+function renderChart(weekMap, cyWeeks, lyWeeks) {
+  const metric = state.metric;
+  const fmtFn  = getMetricFmt(metric);
+
+  const labels = cyWeeks.map(w => fmtWeekLabel(w));
+  const cyData = cyWeeks.map(w => weekMap.get(w)?.[metric] ?? 0);
+
+  // Align LY weeks by week-number offset
+  const cyStart  = cyWeeks[0] ? new Date(cyWeeks[0]).getTime() : 0;
+  const lyData   = cyWeeks.map((w, i) => {
+    const lyW = lyWeeks[i];
+    return lyW ? (weekMap.get(lyW)?.[metric] ?? null) : null;
+  });
+
+  const metricLabel = { prints: 'Impresiones', clicks: 'Clicks', ctr: 'CTR', gmv: 'GMV' }[metric];
+  document.getElementById('chart-title').textContent = `Tendencia — ${metricLabel} (CY vs LY)`;
+
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  if (trendChart) {
+    updateTrendChart(trendChart, { labels, cyData, lyData, fmtFn });
+  } else {
+    trendChart = buildTrendChart(ctx, { labels, cyData, lyData, metric, fmtFn });
+  }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+function renderTable(rows, filter) {
+  const tbody    = document.getElementById('table-body');
+  const weekLbl  = document.getElementById('table-week-label');
+  const data     = aggregateByCampaign(rows, filter, selectedWeek);
+
+  weekLbl.textContent = selectedWeek ? 'Semana ' + fmtWeekLabel(selectedWeek) : '';
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="state-empty">Sin datos</td></tr>`;
+    return;
+  }
+
+  // Sort
+  data.sort((a, b) => {
+    const av = a[sortCol] ?? 0;
+    const bv = b[sortCol] ?? 0;
+    return sortAsc ? av - bv : bv - av;
+  });
+
+  const typeChip = t => `<span class="chip ${(t||'').toLowerCase()}">${t || '—'}</span>`;
+
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>
+        <div class="td-main" title="${r.campaign}">${r.campaign}</div>
+        <div class="td-sub">${r.lineItem}</div>
+      </td>
+      <td>${typeChip(r.type)}</td>
+      <td>${fmtNum(r.prints)}</td>
+      <td>${fmtNum(r.clicks)}</td>
+      <td>${fmtPct(r.ctr)}</td>
+      <td>${fmtUSD(r.gmv)}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── Week Nav ─────────────────────────────────────────────────────────────────
+function renderWeekNav(cyWeeks) {
+  const lbl  = document.getElementById('week-label');
+  const prev = document.getElementById('btn-prev');
+  const next = document.getElementById('btn-next');
+  const idx  = cyWeeks.indexOf(selectedWeek);
+
+  lbl.textContent      = selectedWeek ? 'Sem. ' + fmtWeekLabel(selectedWeek) : '—';
+  prev.disabled        = idx <= 0;
+  next.disabled        = idx >= cyWeeks.length - 1;
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+function bindToggle(groupId, stateKey) {
+  document.getElementById(groupId).addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    document.querySelectorAll(`#${groupId} button`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state[stateKey] = btn.dataset.val;
+    render();
+  });
+}
+
+bindToggle('toggle-seg',    'segmentation');
+bindToggle('toggle-type',   'type');
+bindToggle('toggle-metric', 'metric');
+
+document.getElementById('filter-site').addEventListener('change', e => {
+  state.site = e.target.value;
+  render();
+});
+
+// Table sort
+document.getElementById('main-table').querySelector('thead').addEventListener('click', e => {
+  const th  = e.target.closest('th');
+  if (!th?.dataset.col) return;
+  const col = th.dataset.col;
+  if (col === 'campaign' || col === 'type') return; // non-numeric cols
+  sortAsc = sortCol === col ? !sortAsc : false;
+  sortCol = col;
+  document.querySelectorAll('.data-table thead th').forEach(t => t.classList.remove('sorted'));
+  th.classList.add('sorted');
+  const rows   = allData.filter(r => r.site === state.site);
+  const filter = { segmentation: state.segmentation || null, type: state.type || null };
+  renderTable(rows, filter);
+});
+
+// Week nav
+document.getElementById('btn-prev').addEventListener('click', () => {
+  const rows    = allData.filter(r => r.site === state.site);
+  const filter  = { segmentation: state.segmentation || null, type: state.type || null };
+  const weekMap = aggregateByWeek(rows, filter);
+  const weeks   = getWeeks(weekMap, 'CY');
+  const idx     = weeks.indexOf(selectedWeek);
+  if (idx > 0) { selectedWeek = weeks[idx - 1]; render(); }
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  const rows    = allData.filter(r => r.site === state.site);
+  const filter  = { segmentation: state.segmentation || null, type: state.type || null };
+  const weekMap = aggregateByWeek(rows, filter);
+  const weeks   = getWeeks(weekMap, 'CY');
+  const idx     = weeks.indexOf(selectedWeek);
+  if (idx < weeks.length - 1) { selectedWeek = weeks[idx + 1]; render(); }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadData();
+// Auto-refresh every 5 min
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>

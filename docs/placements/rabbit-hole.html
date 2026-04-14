@@ -210,12 +210,15 @@ function renderKPIs(weekMap) {
     return;
   }
 
+  const currCvr = curr.clicks ? curr.orders / curr.clicks : 0;
+  const prevCvr = prev?.clicks ? prev.orders / prev.clicks : 0;
+
   const kpis = [
-    { label: 'Impresiones', value: fmtNum(curr.prints), delta: calcDelta(curr.prints, prev?.prints) },
-    { label: 'Views',       value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
-    { label: 'Clicks',      value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
-    { label: 'CTR',         value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr)    },
-    { label: 'Órdenes',     value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
+    { label: 'Clicks',  value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
+    { label: 'Views',   value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
+    { label: 'Órdenes', value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
+    { label: 'CTR',     value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr)    },
+    { label: 'CVR',     value: fmtPct(currCvr),     delta: calcDelta(currCvr,     prevCvr)      },
   ];
 
   grid.innerHTML = kpis.map(k => `

@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rabbit Hole — Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
+
+<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
 <nav class="top-nav">
   <div class="nav-brand"><span>◆</span> ML Ads Dashboard</div>
   <a class="nav-link" href="main-sliders.html">Main Sliders</a>
@@ -16,18 +20,327 @@
   <a class="nav-link" href="placement-pers.html">Placement Pers.</a>
   <a class="nav-link" href="tabs.html">Tabs</a>
 </nav>
+
+<!-- ─── Page ─────────────────────────────────────────────────────────────────── -->
 <div class="page-wrapper">
+
+  <!-- Header -->
   <div class="page-header">
     <div>
       <div class="page-title">Rabbit Hole</div>
-      <div class="page-subtitle">Próximamente</div>
+      <div class="page-subtitle">Métricas semanales · últimas 8 semanas</div>
+    </div>
+    <div id="freshness-badge" class="freshness">
+      <span class="freshness-dot" id="freshness-dot"></span>
+      <span id="freshness-text">Cargando…</span>
     </div>
   </div>
-  <div class="card" style="max-width:480px">
-    <div class="card-body state-empty">
-      Este placement está en desarrollo. Pasá la query de Rabbit Hole para activarlo.
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-group" style="margin-left:auto">
+      <span class="filter-label">Gráfico</span>
+      <div class="toggle-group" id="toggle-metric">
+        <button data-val="prints" class="active">Impresiones</button>
+        <button data-val="views">Views</button>
+        <button data-val="clicks">Clicks</button>
+        <button data-val="ctr">CTR</button>
+        <button data-val="orders">Órdenes</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+  </div>
+
+  <!-- Chart + Table -->
+  <div class="content-grid">
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="chart-title">Tendencia semanal</span>
+        <div class="week-nav">
+          <button id="btn-prev" title="Semana anterior">‹</button>
+          <span id="week-label">—</span>
+          <button id="btn-next" title="Semana siguiente">›</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="trend-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Detalle semanal</span>
+        <span id="table-week-label" style="font-size:11px;color:var(--text-muted)"></span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="data-table-wrap">
+          <table class="data-table" id="main-table">
+            <thead>
+              <tr>
+                <th data-col="week">Semana</th>
+                <th data-col="prints">Impresiones</th>
+                <th data-col="views">Views</th>
+                <th data-col="clicks">Clicks</th>
+                <th data-col="ctr">CTR</th>
+                <th data-col="orders">Órdenes</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6" class="state-loading">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-grid -->
+</div><!-- /page-wrapper -->
+
+<script type="module">
+import {
+  fmtNum, fmtPct, fmtUSD, calcDelta, deltaBadge, fmtWeekLabel, fmtRefreshed
+} from '../assets/js/utils.js';
+import { buildTrendChart, updateTrendChart } from '../assets/js/charts.js';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let allData    = [];
+let trendChart = null;
+let sortCol    = 'prints';
+let sortAsc    = false;
+let selectedWeek = null;
+
+const state = { metric: 'prints' };
+
+// ─── Aggregation ──────────────────────────────────────────────────────────────
+function aggregateByWeek(rows) {
+  const map = new Map();
+  for (const r of rows) {
+    const key = r.WEEK;
+    if (!map.has(key)) map.set(key, { prints: 0, views: 0, clicks: 0, orders: 0, year: r.YEAR_FROM_WEEK });
+    const acc = map.get(key);
+    acc.prints += Number(r.PRINTS) || 0;
+    acc.views  += Number(r.VIEWS)  || 0;
+    acc.clicks += Number(r.CLICKS) || 0;
+    acc.orders += Number(r.ORDERS) || 0;
+  }
+  map.forEach(v => { v.ctr = v.prints ? v.clicks / v.prints : 0; });
+  return map;
+}
+
+function getWeeks(weekMap, yearTag) {
+  return [...weekMap.entries()]
+    .filter(([, v]) => v.year === yearTag)
+    .map(([k]) => k)
+    .sort();
+}
+
+function getWeeklyKPIs(weekMap) {
+  const cyWeeks = getWeeks(weekMap, 'CY');
+  if (!cyWeeks.length) return { curr: null, prev: null };
+  const currWeek = cyWeeks[cyWeeks.length - 1];
+  const prevWeek = cyWeeks.length > 1 ? cyWeeks[cyWeeks.length - 2] : null;
+  return {
+    curr: { ...weekMap.get(currWeek), week: currWeek },
+    prev: prevWeek ? { ...weekMap.get(prevWeek), week: prevWeek } : null,
+  };
+}
+
+// ─── Load data ────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch('../data-rabbit-hole.json');
+    const json = await res.json();
+    allData    = json.data || [];
+
+    const ts  = json.refreshed_at;
+    const dot = document.getElementById('freshness-dot');
+    const txt = document.getElementById('freshness-text');
+    if (ts) {
+      txt.textContent = 'Actualizado ' + fmtRefreshed(ts);
+      dot.className   = 'freshness-dot';
+    } else {
+      txt.textContent = 'Sin datos';
+      dot.className   = 'freshness-dot error';
+    }
+
+    render();
+  } catch (e) {
+    console.error('loadData error:', e);
+    document.getElementById('freshness-text').textContent = 'Error al cargar datos';
+    document.getElementById('freshness-dot').className    = 'freshness-dot error';
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const weekMap = aggregateByWeek(allData);
+  const cyWeeks = getWeeks(weekMap, 'CY');
+  const lyWeeks = getWeeks(weekMap, 'LY');
+
+  if (!selectedWeek || !cyWeeks.includes(selectedWeek)) {
+    selectedWeek = cyWeeks[cyWeeks.length - 1] || null;
+  }
+
+  renderKPIs(weekMap);
+  renderChart(weekMap, cyWeeks, lyWeeks);
+  renderTable(weekMap, cyWeeks);
+  renderWeekNav(cyWeeks);
+}
+
+// ─── KPIs ─────────────────────────────────────────────────────────────────────
+function renderKPIs(weekMap) {
+  const { curr, prev } = getWeeklyKPIs(weekMap);
+  const grid = document.getElementById('kpi-grid');
+
+  if (!curr) {
+    grid.innerHTML = '<div class="kpi-card"><div class="state-empty">Sin datos para los filtros seleccionados</div></div>';
+    return;
+  }
+
+  const kpis = [
+    { label: 'Impresiones', value: fmtNum(curr.prints), delta: calcDelta(curr.prints, prev?.prints) },
+    { label: 'Views',       value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
+    { label: 'Clicks',      value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
+    { label: 'CTR',         value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr)    },
+    { label: 'Órdenes',     value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
+  ];
+
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-footer">
+        ${deltaBadge(k.delta)}
+        <span>vs semana anterior</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Chart ────────────────────────────────────────────────────────────────────
+function getMetricFmt(metric) {
+  if (metric === 'ctr') return fmtPct;
+  return fmtNum;
+}
+
+function renderChart(weekMap, cyWeeks, lyWeeks) {
+  const metric = state.metric;
+  const fmtFn  = getMetricFmt(metric);
+  const labels = cyWeeks.map(w => fmtWeekLabel(w));
+  const cyData = cyWeeks.map(w => weekMap.get(w)?.[metric] ?? 0);
+  const lyData = cyWeeks.map((w, i) => {
+    const lyW = lyWeeks[i];
+    return lyW ? (weekMap.get(lyW)?.[metric] ?? null) : null;
+  });
+
+  const metricLabel = { prints: 'Impresiones', views: 'Views', clicks: 'Clicks', ctr: 'CTR', orders: 'Órdenes' }[metric];
+  document.getElementById('chart-title').textContent = `Tendencia — ${metricLabel} (CY vs LY)`;
+
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  if (trendChart) {
+    updateTrendChart(trendChart, { labels, cyData, lyData, fmtFn });
+  } else {
+    trendChart = buildTrendChart(ctx, { labels, cyData, lyData, metric, fmtFn });
+  }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+function renderTable(weekMap, cyWeeks) {
+  const tbody   = document.getElementById('table-body');
+  const weekLbl = document.getElementById('table-week-label');
+
+  weekLbl.textContent = selectedWeek ? 'Semana ' + fmtWeekLabel(selectedWeek) : '';
+
+  const data = cyWeeks.map(w => ({ week: w, ...weekMap.get(w) }));
+
+  data.sort((a, b) => {
+    const av = a[sortCol] ?? 0;
+    const bv = b[sortCol] ?? 0;
+    return sortAsc ? av - bv : bv - av;
+  });
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="state-empty">Sin datos</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${fmtWeekLabel(r.week)}</td>
+      <td>${fmtNum(r.prints)}</td>
+      <td>${fmtNum(r.views)}</td>
+      <td>${fmtNum(r.clicks)}</td>
+      <td>${fmtPct(r.ctr)}</td>
+      <td>${fmtNum(r.orders)}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── Week Nav ─────────────────────────────────────────────────────────────────
+function renderWeekNav(cyWeeks) {
+  const lbl  = document.getElementById('week-label');
+  const prev = document.getElementById('btn-prev');
+  const next = document.getElementById('btn-next');
+  const idx  = cyWeeks.indexOf(selectedWeek);
+
+  lbl.textContent = selectedWeek ? 'Sem. ' + fmtWeekLabel(selectedWeek) : '—';
+  prev.disabled   = idx <= 0;
+  next.disabled   = idx >= cyWeeks.length - 1;
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+document.getElementById('toggle-metric').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('#toggle-metric button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.metric = btn.dataset.val;
+  render();
+});
+
+document.getElementById('main-table').querySelector('thead').addEventListener('click', e => {
+  const th = e.target.closest('th');
+  if (!th?.dataset.col || th.dataset.col === 'week') return;
+  const col = th.dataset.col;
+  sortAsc = sortCol === col ? !sortAsc : false;
+  sortCol = col;
+  document.querySelectorAll('.data-table thead th').forEach(t => t.classList.remove('sorted'));
+  th.classList.add('sorted');
+  const weekMap = aggregateByWeek(allData);
+  const cyWeeks = getWeeks(weekMap, 'CY');
+  renderTable(weekMap, cyWeeks);
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  const weekMap = aggregateByWeek(allData);
+  const weeks   = getWeeks(weekMap, 'CY');
+  const idx     = weeks.indexOf(selectedWeek);
+  if (idx > 0) { selectedWeek = weeks[idx - 1]; render(); }
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  const weekMap = aggregateByWeek(allData);
+  const weeks   = getWeeks(weekMap, 'CY');
+  const idx     = weeks.indexOf(selectedWeek);
+  if (idx < weeks.length - 1) { selectedWeek = weeks[idx + 1]; render(); }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
 </body>
 </html>

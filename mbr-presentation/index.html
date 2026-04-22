@@ -455,6 +455,32 @@
     .s25 .badge.new  { background:#e0f0ff; color:#1060c0; }
     .s25 .growth-box { background:#f0f7f0; border-left:3px solid #2d6a4f; padding:7px 12px; font-size:10px; line-height:1.55; color:#222; border-radius:0 4px 4px 0; flex-shrink:0; }
     .s25 .growth-box strong { color:#1a5c35; }
+
+    /* ── New Bidder / Bidding Doble Click slides ── */
+    .vlbl {
+      writing-mode: vertical-rl; transform: rotate(180deg);
+      font-weight: 900; font-size: 6.5px; letter-spacing: .05em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center;
+      background: #FFD000; color: #111;
+      border-radius: 4px; padding: 4px 3px; flex-shrink: 0; white-space: nowrap;
+    }
+    .creat {
+      border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5;
+      padding: 3px 4px; font-size: 6.5px; font-weight: 700; color: #333;
+      text-align: center; line-height: 1.4; flex: 1;
+    }
+    .creat.win { border-color: #FFA000; background: #FFF8E1; }
+    .gn-pill { border-radius:4px; font-size:6px; font-weight:800; color:#fff; padding:2px 4px; text-align:center; line-height:1.2; }
+    .bdc-c1 { background: #1565C0; color: #fff; }
+    .bdc-c2 { background: #00796B; color: #fff; }
+    .bdc-c3 { background: #F57F17; color: #fff; }
+    .bdc-c4 { background: #455A64; color: #fff; }
+    .bdc-card {
+      flex: 1; border: 1.5px solid #e0e0e0; border-radius: 8px;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .bdc-card-hdr { padding: 5px 8px; font-size: 8.5px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0; }
+    .bdc-card-body { flex: 1; padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
   </style>
 </head>
 <body>
@@ -1112,7 +1138,179 @@
     </div>
 
     <!-- ══════════════════════════════════════
-         SLIDE 12 — SECTION DIVIDER KEY INITIATIVES
+         SLIDE 12 — NEW BIDDER
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content style="font-family:'ProximaNova',sans-serif;">
+
+      <!-- HEADER -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 22px 0;flex-shrink:0;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(0,0,0,.45);display:flex;align-items:center;gap:6px;">
+          <img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:13px;border-radius:2px;">
+          Benefits &amp; Site Merch
+        </span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(0,0,0,.45);">Abr 2026</span>
+      </div>
+
+      <!-- TITLE BAR -->
+      <div style="padding:4px 22px 5px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:12.5px;font-weight:900;color:#111;">[NEW BIDDER]</span>
+        <span style="font-size:10.5px;font-weight:400;color:#555;"> | Dos posiciones fijas para KEY BATTLES y campa&ntilde;a de demanda MKP y un bucket general din&aacute;mico.</span>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding:7px 10px 10px;overflow:hidden;min-height:0;">
+        <div style="flex:1;display:flex;gap:6px;overflow:hidden;min-height:0;">
+
+          <div style="flex:1;display:flex;gap:4px;overflow:hidden;min-width:0;">
+            <div style="flex:1;border:1.5px solid #d0d0d0;border-radius:8px;padding:4px 5px;display:flex;flex-direction:column;gap:3px;overflow:hidden;background:#f8f8f8;min-width:0;">
+
+              <!-- MS 0 ROW -->
+              <div style="flex:0 0 68px;display:flex;gap:3px;align-items:stretch;overflow:hidden;">
+                <div class="vlbl" style="width:18px;flex-shrink:0;font-size:6px;background:#FFF59D;color:#555;">MS 0</div>
+                <div style="flex:0 0 155px;border:1px solid #ddd;border-radius:6px;background:#fff;padding:5px 8px;display:flex;align-items:center;justify-content:center;">
+                  <span style="background:#1565C0;color:#fff;border-radius:3px;padding:2px 7px;font-size:7px;font-weight:800;flex-shrink:0;">Ads</span>
+                  <span style="font-size:6px;color:#555;line-height:1.4;margin-left:4px;">VISIBILIDAD DE MARCAS</span>
+                </div>
+                <div style="flex:1;display:flex;align-items:center;padding:0 2px;">
+                  <div style="flex:1;border-top:1.5px dashed #bbb;"></div>
+                  <span style="font-size:10px;color:#bbb;margin-left:2px;">→</span>
+                </div>
+              </div>
+
+              <!-- SITE MERCH SECTION -->
+              <div style="flex:1;display:flex;gap:3px;overflow:hidden;min-height:0;">
+
+                <!-- Inner axis -->
+                <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;width:18px;">
+                  <div class="vlbl" style="flex:0 0 62px;font-size:6px;background:#FFF59D;color:#555;">MS 1</div>
+                  <div class="vlbl" style="flex:0 0 62px;font-size:6px;background:#FFF59D;color:#555;">MS 2</div>
+                  <div class="vlbl" style="flex:1;font-size:5.5px;background:#FFF59D;color:#555;">MS 3 - MS 7</div>
+                </div>
+
+                <!-- Team config -->
+                <div style="flex:0 0 155px;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+                  <div style="flex:0 0 62px;border:1px solid #ddd;border-radius:6px;background:#fff;padding:4px 8px;display:flex;align-items:center;gap:6px;overflow:hidden;">
+                    <span style="background:#E65100;color:#fff;border-radius:3px;padding:2px 7px;font-size:7px;font-weight:800;flex-shrink:0;">Site Merch</span>
+                    <span style="font-size:6px;color:#555;line-height:1.4;">POSICI&Oacute;N FIJA PARA MS GENERALES DE CAMPA&Ntilde;AS MK O KEY BATTLES</span>
+                  </div>
+                  <div style="flex:0 0 62px;border:1px solid #ddd;border-radius:6px;background:#fff;padding:4px 8px;display:flex;align-items:center;gap:6px;overflow:hidden;">
+                    <span style="background:#E65100;color:#fff;border-radius:3px;padding:2px 7px;font-size:7px;font-weight:800;flex-shrink:0;">Site Merch</span>
+                    <span style="font-size:6px;color:#555;line-height:1.4;">POSICI&Oacute;N FIJA PARA MS GENERALES DE CAMPA&Ntilde;AS MK O KEY BATTLES</span>
+                  </div>
+                  <div style="flex:1;border:1px solid #ddd;border-radius:6px;background:#fff;padding:4px 8px;display:flex;align-items:center;gap:6px;overflow:hidden;min-height:0;">
+                    <span style="background:#E65100;color:#fff;border-radius:3px;padding:2px 7px;font-size:7px;font-weight:800;flex-shrink:0;">Site Merch</span>
+                    <span style="font-size:6px;color:#555;line-height:1.4;">5 POSICIONES DIN&Aacute;MICAS, COMPETENCIA POR CTR (SEGMENTADOS)</span>
+                  </div>
+                </div>
+
+                <!-- Buckets -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;overflow:hidden;min-width:0;">
+                  <div style="flex:0 0 62px;border:1.5px solid #00796B;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;">
+                    <div style="background:#00796B;color:#fff;padding:2px 7px;font-size:7.5px;font-weight:800;flex-shrink:0;">Bucket 1 | Prioridad: Very High</div>
+                    <div style="flex:1;padding:4px;background:#fff;display:flex;">
+                      <div class="creat" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;">CREAT 1</div>
+                    </div>
+                  </div>
+                  <div style="flex:0 0 62px;border:1.5px solid #388E3C;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;">
+                    <div style="background:#388E3C;color:#fff;padding:2px 7px;font-size:7.5px;font-weight:800;flex-shrink:0;">Bucket 2 | Prioridad: High</div>
+                    <div style="flex:1;padding:4px;background:#fff;display:flex;">
+                      <div class="creat" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;">CREAT 1</div>
+                    </div>
+                  </div>
+                  <div style="flex:1;border:1.5px solid #455A64;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+                    <div style="background:#455A64;color:#fff;padding:2px 7px;font-size:7.5px;font-weight:800;flex-shrink:0;">Bucket 3 | GENERAL</div>
+                    <div style="flex:1;padding:4px;background:#fff;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:3px;align-content:center;">
+                      <div class="creat win">★ CREAT 1<br>CTR: 1,8%</div>
+                      <div class="creat win">★ CREAT 2<br>CTR: 2,1%</div>
+                      <div class="creat win">★ CREAT 3<br>CTR: 1,9%</div>
+                      <div class="creat">CREAT 4<br>CTR: 1,3%</div>
+                      <div class="creat win">★ CREAT 5<br>CTR: 2,2%</div>
+                      <div class="creat">CREAT 6<br>CTR: 1,3%</div>
+                      <div class="creat win">★ CREAT 7<br>CTR: 2,0%</div>
+                      <div class="creat">CREAT 8<br>CTR: 1,1%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Gana -->
+                <div style="flex:0 0 28px;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+                  <div style="flex:0 0 62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+                    <span style="font-size:10px;color:#aaa;line-height:1;">→</span>
+                    <div class="gn-pill" style="background:#00796B;">Gana<br>1</div>
+                  </div>
+                  <div style="flex:0 0 62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+                    <span style="font-size:10px;color:#aaa;line-height:1;">→</span>
+                    <div class="gn-pill" style="background:#388E3C;">Gana<br>1</div>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:0;">
+                    <span style="font-size:10px;color:#aaa;line-height:1;">→</span>
+                    <div class="gn-pill" style="background:#455A64;">Ganan<br>5</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Images column -->
+          <div style="flex:0 0 172px;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+            <div style="flex:0 0 68px;display:flex;gap:0;overflow:hidden;border-radius:5px;">
+              <div class="vlbl" style="width:14px;flex-shrink:0;font-size:5.5px;border-radius:4px 0 0 4px;">MS 0</div>
+              <div style="flex:1;overflow:hidden;border-radius:0 4px 4px 0;background:#ddd;">
+                <img src="IMAGENES MS/MS AO/AO4.jpg" style="width:100%;height:100%;object-fit:cover;display:block;">
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:3px;overflow:hidden;min-height:0;">
+              <div style="flex:0 0 62px;display:flex;gap:0;overflow:hidden;border-radius:5px;">
+                <div class="vlbl" style="width:14px;flex-shrink:0;font-size:5.5px;background:#00796B;color:#fff;border-radius:4px 0 0 4px;">MS 1</div>
+                <div style="flex:1;overflow:hidden;border-radius:0 4px 4px 0;background:#ddd;">
+                  <img src="IMAGENES MS/FD/D_NQ_NP_974648-MLA109804420150_042026-F.jpg" style="width:100%;height:100%;object-fit:cover;display:block;">
+                </div>
+              </div>
+              <div style="flex:0 0 62px;display:flex;gap:0;overflow:hidden;border-radius:5px;">
+                <div class="vlbl" style="width:14px;flex-shrink:0;font-size:5.5px;background:#388E3C;color:#fff;border-radius:4px 0 0 4px;">MS 2</div>
+                <div style="flex:1;overflow:hidden;border-radius:0 4px 4px 0;background:#ddd;">
+                  <img src="IMAGENES MS/MS GENERAL/D_NQ_NP_681235-MLA110655589101_042026-F.jpg" style="width:100%;height:100%;object-fit:cover;display:block;">
+                </div>
+              </div>
+              <div style="flex:1;display:flex;gap:0;overflow:hidden;border-radius:5px;min-height:0;">
+                <div class="vlbl" style="width:14px;flex-shrink:0;font-size:5px;background:#455A64;color:#fff;border-radius:4px 0 0 4px;">MS 3 - MS 7</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-height:0;">
+                  <div style="flex:1;overflow:hidden;border-radius:0 3px 3px 0;background:#ddd;min-height:0;"><img src="IMAGENES MS/MS SATELITES/D_NQ_NP_634418-MLA110675183637_042026-F.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+                  <div style="flex:1;overflow:hidden;border-radius:0 3px 3px 0;background:#ddd;min-height:0;"><img src="IMAGENES MS/MS AO/AO.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+                  <div style="flex:1;overflow:hidden;border-radius:0 3px 3px 0;background:#ddd;min-height:0;"><img src="IMAGENES MS/MS SATELITES/D_NQ_NP_709116-MLA110698031831_042026-F.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+                  <div style="flex:1;overflow:hidden;border-radius:0 3px 3px 0;background:#ddd;min-height:0;"><img src="IMAGENES MS/MS AO/AO2.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+                  <div style="flex:1;overflow:hidden;border-radius:0 3px 3px 0;background:#ddd;min-height:0;"><img src="IMAGENES MS/MS SATELITES/D_NQ_NP_807692-MLA110629247385_042026-F.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bracket -->
+          <div style="flex:0 0 100px;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+            <div style="flex:0 0 68px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;">
+              <div style="flex:0 0 62px;"></div>
+              <div style="flex:0 0 62px;"></div>
+              <div style="flex:1;display:flex;align-items:center;gap:6px;min-height:0;">
+                <div style="align-self:stretch;width:14px;position:relative;flex-shrink:0;">
+                  <div style="position:absolute;top:0;left:0;right:0;height:50%;border-top:2px solid #455A64;border-right:2px solid #455A64;border-radius:0 5px 0 0;"></div>
+                  <div style="position:absolute;bottom:0;left:0;right:0;height:50%;border-bottom:2px solid #455A64;border-right:2px solid #455A64;border-radius:0 0 5px 0;"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+                  <span style="font-size:16px;color:#455A64;line-height:1;">→</span>
+                  <span style="font-size:7.5px;font-weight:800;color:#333;line-height:1.4;">Bidding<br>Doble Click</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 13 — SECTION DIVIDER KEY INITIATIVES
     ══════════════════════════════════════ -->
     <div class="slide slide-section bg-section" data-content>
       <div class="slide-header">

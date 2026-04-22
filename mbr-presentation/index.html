@@ -1,0 +1,2469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBR MLA – Ads</title>
+  <style>
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-thin.otf'); font-weight:100; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-light.otf'); font-weight:300; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-regular.otf'); font-weight:400; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-medium.otf'); font-weight:500; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-semibold.otf'); font-weight:600; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-bold.otf'); font-weight:700; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-extrabold.otf'); font-weight:800; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-black.otf'); font-weight:900; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'ProximaNova', sans-serif;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Slide wrapper ── */
+    #deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #deck {
+      position: relative;
+      width: 960px;
+      height: 540px;
+      overflow: hidden;
+      flex-shrink: 0;
+      transform-origin: center center;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+    }
+    .slide.active { display: flex; }
+
+    /* ─────────────────────────────────────────────
+       BACKGROUND STYLES
+    ───────────────────────────────────────────── */
+    .bg-gradient-yellow {
+      background: linear-gradient(120deg, #FFD000 0%, #C9A800 35%, #6B5C00 65%, #2B2410 100%);
+    }
+    .bg-dark {
+      background: linear-gradient(120deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+    }
+    .bg-white-content {
+      background: #FFFFFF;
+    }
+    .bg-section {
+      background: linear-gradient(120deg, #FFD000 0%, #C9A800 35%, #6B5C00 65%, #2B2410 100%);
+    }
+
+    /* ─────────────────────────────────────────────
+       COMMON COMPONENTS
+    ───────────────────────────────────────────── */
+
+    /* Header bar (top left + top right) */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px 32px 0;
+      flex-shrink: 0;
+    }
+    .slide-header span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.75);
+    }
+    .slide-header.dark-text span {
+      color: rgba(0,0,0,.5);
+    }
+    .slide-header.dark-text span img {
+      opacity: .85;
+    }
+
+    /* ML Logo pill — full (cover/cierre) */
+    .ml-logo {
+      position: absolute;
+      bottom: 20px;
+      right: 28px;
+      background: #fff;
+      border-radius: 40px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+    }
+    .ml-logo img {
+      height: 36px;
+      display: block;
+    }
+
+    /* ML Logo icon only — slides de contenido */
+    .ml-logo-icon {
+      position: absolute;
+      bottom: 14px;
+      right: 18px;
+    }
+    .ml-logo-icon img {
+      height: 24px;
+      width: auto;
+      display: block;
+    }
+
+    /* Section badge / pill */
+    .section-badge {
+      display: inline-block;
+      border: 2px solid rgba(0,0,0,.35);
+      border-radius: 40px;
+      padding: 5px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+      background: rgba(255,208,0,.55);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ─────────────────────────────────────────────
+       SLIDE TYPES
+    ───────────────────────────────────────────── */
+
+    /* === COVER === */
+    .slide-cover .cover-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 52px;
+      gap: 18px;
+    }
+    .slide-cover h1 {
+      font-size: 64px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+    .slide-cover h2 {
+      font-size: 36px;
+      font-weight: 500;
+      color: rgba(255,255,255,.88);
+      line-height: 1.2;
+    }
+
+    /* === SECTION DIVIDER === */
+    .slide-section .section-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 52px;
+      gap: 16px;
+    }
+    .slide-section .section-number {
+      font-size: 40px;
+      font-weight: 700;
+      color: rgba(255,255,255,.6);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .slide-section h1 {
+      font-size: 56px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+    }
+    .slide-section p {
+      font-size: 18px;
+      color: rgba(255,255,255,.75);
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    /* === CONTENT (white background) === */
+    .slide-content .content-header {
+      padding: 28px 40px 12px;
+      border-bottom: 2px solid #FFD000;
+      flex-shrink: 0;
+    }
+    .slide-content .content-header .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 4px;
+    }
+    .slide-content .content-header h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #111;
+    }
+    .slide-content .content-body {
+      flex: 1;
+      padding: 24px 40px;
+      display: flex;
+      gap: 32px;
+      overflow: hidden;
+    }
+
+    /* Metrics row */
+    .metrics-row {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+    }
+    .metric-card {
+      flex: 1;
+      background: #F8F8F8;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 4px solid #FFD000;
+    }
+    .metric-card .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .metric-card .metric-value {
+      font-size: 34px;
+      font-weight: 900;
+      color: #111;
+      line-height: 1;
+    }
+    .metric-card .metric-delta {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .metric-card .metric-delta.up   { color: #00A650; }
+    .metric-card .metric-delta.down { color: #E53935; }
+    .metric-card .metric-delta.flat { color: #888; }
+
+    /* Bullet list */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: #222;
+      line-height: 1.4;
+    }
+    .bullet-list li::before {
+      content: '';
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      background: #FFD000;
+      border-radius: 50%;
+      margin-top: 5px;
+    }
+    .bullet-list li strong { font-weight: 700; color: #000; }
+
+    /* Two-column layout helper */
+    .col-2 {
+      display: flex;
+      gap: 28px;
+      width: 100%;
+    }
+    .col { flex: 1; }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .data-table th {
+      background: #FFD000;
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #111;
+    }
+    .data-table td {
+      padding: 7px 12px;
+      color: #222;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #FFFBEA; }
+
+    /* Agenda items */
+    .agenda-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .agenda-num {
+      font-size: 15px;
+      font-weight: 800;
+      color: #111;
+      letter-spacing: .01em;
+    }
+    .agenda-title {
+      font-size: 15px;
+      font-weight: 400;
+      color: #111;
+    }
+
+    /* Tag/chip */
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .chip.green  { background: #E8F5E9; color: #2E7D32; }
+    .chip.red    { background: #FFEBEE; color: #C62828; }
+    .chip.yellow { background: #FFFDE7; color: #827717; }
+    .chip.blue   { background: #E3F2FD; color: #1565C0; }
+
+    /* ML logo on white slides */
+    .ml-logo-small {
+      position: absolute;
+      bottom: 16px;
+      right: 28px;
+    }
+    .ml-logo-small img { height: 28px; }
+
+    /* ─────────────────────────────────────────────
+       NAVIGATION
+    ───────────────────────────────────────────── */
+    #nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px 0;
+      background: #111;
+      flex-shrink: 0;
+    }
+    #nav button {
+      background: #FFD000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 24px;
+      font-family: 'ProximaNova', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #111;
+      transition: background .15s, transform .1s;
+      letter-spacing: .02em;
+    }
+    #nav button:hover  { background: #e6bb00; }
+    #nav button:active { transform: scale(.97); }
+    #nav button:disabled { background: #333; color: #666; cursor: default; }
+
+    #counter {
+      font-family: 'ProximaNova', sans-serif;
+      font-size: 13px;
+      color: #aaa;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      width: 100%;
+      height: 3px;
+      background: #2a2a2a;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #progress-fill {
+      height: 100%;
+      background: #FFD000;
+      transition: width .3s ease;
+    }
+
+    /* ── Slide 25: Optin Masivo ── */
+    .s25 .s25-title { padding:5px 28px 6px; border-bottom:2px solid #FFD000; flex-shrink:0; }
+    .s25 .s25-title b { font-size:12.5px; font-weight:800; color:#111; }
+    .s25 .s25-title .sep { color:#aaa; font-weight:400; margin:0 4px; }
+    .s25 .s25-title .sub { font-size:10.5px; font-weight:400; color:#444; }
+    .s25 .s25-body { flex:1; display:flex; flex-direction:column; padding:20px 18px 32px; gap:8px; min-height:0; overflow:hidden; }
+    .s25 .charts-row { display:flex; gap:12px; flex:0 0 200px; min-height:0; }
+    .s25 .chart-col { display:flex; flex-direction:column; min-height:0; }
+    .s25 .chart-col.wide { flex:1.5; }
+    .s25 .chart-col.narrow { flex:1; border-left:1px solid #eee; padding-left:12px; }
+    .s25 .chart-label { font-size:8px; font-weight:700; color:#333; margin-bottom:3px; flex-shrink:0; text-transform:uppercase; letter-spacing:.03em; }
+    .s25 .chart-wrap { flex:1; position:relative; min-height:0; }
+    .s25 .chart-wrap canvas { position:absolute; top:0; left:0; width:100%!important; height:100%!important; }
+    .s25 .chart-note { font-size:6.5px; color:#bbb; font-style:italic; margin-top:2px; flex-shrink:0; line-height:1.4; }
+    .s25 .bottom-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; flex-shrink:0; }
+    .s25 .panel-header { background:#2d2d2d; color:#fff; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; padding:3px 9px; border-radius:3px; margin-bottom:5px; flex-shrink:0; }
+    .s25 .kpi-strip { display:flex; border:1px solid #e0e0e0; border-radius:5px; overflow:hidden; margin-bottom:5px; flex-shrink:0; }
+    .s25 .kpi-box { flex:1; padding:4px 9px; border-right:1px solid #e0e0e0; }
+    .s25 .kpi-box:last-child { border-right:none; }
+    .s25 .kpi-lbl { font-size:7px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .s25 .kpi-val { font-size:21px; font-weight:900; line-height:1.1; }
+    .s25 .kpi-det { font-size:7px; color:#666; }
+    .s25 .sbar-title { background:#FFD000; color:#111; font-size:7.5px; font-weight:700; padding:2px 7px; border-radius:2px; margin-bottom:3px; flex-shrink:0; }
+    .s25 .sbar-wrap { margin-bottom:4px; flex-shrink:0; }
+    .s25 .sbar-lbl { font-size:7.5px; color:#333; font-weight:600; margin-bottom:2px; }
+    .s25 .sbar { display:flex; height:15px; border-radius:3px; overflow:hidden; }
+    .s25 .sbar-seg { display:flex; align-items:center; justify-content:center; font-size:7.5px; font-weight:700; color:#fff; padding:0 5px; white-space:nowrap; overflow:hidden; }
+    .s25 .ytable-title { background:#FFD000; color:#111; font-size:8px; font-weight:700; padding:3px 8px; border-radius:3px; margin-bottom:4px; flex-shrink:0; }
+    .s25 .mini-table { width:100%; border-collapse:collapse; font-size:7.5px; flex-shrink:0; }
+    .s25 .mini-table th { background:#2d2d2d; color:#fff; padding:3px 7px; font-weight:700; text-align:center; }
+    .s25 .mini-table th:first-child { text-align:left; }
+    .s25 .mini-table td { padding:3px 7px; border-bottom:1px solid #f0f0f0; text-align:center; }
+    .s25 .mini-table td:first-child { text-align:left; }
+    .s25 .mini-table tr.post td { background:#f0f7f0; }
+    .s25 .mini-table tr.tot td { font-weight:700; background:#f0f0f0; border-top:1.5px solid #ddd; }
+    .s25 .badge { display:inline-block; font-size:7px; padding:1px 5px; border-radius:5px; font-weight:700; }
+    .s25 .badge.pre  { background:#fff0e0; color:#c06000; }
+    .s25 .badge.post { background:#e0f0e8; color:#1a7040; }
+    .s25 .badge.new  { background:#e0f0ff; color:#1060c0; }
+    .s25 .growth-box { background:#f0f7f0; border-left:3px solid #2d6a4f; padding:7px 12px; font-size:10px; line-height:1.55; color:#222; border-radius:0 4px 4px 0; flex-shrink:0; }
+    .s25 .growth-box strong { color:#1a5c35; }
+  </style>
+</head>
+<body>
+
+  <div id="deck-container">
+  <div id="deck">
+
+    <!-- ══════════════════════════════════════
+         SLIDE 1 — COVER
+    ══════════════════════════════════════ -->
+    <div class="slide slide-cover bg-gradient-yellow active">
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div class="cover-body">
+        <h1>MBR MLA</h1>
+        <h2>Benefits & Site Merch<br/>Mar 2026</h2>
+      </div>
+      <!-- Mercado Libre logo -->
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 2 — AGENDA / ÍNDICE
+    ══════════════════════════════════════ -->
+    <div class="slide slide-content bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="content-header">
+        <h2>Agenda</h2>
+      </div>
+      <div class="content-body">
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:16px;">
+          <li style="font-size:22px; color:#111;"><strong style="color:#FFD000;">01 ·</strong> Highs &amp; Lows</li>
+          <li style="font-size:22px; color:#111;"><strong style="color:#FFD000;">02 ·</strong> Site Merch</li>
+          <li style="font-size:22px; color:#111;"><strong style="color:#FFD000;">03 ·</strong> Home Placements</li>
+          <li style="font-size:22px; color:#111;"><strong style="color:#FFD000;">04 ·</strong> Key Initiatives</li>
+          <li style="font-size:22px; color:#111;"><strong style="color:#FFD000;">05 ·</strong> Benefits</li>
+        </ul>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 3 — SECTION DIVIDER
+    ══════════════════════════════════════ -->
+    <div class="slide slide-section bg-section" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div class="section-body">
+        <h1><span class="section-number">01</span><span style="color:rgba(255,255,255,.6); font-weight:100; margin:0 12px;">|</span>Highs &amp; Lows</h1>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 4 — HIGHS & LOWS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <!-- Título -->
+      <div style="padding: 10px 28px 8px; border-bottom: 2px solid #FFD000; flex-shrink:0;">
+        <span style="font-size:15px; font-weight:800; color:#111;">Highs &amp; Lows</span>
+        <span style="font-size:13px; font-weight:400; color:#555;"> | Análisis 360° de la performance de Promos &amp; Site Merch.</span>
+      </div>
+
+      <!-- 4 columnas -->
+      <div style="flex:1; display:flex; gap:10px; padding:10px 20px 50px; overflow:hidden;">
+
+        <!-- OVERALL PERFORMANCE -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          <div style="background:#FFD000; border-radius:20px; padding:6px 10px; text-align:center; font-size:11px; font-weight:900; color:#111; line-height:1.2;">OVERALL<br/>PERFORMANCE</div>
+          <div style="background:#E8F5E9; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#2E7D32; letter-spacing:.06em; margin-bottom:5px;">HIGHS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+            </ul>
+          </div>
+          <div style="background:#FFEBEE; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#C62828; letter-spacing:.06em; margin-bottom:5px;">LOWS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- CAMPAIGNS & SEG. SELLER -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          <div style="background:#FFD000; border-radius:20px; padding:6px 10px; text-align:center; font-size:11px; font-weight:900; color:#111; line-height:1.2;">CAMPAIGNS &amp;<br/>SEG. SELLER</div>
+          <div style="background:#E8F5E9; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#2E7D32; letter-spacing:.06em; margin-bottom:5px;">HIGHS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+              <li></li>
+            </ul>
+          </div>
+          <div style="background:#FFEBEE; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#C62828; letter-spacing:.06em; margin-bottom:5px;">LOWS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- SITE MERCH -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          <div style="background:#FFD000; border-radius:20px; padding:6px 10px; text-align:center; font-size:11px; font-weight:900; color:#111; line-height:1.2;">SITE<br/>MERCH</div>
+          <div style="background:#E8F5E9; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#2E7D32; letter-spacing:.06em; margin-bottom:5px;">HIGHS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+              <li></li>
+              <li></li>
+            </ul>
+          </div>
+          <div style="background:#FFEBEE; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#C62828; letter-spacing:.06em; margin-bottom:5px;">LOWS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+              <li></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- HOME PLACEMENTS -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          <div style="background:#FFD000; border-radius:20px; padding:6px 10px; text-align:center; font-size:11px; font-weight:900; color:#111; line-height:1.2;">HOME<br/>PLACEMENTS</div>
+          <div style="background:#E8F5E9; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#2E7D32; letter-spacing:.06em; margin-bottom:5px;">HIGHS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+            </ul>
+          </div>
+          <div style="background:#FFEBEE; border-radius:8px; padding:5px 8px; flex:1;">
+            <div style="font-size:9px; font-weight:800; color:#C62828; letter-spacing:.06em; margin-bottom:5px;">LOWS</div>
+            <ul style="list-style:disc; padding-left:12px; font-size:10px; color:#222; line-height:1.4; display:flex; flex-direction:column; gap:4px;">
+              <li></li>
+              <li></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 5 — SECTION DIVIDER SITE MERCH
+    ══════════════════════════════════════ -->
+    <div class="slide slide-section bg-section" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="section-body">
+        <h1><span class="section-number">02</span><span style="color:rgba(255,255,255,.6); font-weight:100; margin:0 12px;">|</span>Site Merch</h1>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         SLIDE 6 — ENGAGEMENT & GROWTH
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:6px 24px 6px; border-bottom:2px solid #FFD000; flex-shrink:0;">
+        <span style="font-size:13px; font-weight:800; color:#111;">Engagement &amp; Growth</span>
+        <span style="font-size:11px; font-weight:400; color:#555;"> | CTR 1,30% (+0,31pp VS FEB 26) &amp; NMV ATTR 125M USD (+31,5% VS FEB 26)</span>
+      </div>
+
+      <div style="flex:0 0 210px; padding:22px 20px 0; position:relative; margin-top:22px;">
+        <canvas id="engagementChart" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+        <div style="position:absolute; top:4px; right:20px; display:flex; align-items:center; gap:12px; pointer-events:none;">
+          <span style="display:flex; align-items:center; gap:4px; font-size:7.5px; color:#888; font-family:'ProximaNova',sans-serif;">
+            <span style="width:12px; height:8px; background:rgba(180,180,180,0.7); display:inline-block; border-radius:2px;"></span>Prints
+          </span>
+          <span style="display:flex; align-items:center; gap:4px; font-size:7.5px; color:#555; font-family:'ProximaNova',sans-serif;">
+            <span style="width:12px; height:8px; background:rgba(255,208,0,0.9); display:inline-block; border-radius:2px;"></span>NMV ATR
+          </span>
+          <span style="display:flex; align-items:center; gap:4px; font-size:7.5px; color:#2563EB; font-family:'ProximaNova',sans-serif;">
+            <span style="width:12px; height:2px; background:#2563EB; display:inline-block;"></span>CTR
+          </span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:8fr 7fr 7fr 9fr; gap:6px; padding:16px 20px 16px; align-items:flex-start; overflow:hidden;">
+
+        <!-- WEEK 1 -->
+        <div style="border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px; text-align:center;">T2 DOUBLE DATES 3.3</div>
+            <div style="color:#555; line-height:1.5;">
+              &bull; CTR | 1,91% <span style="color:#2E7D32;">(+0,76pp vs tgt)</span><br>
+              &bull; SESIONES | 9.2 M <span style="color:#2E7D32;">(+8% vs tgt)</span><br>
+              &bull; NMV | 1.9 M <span style="color:#2E7D32;">(+19% vs tgt)</span><br>
+              &bull; NMV ATTR | 1,70% <span style="color:#2E7D32;">(+0,19pp vs tgt)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 2 -->
+        <div style="border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px; text-align:center;">T2 CYBER FEST</div>
+            <div style="color:#555; line-height:1.5;">
+              &bull; CTR | 1,20% <span style="color:#2E7D32;">(+0,05pp vs tgt)</span><br>
+              &bull; SESIONES | 61 M <span style="color:#2E7D32;">(+22% vs tgt)</span><br>
+              &bull; NMV | 9.1 M <span style="color:#2E7D32;">(+162% vs tgt)</span><br>
+              &bull; NMV ATTR | 3,71% <span style="color:#2E7D32;">(+0,80pp vs tgt)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 3 -->
+        <div style="border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px; text-align:center;">T2 BEAUTY WEEK</div>
+            <div style="color:#555; line-height:1.5;">
+              &bull; CTR | 1,00% <span style="color:#C62828;">(-0,15pp vs tgt)</span><br>
+              &bull; SESIONES | 753.381 <span style="color:#2E7D32;">(+49% vs tgt)</span><br>
+              &bull; NMV | 304.091 <span style="color:#2E7D32;">(+16% vs tgt)</span><br>
+              &bull; NMV ATTR | 0,14% <span style="color:#C62828;">(-0,01pp vs tgt)</span>
+            </div>
+          </div>
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px; text-align:center;">T2 CYBER FEST</div>
+            <div style="color:#555; line-height:1.5;">
+              &bull; CTR | 1,24% <span style="color:#2E7D32;">(+0,09pp vs tgt)</span><br>
+              &bull; SESIONES | 9.405.820 <span style="color:#2E7D32;">(+6% vs tgt)</span><br>
+              &bull; NMV | 1.157.097 <span style="color:#2E7D32;">(+17% vs tgt)</span><br>
+              &bull; NMV ATTR | 1,10% <span style="color:#2E7D32;">(+0,10pp vs tgt)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 4 -->
+        <div style="border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px; text-align:center;">T2 DOUBLE DATES 4.4</div>
+            <div style="color:#555; line-height:1.5;">
+              &bull; CTR | 1,32% <span style="color:#2E7D32;">(+0,17pp vs tgt)</span><br>
+              &bull; SESIONES | 8.467.019 <span style="color:#C62828;">(-5% vs tgt)</span><br>
+              &bull; NMV | 1.233.044 <span style="color:#C62828;">(-29% vs tgt)</span><br>
+              &bull; NMV ATTR | 0,46% <span style="color:#C62828;">(-0,20pp vs tgt)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 7 — NUEVO MODELO MAIN SLIDERS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:6px 24px 6px; border-bottom:2px solid #FFD000; flex-shrink:0;">
+        <span style="font-size:13px; font-weight:800; color:#111;">Nuevo Modelo Main Sliders</span>
+        <span style="font-size:11px; font-weight:400; color:#555;"> | CTR SEG +0,16pp vs LM &nbsp;&middot;&nbsp; Clicks +43,9% vs LM &nbsp;&middot;&nbsp; Prints +29,9% vs LM &nbsp;&middot;&nbsp; Sat&eacute;lites segmentados a partir de abril</span>
+      </div>
+
+      <div id="slide7body" style="flex:1; display:flex; gap:0; padding:10px 20px 36px; overflow:hidden; position:relative;">
+
+        <div style="flex:0 0 320px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; gap:12px; align-items:center; font-size:9px; color:#555; padding-left:4px;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:10px;background:#FFD000;display:inline-block;border-radius:2px;"></span>NMV ATTR</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:16px;height:2px;background:#3B82F6;display:inline-block;"></span>CTR</span>
+          </div>
+          <div style="flex:1; position:relative; min-height:0;">
+            <canvas id="mainSlidersChart" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+          </div>
+          <div style="height:78px; flex-shrink:0;"></div>
+        </div>
+
+        <div style="flex:1; display:flex; overflow:hidden; gap:0;">
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; overflow:hidden; padding-top:52px;">
+
+            <!-- TOTAL -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelTotal" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">TOTAL</div>
+              <div style="flex:1; border:1.5px solid #FFD000; border-radius:8px; padding:6px 10px; background:#FFFDE7; display:flex; align-items:center; gap:16px;">
+                <div style="font-size:8px; font-weight:800; color:#111; letter-spacing:.04em; white-space:nowrap;">MAIN SLIDERS</div>
+                <div style="font-size:8px; color:#333; line-height:1.6;">
+                  CTR: <strong>1,30%</strong> &nbsp;|&nbsp; NMV ATTR: <strong>125 M</strong> &nbsp;|&nbsp; N&deg; Campa&ntilde;as: <strong>190</strong> &nbsp;|&nbsp; N&deg; Campa&ntilde;as SEG: <strong style="color:#E65100;">99 (52%)</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- ALL AUDIENCIA -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelAllAud" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">ALL AUDIENCIA</div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:5px; font-size:8px;">
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">CTR 1,26%</span>
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">NMV 114 M <span style="color:#888;">(92%)</span></span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; min-height:65px; display:flex; flex-direction:column; justify-content:center;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">MS GENERAL</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>1,27%</strong> &nbsp; NMV ATTR: <strong>99 M</strong> <span style="color:#888;">(79%)</span></div>
+                    </div>
+                    <img src="FOTOS SLIDE SEGMENTACION/MS GENERAL.jpg" style="width:155px; height:65px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.style.display='none'">
+                  </div>
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; min-height:65px; display:flex; flex-direction:column; justify-content:center;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">MS SAT&Eacute;LITES &amp; MS T3</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>1,22%</strong> &nbsp; NMV ATTR: <strong>15 M</strong> <span style="color:#888;">(12%)</span></div>
+                    </div>
+                    <img src="FOTOS SLIDE SEGMENTACION/MS SATELITE.jpg" style="width:155px; height:65px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.style.display='none'">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEGMENTADO -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelSeg" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">SEGMENTADO</div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:5px; font-size:8px;">
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">CTR 1,64%</span>
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">NMV 10.5 M <span style="color:#888;">(8%)</span></span>
+                </div>
+                <div style="flex:1; display:flex;">
+                  <div style="flex:1; display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; min-height:65px; display:flex; flex-direction:column; justify-content:center;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">ALWAYS ON + AO ESTRAT&Eacute;GICOS</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>1,64%</strong> &nbsp; NMV ATTR: <strong>10.5 M</strong> <span style="color:#888;">(8%)</span></div>
+                    </div>
+                    <img src="FOTOS SLIDE SEGMENTACION/AO.jpg" style="width:155px; height:65px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.style.display='none'">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Segmentación en Satélites - Abril -->
+            <div style="background:rgba(229,57,53,0.1); border:1px solid rgba(229,57,53,0.35); border-radius:8px; padding:8px 10px; margin-top:6px; margin-left:8px;">
+              <div style="font-size:9px; font-weight:800; color:#E53935; margin-bottom:4px;">Segmentaci&oacute;n en Sat&eacute;lites &ndash; Abril</div>
+              <div style="font-size:8.5px; color:#444; line-height:1.5;">
+                &bull; Uplift NMV ATR segmentado <strong style="color:#E53935;">+16%</strong> vs mes anterior en los primeros 20 d&iacute;as.<br>
+                &bull; Sat&eacute;lites SEG representan el <strong style="color:#E53935;">60%</strong> del NMV total de sat&eacute;lites.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 8 — SECTION DIVIDER HOME PLACEMENTS
+    ══════════════════════════════════════ -->
+    <div class="slide slide-section bg-section" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="section-body">
+        <h1><span class="section-number">03</span><span style="color:rgba(255,255,255,.6); font-weight:100; margin:0 12px;">|</span>Home Placements</h1>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 9 — RABBIT HOLE HOME
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content style="font-family:'ProximaNova',sans-serif;">
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <!-- Title -->
+      <div style="padding:3px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Rabbit Hole Home]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | Crecimiento de clicks, views y orders en <span style="color:#16a34a;font-weight:700;">+17%</span>, <span style="color:#16a34a;font-weight:700;">+19%</span> y <span style="color:#16a34a;font-weight:700;">+1%</span> respectivamente</span>
+      </div>
+
+      <!-- Body: grid 3 cols × 4 rows -->
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto 1fr 1fr 38px;gap:5px;padding:8px 12px 6px;align-content:space-between;min-height:0;overflow:hidden;">
+
+        <!-- Pills -->
+        <div style="grid-column:1/3;background:#555;border-radius:20px;padding:3px 14px;text-align:center;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+          <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Resultados RH en Home</span>
+        </div>
+        <div style="grid-column:3/4;background:#555;border-radius:20px;padding:3px 14px;text-align:center;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+          <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Resultados PP en RH Home</span>
+        </div>
+
+        <!-- Fila 1: Clicks | Orders | Prints -->
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Clicks por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-clicks"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Orders por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-orders"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Prints por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-prints"></canvas></div>
+        </div>
+
+        <!-- Fila 2: Views | CTR+CVR | CTR PP -->
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Views por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-views"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;flex-shrink:0;margin-bottom:2px;"><span style="color:#EAB308;">CTR</span><span style="color:#333;"> y </span><span style="color:#9ca3af;">CVR</span><span style="color:#333;"> por Mes</span></div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-ctrcvr"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">CTR por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s9-ctrpp"></canvas></div>
+        </div>
+
+        <!-- Insights -->
+        <div style="grid-column:1/3;background:#fffbea;border:1px solid #FFD000;border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:9px;font-weight:700;color:#886600;flex-shrink:0;">&#128161; Insights</span>
+          <span style="font-size:9px;color:#555;">Crecimiento de clicks, views y orders en <strong style="color:#16a34a;">+17%</strong>, <strong style="color:#16a34a;">+19%</strong> y <strong style="color:#16a34a;">+1%</strong> respectivamente. CTR y CVR en <strong style="color:#dc2626;">-0,03pp</strong> y <strong style="color:#dc2626;">-0,08pp</strong> respectivamente.</span>
+        </div>
+        <div style="grid-column:3/4;background:#fffbea;border:1px solid #FFD000;border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:9px;font-weight:700;color:#886600;flex-shrink:0;">&#128161; Insights</span>
+          <span style="font-size:9px;color:#555;line-height:1.5;">Crecimiento de Prints en <strong style="color:#16a34a;">+33%</strong> alineado con el<br>aumento que vemos a nivel general del placement<br>de <strong style="color:#16a34a;">+19%</strong> en Views.</span>
+        </div>
+
+      </div>
+
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 10 — RABBIT HOLE TABS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content style="font-family:'ProximaNova',sans-serif;">
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:3px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Rabbit Hole Tabs]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | Aumento de clicks, views y orders en <span style="color:#16a34a;font-weight:700;">+29%</span>, <span style="color:#16a34a;font-weight:700;">+19%</span> y <span style="color:#16a34a;font-weight:700;">+30%</span> respectivamente</span>
+      </div>
+      <!-- Body: grid 3 cols × 4 rows -->
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto 1fr 1fr 38px;gap:5px;padding:8px 12px 6px;min-height:0;overflow:hidden;align-content:space-between;">
+        <!-- Pills -->
+        <div style="grid-column:1/3;background:#555;border-radius:20px;padding:3px 14px;text-align:center;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+          <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Resultados RH en Tabs</span>
+        </div>
+        <div style="grid-column:3/4;background:#555;border-radius:20px;padding:3px 14px;text-align:center;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+          <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Resultados PP en RH Tabs</span>
+        </div>
+        <!-- Fila 1 -->
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Clicks por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-clicks"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Orders por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-orders"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">NMV por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-nmv"></canvas></div>
+        </div>
+        <!-- Fila 2 -->
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Views por Mes</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-views"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;flex-shrink:0;margin-bottom:2px;"><span style="color:#EAB308;">CTR</span><span style="color:#333;"> y </span><span style="color:#9ca3af;">CVR</span><span style="color:#333;"> por Mes</span></div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-ctrcvr"></canvas></div>
+        </div>
+        <div style="background:#f5f5f5;border-radius:6px;padding:3px 5px;display:flex;flex-direction:column;min-height:0;overflow:hidden;contain:strict;">
+          <div style="font-size:11px;font-weight:700;color:#333;flex-shrink:0;margin-bottom:2px;">Prints por Semana</div>
+          <div style="flex:1;position:relative;min-height:0;overflow:hidden;"><canvas id="s10-ctrpp"></canvas></div>
+        </div>
+        <!-- Insights -->
+        <div style="grid-column:1/3;background:#fffbea;border:1px solid #FFD000;border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:9px;font-weight:700;color:#886600;flex-shrink:0;">&#128161; Insights</span>
+          <span style="font-size:9px;color:#555;">Aumento de clicks, views y orders en <strong style="color:#16a34a;">+29%</strong>, <strong style="color:#16a34a;">+19%</strong> y <strong style="color:#16a34a;">+30%</strong> respectivamente. CTR con aumento de <strong style="color:#16a34a;">+0,08pp</strong> y CVR se mantiene constante.</span>
+        </div>
+        <div style="grid-column:3/4;background:#fffbea;border:1px solid #FFD000;border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:9px;font-weight:700;color:#886600;flex-shrink:0;">&#128161; Insights</span>
+          <span style="font-size:9px;color:#555;line-height:1.5;">Aumento del NMV a nivel total de la Landing<br>del <strong style="color:#16a34a;">+25%</strong>. Display sin imprimir, TBD soluci&oacute;n.</span>
+        </div>
+      </div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         SLIDE 11 — QA SEGMENTADOS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content style="font-family:'ProximaNova',sans-serif;">
+
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[QA Segmentados]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | La segmentaci&oacute;n del QA produjo un aumento en NMV de +10% y +69% en semanas consecutivas sin est&iacute;mulos vs el QA Modo F&uacute;tbol sin segmentaci&oacute;n</span>
+      </div>
+
+      <!-- Cronograma -->
+      <div style="flex-shrink:0;background:#f5f5f5;border:1px solid rgba(0,0,0,.08);border-radius:8px;margin:12px 14px 0;padding:8px 10px 8px;">
+        <div style="font-size:8px;font-weight:800;color:#333;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;padding-bottom:3px;border-bottom:2px solid #FFE600;">Cronograma de Eventos</div>
+        <div style="display:flex;height:66px;">
+          <div style="width:34px;flex-shrink:0;position:relative;">
+            <div style="position:absolute;right:5px;top:24px;font-size:6.5px;font-weight:700;color:#bbb;text-transform:uppercase;">TKO</div>
+            <div style="position:absolute;right:5px;top:36px;font-size:6.5px;font-weight:700;color:#bbb;text-transform:uppercase;">CMP</div>
+          </div>
+          <div style="flex:1;position:relative;">
+            <div style="position:absolute;top:0;height:42px;background:rgba(50,170,110,.10);border-left:1px solid rgba(50,170,110,.28);border-right:1px solid rgba(50,170,110,.28);left:29.17%;width:12.50%;"></div>
+            <div style="position:absolute;top:0;height:42px;background:rgba(50,170,110,.10);border-left:1px solid rgba(50,170,110,.28);border-right:1px solid rgba(50,170,110,.28);left:72.92%;width:12.50%;"></div>
+            <div style="position:absolute;left:0;right:0;height:9px;top:20px;background:rgba(0,0,0,.07);border-radius:3px;overflow:hidden;">
+              <div style="position:absolute;top:0;height:100%;background:rgba(210,55,45,.84);border-radius:2px;left:14.58%;width:14.58%;"></div>
+              <div style="position:absolute;top:0;height:100%;background:rgba(210,55,45,.84);border-radius:2px;left:58.33%;width:2.08%;"></div>
+              <div style="position:absolute;top:0;height:100%;background:rgba(210,55,45,.84);border-radius:2px;left:68.75%;width:2.08%;"></div>
+            </div>
+            <div style="position:absolute;left:0;right:0;height:9px;top:32px;background:rgba(0,0,0,.07);border-radius:3px;overflow:hidden;">
+              <div style="position:absolute;top:0;height:100%;background:rgba(255,175,0,.90);border-radius:2px;left:43.75%;width:27.08%;"></div>
+              <div style="position:absolute;top:0;height:100%;background:rgba(35,115,210,.85);border-radius:2px;left:72.92%;width:12.50%;"></div>
+            </div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:14.58%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:20.83%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:29.17%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:43.75%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:58.33%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:68.75%;"></div>
+            <div style="position:absolute;width:1px;top:20px;height:21px;background:rgba(0,0,0,.22);left:72.92%;"></div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:1px;left:14.58%;">TKO&#9650;<br>09/03</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:1px;left:29.17%;">TKO&#9660;<br>16/03</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:1px;left:43.75%;">DD&#9650;<br>23/03</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:1px;left:68.75%;">TKO&#9650;<br>04/04</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#2aaa60;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:10px;left:20.83%;">QA&#9650;<br>12/03</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:10px;left:58.33%;">TKO&#9650;<br>30/03</div>
+            <div style="position:absolute;font-size:6px;font-weight:700;color:#444;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.2;top:10px;left:72.92%;">LIQ&#9650;<br>06/04</div>
+            <div style="position:absolute;left:0;right:0;top:42px;height:1px;background:rgba(0,0,0,.10);"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:0%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:14.58%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:29.17%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:43.75%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:58.33%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:72.92%;"></div>
+            <div style="position:absolute;width:1px;top:42px;height:4px;background:rgba(0,0,0,.15);left:87.50%;"></div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:0%;">02/03</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:14.58%;">09/03</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:29.17%;">16/03</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:43.75%;">23/03</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:58.33%;">30/03</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:72.92%;">06/04</div>
+            <div style="position:absolute;top:47px;font-size:6px;color:#aaa;transform:translateX(-50%);left:87.50%;">13/04</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:5px;padding-top:4px;border-top:1px solid rgba(0,0,0,.07);">
+          <span style="display:flex;align-items:center;gap:4px;font-size:7px;color:#555;"><span style="width:14px;height:4px;background:rgba(210,55,45,.84);border-radius:2px;display:inline-block;flex-shrink:0;"></span>Takeover</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:7px;color:#555;"><span style="width:14px;height:4px;background:rgba(255,175,0,.90);border-radius:2px;display:inline-block;flex-shrink:0;"></span>Campa&ntilde;a Double Dates</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:7px;color:#555;"><span style="width:14px;height:4px;background:rgba(35,115,210,.85);border-radius:2px;display:inline-block;flex-shrink:0;"></span>Campa&ntilde;a Liq. Total</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:7px;color:#555;"><span style="width:14px;height:4px;background:rgba(50,170,110,.20);border:1px solid rgba(50,170,110,.40);border-radius:2px;display:inline-block;flex-shrink:0;"></span>Semana sin est&iacute;mulos</span>
+          <span style="font-size:7px;color:#2aaa60;font-weight:700;white-space:nowrap;">QA&#9650; = QA Seg. encendido (12/03)</span>
+        </div>
+      </div>
+
+      <!-- Bottom: charts + insights -->
+      <div style="flex:1;display:flex;gap:8px;padding:5px 14px 50px;min-height:0;overflow:hidden;">
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f5f5;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:6px 10px;">
+          <div style="font-size:8px;font-weight:800;color:#333;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;padding-bottom:3px;border-bottom:2px solid #FFE600;flex-shrink:0;">Sesiones Semanales</div>
+          <div style="flex:1;position:relative;min-height:0;"><canvas id="s11-sess"></canvas></div>
+          <div style="display:flex;justify-content:center;gap:8px;flex-shrink:0;margin-top:3px;">
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:8px;height:8px;background:rgba(255,220,0,.85);display:inline-block;border-radius:1px;"></span>MUNDIAL</span>
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:8px;height:8px;background:rgba(100,100,115,.75);display:inline-block;border-radius:1px;"></span>MODA</span>
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:12px;height:2px;background:rgba(160,100,0,.90);display:inline-block;margin-bottom:1px;"></span>Attr QA Mundial</span>
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:12px;height:2px;background:rgba(60,60,90,.85);display:inline-block;margin-bottom:1px;"></span>Attr QA Moda</span>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f5f5;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:6px 10px;">
+          <div style="font-size:8px;font-weight:800;color:#333;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;padding-bottom:3px;border-bottom:2px solid #FFE600;flex-shrink:0;">NMV Semanal (USD)</div>
+          <div style="flex:1;position:relative;min-height:0;"><canvas id="s11-nmv"></canvas></div>
+          <div style="display:flex;justify-content:center;gap:8px;flex-shrink:0;margin-top:3px;">
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:8px;height:8px;background:rgba(255,220,0,.85);display:inline-block;border-radius:1px;"></span>MUNDIAL</span>
+            <span style="display:flex;align-items:center;gap:3px;font-size:6.5px;color:#555;"><span style="width:8px;height:8px;background:rgba(100,100,115,.75);display:inline-block;border-radius:1px;"></span>MODA</span>
+          </div>
+        </div>
+
+        <div style="flex:0.65;min-width:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f5f5;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:6px 10px;">
+          <div style="font-size:8px;font-weight:800;color:#333;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid #FFE600;flex-shrink:0;">Insights</div>
+          <div style="flex:1;display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.07);">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,220,0,.22);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;">&#9889;</div>
+            <div style="flex:1;">
+              <div style="font-size:10px;font-weight:700;color:#1a1a2e;line-height:1.25;"><span style="color:#CC7700;">18% &#8594; 62%</span> attr QA</div>
+              <div style="font-size:9px;color:#666;line-height:1.45;margin-top:2px;">La semana del 02/03 adem&aacute;s del encendido del QA la landing contaba con el est&iacute;mulo de redirecci&oacute;n del MS, por eso el atribuido del QA solo representa el 18%</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.07);">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,220,0,.22);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;">&#128161;</div>
+            <div style="flex:1;">
+              <div style="font-size:10px;font-weight:700;color:#1a1a2e;line-height:1.25;">NMV <span style="color:#CC7700;">&#8593;</span> con menos sesiones</div>
+              <div style="font-size:9px;color:#666;line-height:1.45;margin-top:2px;">Inclusive con menor cantidad de sesiones aportadas entre los dos QA el NMV crece +10% y +69% comparando con el QA de Modo F&uacute;tbol sin segmentaci&oacute;n de la primera semana</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;align-items:flex-start;gap:7px;padding:5px 0;">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,220,0,.22);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;">&#127919;</div>
+            <div style="flex:1;">
+              <div style="font-size:10px;font-weight:700;color:#1a1a2e;line-height:1.25;">CTR Mundial <span style="color:#CC7700;">0,12%</span> &mdash; Moda <span style="color:#CC7700;">0,15%</span></div>
+              <div style="font-size:9px;color:#666;line-height:1.45;margin-top:2px;">Los CTR est&aacute;n al mismo nivel que los QA de Cupones y Afiliados (0,15% y 0,13%) que no est&aacute;n segmentados</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 12 — SECTION DIVIDER KEY INITIATIVES
+    ══════════════════════════════════════ -->
+    <div class="slide slide-section bg-section" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="section-body">
+        <h1><span class="section-number">04</span><span style="color:rgba(255,255,255,.6); font-weight:100; margin:0 12px;">|</span>Key Initiatives</h1>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDES 13-18 — KEY INITIATIVES CONTENIDO
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Green]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | </span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Potencia Interior]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | </span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Instore]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | </span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 16 — BIG PUSH ESTÍMULOS ONSITE
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;">
+          <img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;">
+          Benefits &amp; Site Merch
+        </span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:5px 24px 5px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Delivery] Est&iacute;mulos Onsite dentro de Big Push</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | Se recibieron m&aacute;s de 160,6M de prints (+60,8% vs BP Nov, +34,2% vs LM) y 55,4K de orders (+145,4% vs BP Nov, +30,6% vs LM)</span>
+      </div>
+
+      <div style="flex:1;display:flex;gap:8px;padding:8px 14px 32px;overflow:hidden;">
+
+        <!-- IZQ: Impresiones + Orders -->
+        <div style="flex:0 0 215px;display:flex;flex-direction:column;gap:6px;">
+
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;background:#f0f0f0;border-radius:8px;padding:4px 6px;">
+            <div style="background:#555;border-radius:20px;padding:3px 14px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+              <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Impresiones</span>
+            </div>
+            <div style="padding:2px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;margin-bottom:2px;">
+              <div>
+                <div style="font-size:8px;color:#666;">Prints Total</div>
+                <div style="font-size:20px;font-weight:900;color:#111;line-height:1.1;">160,6M</div>
+              </div>
+              <div style="width:1px;align-self:stretch;background:#ccc;flex-shrink:0;"></div>
+              <div style="display:flex;flex-direction:column;justify-content:center;gap:3px;">
+                <div style="font-size:8px;color:#2E7D32;white-space:nowrap;">&#9650; +60,8% vs BP Nov</div>
+                <div style="font-size:8px;color:#2E7D32;white-space:nowrap;">&#9650; +34,2% vs LM</div>
+              </div>
+            </div>
+            <div style="flex:1;position:relative;min-height:0;">
+              <canvas id="impresionesChart"></canvas>
+            </div>
+          </div>
+
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;background:#f0f0f0;border-radius:8px;padding:4px 6px;">
+            <div style="background:#555;border-radius:20px;padding:3px 14px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+              <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Orders</span>
+            </div>
+            <div style="padding:2px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;margin-bottom:2px;">
+              <div>
+                <div style="font-size:8px;color:#666;">Orders Total</div>
+                <div style="font-size:20px;font-weight:900;color:#111;line-height:1.1;">55,4K</div>
+              </div>
+              <div style="width:1px;align-self:stretch;background:#ccc;flex-shrink:0;"></div>
+              <div style="display:flex;flex-direction:column;justify-content:center;gap:3px;">
+                <div style="font-size:8px;color:#2E7D32;white-space:nowrap;">&#9650; +145,4% vs BP Nov</div>
+                <div style="font-size:8px;color:#2E7D32;white-space:nowrap;">&#9650; +30,6% vs LM</div>
+              </div>
+            </div>
+            <div style="flex:1;position:relative;min-height:0;">
+              <canvas id="ordersChart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CENTRO: ML + MP Apertura por canal -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px;overflow:hidden;padding-top:6px;">
+
+          <!-- ML pill -->
+          <div style="background:#555;border-radius:20px;padding:3px 14px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+            <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">ML &mdash; Apertura por canal</span>
+          </div>
+
+          <!-- ML table -->
+          <div style="overflow:hidden;background:#fff;border:1px solid #e2e4ef;border-radius:8px;padding:4px 8px;">
+            <table style="width:100%;border-collapse:collapse;font-family:'ProximaNova',sans-serif;font-size:9px;">
+              <thead>
+                <tr>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:left;font-size:8px;">Espacio</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:center;font-size:8px;">M&eacute;trica</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">BP 26</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">vs BP25</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">vs LM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td rowspan="3" style="vertical-align:middle;padding:2px 5px 2px 0;width:68px;">
+                    <div style="background:#f1f2f6;color:#555;font-size:9px;font-weight:600;text-align:center;border-radius:6px;padding:4px 3px;line-height:1.3;font-family:'ProximaNova',sans-serif;">Main Slider</div>
+                  </td>
+                  <td style="color:#aaa;text-align:center;padding:9px 3px 4px;white-space:nowrap;">Prints</td>
+                  <td style="color:#222;text-align:right;padding:9px 3px 4px;white-space:nowrap;">55,0M</td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+1,4%</span></td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,4%</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px;white-space:nowrap;">CTR</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px;white-space:nowrap;">0,39%</td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+0,01pp</span></td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+0,04pp</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px 10px;white-space:nowrap;border-bottom:1px solid #eaecf5;">&#211;rdenes</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px 10px;white-space:nowrap;border-bottom:1px solid #eaecf5;">30.745</td>
+                  <td style="text-align:right;padding:6px 3px 10px;border-bottom:1px solid #eaecf5;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+46,6%</span></td>
+                  <td style="text-align:right;padding:6px 3px 10px;border-bottom:1px solid #eaecf5;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+35,4%</span></td>
+                </tr>
+                <tr>
+                  <td rowspan="3" style="vertical-align:middle;padding:2px 5px 2px 0;width:68px;">
+                    <div style="background:#f1f2f6;color:#555;font-size:9px;font-weight:600;text-align:center;border-radius:6px;padding:4px 3px;line-height:1.3;font-family:'ProximaNova',sans-serif;">Placement Person.</div>
+                  </td>
+                  <td style="color:#aaa;text-align:center;padding:9px 3px 4px;white-space:nowrap;">Prints</td>
+                  <td style="color:#222;text-align:right;padding:9px 3px 4px;white-space:nowrap;">16,0M</td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+67,2%</span></td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+173,7%</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px;white-space:nowrap;">CTR</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px;white-space:nowrap;">0,27%</td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,14pp</span></td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,07pp</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px 9px;white-space:nowrap;">&#211;rdenes</td>
+                  <td style="color:#aaa;font-style:italic;text-align:right;padding:6px 3px 9px;white-space:nowrap;">s/d</td>
+                  <td style="color:#ccc;text-align:right;padding:6px 3px 9px;">&mdash;</td>
+                  <td style="color:#ccc;text-align:right;padding:6px 3px 9px;">&mdash;</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- MP pill -->
+          <div style="background:#555;border-radius:20px;padding:3px 14px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+            <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">MP &mdash; Apertura por canal</span>
+          </div>
+
+          <!-- MP table -->
+          <div style="overflow:hidden;background:#fff;border:1px solid #e2e4ef;border-radius:8px;padding:4px 8px;">
+            <table style="width:100%;border-collapse:collapse;font-family:'ProximaNova',sans-serif;font-size:9px;">
+              <thead>
+                <tr>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:left;font-size:8px;">Espacio</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:center;font-size:8px;">M&eacute;trica</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">BP 26</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">vs BP25</th>
+                  <th style="text-transform:uppercase;color:#bbb;padding:2px 3px 4px;border-bottom:1px solid #eaecf5;text-align:right;font-size:8px;">vs LM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td rowspan="3" style="vertical-align:middle;padding:2px 5px 2px 0;width:68px;">
+                    <div style="background:#f1f2f6;color:#555;font-size:9px;font-weight:600;text-align:center;border-radius:6px;padding:4px 3px;line-height:1.3;font-family:'ProximaNova',sans-serif;">Shortcut</div>
+                  </td>
+                  <td style="color:#aaa;text-align:center;padding:9px 3px 4px;white-space:nowrap;">Prints</td>
+                  <td style="color:#222;text-align:right;padding:9px 3px 4px;white-space:nowrap;">70,0M</td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+120,0%</span></td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+52,0%</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px;white-space:nowrap;">CTR</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px;white-space:nowrap;">0,40%</td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,15pp</span></td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,02pp</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px 10px;white-space:nowrap;border-bottom:1px solid #eaecf5;">&#211;rdenes</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px 10px;white-space:nowrap;border-bottom:1px solid #eaecf5;">22.732</td>
+                  <td style="color:#ccc;text-align:right;padding:6px 3px 10px;border-bottom:1px solid #eaecf5;">&mdash;</td>
+                  <td style="text-align:right;padding:6px 3px 10px;border-bottom:1px solid #eaecf5;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+26,9%</span></td>
+                </tr>
+                <tr>
+                  <td rowspan="3" style="vertical-align:middle;padding:2px 5px 2px 0;width:68px;">
+                    <div style="background:#f1f2f6;color:#555;font-size:9px;font-weight:600;text-align:center;border-radius:6px;padding:4px 3px;line-height:1.3;font-family:'ProximaNova',sans-serif;">Xsell</div>
+                  </td>
+                  <td style="color:#aaa;text-align:center;padding:9px 3px 4px;white-space:nowrap;">Prints</td>
+                  <td style="color:#222;text-align:right;padding:9px 3px 4px;white-space:nowrap;">19,6M</td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+382,3%</span></td>
+                  <td style="text-align:right;padding:9px 3px 4px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+59,8%</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px;white-space:nowrap;">CTR</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px;white-space:nowrap;">0,15%</td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,09pp</span></td>
+                  <td style="text-align:right;padding:6px 3px;white-space:nowrap;"><span style="background:rgba(220,38,38,.12);color:#dc2626;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">-0,01pp</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#aaa;text-align:center;padding:6px 3px 9px;white-space:nowrap;">&#211;rdenes</td>
+                  <td style="color:#222;text-align:right;padding:6px 3px 9px;white-space:nowrap;">1.951</td>
+                  <td style="text-align:right;padding:6px 3px 9px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+20,4%</span></td>
+                  <td style="text-align:right;padding:6px 3px 9px;white-space:nowrap;"><span style="background:rgba(22,163,74,.12);color:#16a34a;border-radius:3px;padding:1px 3px;font-weight:700;font-size:8px;">+6,1%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <a href="https://script.google.com/a/macros/mercadolibre.com/s/AKfycby0sglwjcwlmuC7tX9M4qCC52vwlDvJ5ToN30rlyrNT-qa_WilRoXGw7Feu8I7Kxipy/exec"
+             target="_blank"
+             style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;background:#f0f0f0;border-radius:8px;padding:6px 12px;text-decoration:none;margin-top:2px;">
+            <span style="font-size:9px;font-weight:700;color:#0052CC;font-family:'ProximaNova',sans-serif;">&#127828; Nuevo Dashboard Food Delivery</span>
+            <span style="font-size:8px;font-weight:400;color:#666;font-family:'ProximaNova',sans-serif;text-align:center;line-height:1.4;">Con apertura diaria, semanal y mensual para todos los est&iacute;mulos de ML &amp; MP operados por SM</span>
+          </a>
+        </div>
+
+        <!-- DER: Creativos -->
+        <div style="flex:0 0 270px;display:flex;flex-direction:column;gap:5px;overflow:hidden;padding-top:6px;">
+          <div style="background:#555;border-radius:20px;padding:3px 14px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'ProximaNova',sans-serif;">
+            <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.06em;font-family:'ProximaNova',sans-serif;">Creativos</span>
+          </div>
+          <div style="flex:1;border-radius:8px;overflow:hidden;min-height:0;">
+            <img src="imagen mbr.jpg" alt="Creativos Big Push" style="width:100%;height:100%;object-fit:contain;display:block;" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[Pharma]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | </span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="padding:4px 24px;border-bottom:2px solid #FFD000;flex-shrink:0;">
+        <span style="font-size:13px;font-weight:800;color:#111;">[AI]</span>
+        <span style="font-size:11px;font-weight:400;color:#555;"> | </span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION DIVIDER — 05 BENEFITS
+    ══════════════════════════════════════ -->
+    <div class="slide slide-section bg-section" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="section-body">
+        <h1><span class="section-number">05</span><span style="color:rgba(255,255,255,.6); font-weight:100; margin:0 12px;">|</span>Benefits</h1>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDES BENEFITS — CONTENIDO (x6)
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;font-weight:600;">Contenido pendiente</div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;font-weight:600;">Contenido pendiente</div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;font-weight:600;">Contenido pendiente</div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;font-weight:600;">Contenido pendiente</div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <div class="slide bg-white-content" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;font-weight:600;">Contenido pendiente</div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 25 — OPTIN MASIVO BENEFITS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content s25" data-content>
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits &amp; Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+      <div class="s25-title">
+        <b>Herramienta de optin masivo</b>
+        <span class="sep"> | </span>
+        <span class="sub">45% de los sellers de mar/abr nunca habían descargado el EMOFF para Smart Masivas · CA (lanz. 10-mar) · SD HT A360 (lanz. 17-mar)</span>
+      </div>
+      <div class="s25-body">
+
+        <!-- Gráficos -->
+        <div class="charts-row">
+          <div class="chart-col wide">
+            <div class="chart-label">Descargas diarias EMOFF · Solo campañas Smart Masiva</div>
+            <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
+            <div class="chart-note">Punteada = pre-herramienta · Sólida = post · Dorado = CA · Azul = SD HT</div>
+          </div>
+          <div class="chart-col narrow">
+            <div class="chart-label">Sellers por período · Marzo apilado pre+post</div>
+            <div class="chart-wrap"><canvas id="chart-stack"></canvas></div>
+            <div class="chart-note">Claro = pre · Sólido = post · Mar partido: CA 10-mar, HT 17-mar</div>
+          </div>
+        </div>
+
+        <!-- Panel inferior -->
+        <div class="bottom-row">
+          <div style="display:flex;flex-direction:column;overflow:hidden;">
+            <div class="panel-header">Sellers nuevos post-lanzamiento</div>
+            <div class="kpi-strip">
+              <div class="kpi-box">
+                <div class="kpi-lbl">Nuevos CA</div>
+                <div class="kpi-val" style="color:#B07D00">56</div>
+                <div class="kpi-det">55% del total CA mar+abr</div>
+              </div>
+              <div class="kpi-box">
+                <div class="kpi-lbl">Nuevos SD HT</div>
+                <div class="kpi-val" style="color:#1a5276">73</div>
+                <div class="kpi-det">40% del total SD HT mar+abr</div>
+              </div>
+              <div class="kpi-box">
+                <div class="kpi-lbl">Total nuevos</div>
+                <div class="kpi-val" style="color:#2d6a4f">129</div>
+                <div class="kpi-det">45% de 285 sellers</div>
+              </div>
+            </div>
+            <div class="sbar-title">Composición post-lanzamiento (sellers únicos mar+abr)</div>
+            <div class="sbar-wrap">
+              <div class="sbar-lbl">CA · 102 sellers únicos</div>
+              <div class="sbar">
+                <div class="sbar-seg" style="width:54.9%;background:#2d6a4f;">56 nuevos (55%)</div>
+                <div class="sbar-seg" style="width:45.1%;background:#888;">46 fidelizados (45%)</div>
+              </div>
+            </div>
+            <div class="sbar-wrap">
+              <div class="sbar-lbl">SD HT · 183 sellers únicos</div>
+              <div class="sbar">
+                <div class="sbar-seg" style="width:39.9%;background:#1a5276;">73 nuevos (40%)</div>
+                <div class="sbar-seg" style="width:60.1%;background:#888;">110 fidelizados (60%)</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;overflow:hidden;">
+            <div class="ytable-title">Detalle por período</div>
+            <table class="mini-table">
+              <thead>
+                <tr><th>Período</th><th>CA</th><th>SD HT</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Enero</td><td>76</td><td>208</td><td><span class="badge pre">Pre</span></td></tr>
+                <tr><td>Febrero</td><td>87</td><td>163</td><td><span class="badge pre">Pre</span></td></tr>
+                <tr><td>Mar 1–9 (CA) / 1–16 (HT)</td><td>47</td><td>94</td><td><span class="badge pre">Pre</span></td></tr>
+                <tr class="post"><td>Mar 10–31 (CA) / 17–31 (HT)</td><td>72</td><td>132</td><td><span class="badge post">Post</span></td></tr>
+                <tr class="post"><td>Abril 1–19</td><td>94</td><td>164</td><td><span class="badge post">Post</span></td></tr>
+                <tr class="tot"><td>Sellers nuevos (no descargaban antes)</td><td>56 · 55%</td><td>73 · 40%</td><td><span class="badge new">Nuevo</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accionable -->
+        <div class="growth-box">
+          <strong>Potencial de crecimiento:</strong>
+          En CA hay ~930 sellers con candidatos activos en Smart Masivas, hay todavía mucho espacio de crecimiento para que más sellers adopten la herramienta. La situación en SD HT es similar.
+        </div>
+
+      </div>
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 8 — CIERRE
+    ══════════════════════════════════════ -->
+    <div class="slide slide-cover bg-gradient-yellow" data-content>
+      <div class="slide-header">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div class="cover-body" style="align-items:center; text-align:center;">
+        <h1 style="font-size:52px;">¡Gracias!</h1>
+        <h2 style="font-size:24px;">Preguntas y comentarios</h2>
+      </div>
+      <div class="ml-logo">
+        <img src="ml-logo.png" alt="Mercado Libre" />
+      </div>
+    </div>
+
+  </div><!-- /deck -->
+  </div><!-- /deck-container -->
+
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <div id="nav">
+    <button id="btn-prev" disabled>← Anterior</button>
+    <span id="counter">1 / 9</span>
+    <button id="btn-next">Siguiente →</button>
+  </div>
+
+  <script>
+    // Reemplaza el logo en todas las slides excepto la portada (primera)
+    const allSlides = document.querySelectorAll('.slide');
+    allSlides.forEach((slide, i) => {
+      if (i === 0) return; // portada: mantener logo completo
+      const logo = slide.querySelector('.ml-logo');
+      if (logo) {
+        logo.className = 'ml-logo-icon';
+        logo.querySelector('img').src = 'ml-logo-sec.png';
+      }
+    });
+
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const total = slides.length;
+
+    const btnPrev   = document.getElementById('btn-prev');
+    const btnNext   = document.getElementById('btn-next');
+    const counter   = document.getElementById('counter');
+    const fillEl    = document.getElementById('progress-fill');
+
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      current = Math.max(0, Math.min(n, total - 1));
+      slides[current].classList.add('active');
+      counter.textContent = `${current + 1} / ${total}`;
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === total - 1;
+      fillEl.style.width = `${((current + 1) / total) * 100}%`;
+    }
+
+    btnPrev.addEventListener('click', () => goTo(current - 1));
+    btnNext.addEventListener('click', () => goTo(current + 1));
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown'  || e.key === ' ') goTo(current + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') goTo(current - 1);
+    });
+
+    // Escala el deck para ocupar toda la pantalla manteniendo 16:9
+    const deck = document.getElementById('deck');
+    const SLIDE_W = 960;
+    const SLIDE_H = 540;
+
+    function scaleToFit() {
+      const container = document.getElementById('deck-container');
+      const availW = container.clientWidth;
+      const availH = container.clientHeight;
+      const scale = Math.min(availW / SLIDE_W, availH / SLIDE_H);
+      deck.style.transform = `scale(${scale})`;
+      if (window._msChart) window._msChart.resize();
+    }
+
+    let _resizeTimer;
+    function onResize() {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(scaleToFit, 60);
+    }
+
+    window.addEventListener('resize', onResize);
+    document.addEventListener('fullscreenchange', onResize);
+    document.addEventListener('webkitfullscreenchange', onResize);
+    scaleToFit();
+
+    // ── Main Sliders chart ──
+    const ctx2 = document.getElementById('mainSlidersChart');
+    if (ctx2) {
+      const msLabels = ['AGO 25','SEP 25','OCT 25','NOV 25','DIC 25','ENE 26','FEB 26','MAR 26'];
+      const msNMV    = [36, 75, 60, 132, 141, 113, 95, 125];
+      const msCTR    = [0.91, 1.04, 1.29, 1.62, 1.04, 0.77, 0.99, 1.30];
+      window._msChart = new Chart(ctx2, {
+        data: {
+          labels: msLabels,
+          datasets: [
+            {
+              type: 'bar', label: 'NMV ATTR (M)', data: msNMV,
+              backgroundColor: '#FFD000', borderRadius: 3,
+              yAxisID: 'y1', barPercentage: 0.6, order: 2
+            },
+            {
+              type: 'line', label: 'CTR %', data: msCTR,
+              borderColor: '#3B82F6', borderWidth: 2,
+              pointRadius: 4, pointBackgroundColor: '#3B82F6', pointBorderColor: '#fff', pointBorderWidth: 1.5,
+              yAxisID: 'y2', tension: 0.3, order: 1,
+              datalabels: {
+                display: true, align: 'top', anchor: 'top',
+                formatter: v => v.toFixed(2) + '%',
+                font: { size: 8, weight: '700' }, color: '#2563EB', offset: 2
+              }
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          devicePixelRatio: window.devicePixelRatio * 2,
+          animation: false,
+          layout: { padding: { top: 24, right: 8 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 8, family: 'ProximaNova, sans-serif' }, color: '#555', maxRotation: 0 },
+              grid: { display: false }, border: { display: false }
+            },
+            y1: { display: false, min: 0, max: 180 },
+            y2: { display: false, min: 0, max: 2.5 }
+          }
+        },
+        plugins: [{
+          id: 'nmvLabelsAndSplit',
+          afterDatasetsDraw(chart) {
+            const { ctx, scales: { y1 }, data } = chart;
+            const ds = chart.getDatasetMeta(0);
+
+            // Labels NMV encima de cada barra
+            ctx.save();
+            ctx.font = `700 9px ProximaNova, sans-serif`;
+            ctx.fillStyle = '#111';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ds.data.forEach((bar, i) => {
+              const val = data.datasets[0].data[i];
+              ctx.fillText(val + ' M', bar.x, bar.y - 2);
+            });
+            ctx.restore();
+
+            // Línea roja punteada en la última barra (FEB 26)
+            // 88.7M = límite All Audiencia dentro de 95M total
+            const lastBar = ds.data[ds.data.length - 1];
+            const splitY = y1.getPixelForValue(6.3);
+            const barHalfW = lastBar.width / 2;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(lastBar.x - barHalfW - 6, splitY);
+            ctx.lineTo(lastBar.x + barHalfW + 6, splitY);
+            ctx.strokeStyle = '#E53935';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 3]);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }]
+      });
+    }
+
+    // ── Flechas conectoras slide 7 (deshabilitado) ──
+    function drawArrows() {
+      return;
+      const svg     = document.getElementById('arrowSvg');
+      const body    = document.getElementById('slide7body');
+      const canvas  = document.getElementById('mainSlidersChart');
+      const lTotal  = document.getElementById('labelTotal');
+      const lAllAud = document.getElementById('labelAllAud');
+      const lSeg    = document.getElementById('labelSeg');
+      if (!svg || !body || !canvas || !lTotal || !lAllAud || !lSeg) return;
+
+      const chartInst = Chart.getChart(canvas);
+      if (!chartInst) return;
+
+      // Calcular escala del deck (transform: scale)
+      const deckEl   = document.getElementById('deck');
+      const deckRect = deckEl.getBoundingClientRect();
+      const scaleX   = deckRect.width  / 960;
+      const scaleY   = deckRect.height / 540;
+
+      // Helper: rect relativo al body, compensando escala
+      function rel(el) {
+        const er = el.getBoundingClientRect();
+        const br = body.getBoundingClientRect();
+        return {
+          left:   (er.left   - br.left)   / scaleX,
+          top:    (er.top    - br.top)    / scaleY,
+          width:  er.width  / scaleX,
+          height: er.height / scaleY,
+          right:  (er.right  - br.left)   / scaleX,
+          bottom: (er.bottom - br.top)    / scaleY,
+          cx:     (er.left + er.width/2   - br.left) / scaleX,
+          cy:     (er.top  + er.height/2  - br.top)  / scaleY,
+        };
+      }
+
+      const canvasR  = rel(canvas);
+      const y1scale  = chartInst.scales.y1;
+      const lastBar  = chartInst.getDatasetMeta(0).data[6];
+
+      const barX     = canvasR.left + lastBar.x;
+      const barTop   = canvasR.top  + lastBar.y;
+      const barBot   = canvasR.top  + y1scale.getPixelForValue(0);
+      const redLineY = canvasR.top  + y1scale.getPixelForValue(6.3);
+
+      const rT  = rel(lTotal);
+      const rA  = rel(lAllAud);
+      const rS  = rel(lSeg);
+
+      const arrow = (x1, y1r, x2, y2r) => {
+        const mx = x1 + (x2 - x1) * 0.6;
+        return `<path d="M${x1},${y1r} C${mx},${y1r} ${mx},${y2r} ${x2},${y2r}"
+          fill="none" stroke="#aaa" stroke-width="1.2" stroke-dasharray="4,3"
+          marker-end="url(#ah)"/>`;
+      };
+
+      svg.innerHTML = `
+        <defs>
+          <marker id="ah" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+            <path d="M0,0 L0,5 L5,2.5 z" fill="#aaa"/>
+          </marker>
+        </defs>
+        ${arrow(barX, barTop,                        rT.left, rT.cy)}
+        ${arrow(barX, (barTop + redLineY) / 2,       rA.left, rA.cy)}
+        ${arrow(barX, (redLineY + barBot) / 2,       rS.left, rS.cy)}
+      `;
+    }
+
+    setTimeout(drawArrows, 400);
+    window.addEventListener('resize', () => setTimeout(drawArrows, 150));
+
+    goTo(0);
+
+    // ── Slide 25: Optin Masivo charts ──
+    (function() {
+      const ctxDaily = document.getElementById('chart-daily');
+      const ctxStack = document.getElementById('chart-stack');
+      if (!ctxDaily || !ctxStack) return;
+
+      new Chart(ctxDaily, {
+        type: 'line',
+        data: {
+          labels: ["2025-12-24","2025-12-25","2025-12-26","2025-12-27","2025-12-29","2025-12-30","2025-12-31","2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09","2026-01-10","2026-01-11","2026-01-12","2026-01-13","2026-01-14","2026-01-15","2026-01-16","2026-01-17","2026-01-19","2026-01-20","2026-01-21","2026-01-22","2026-01-23","2026-01-26","2026-01-27","2026-01-28","2026-01-29","2026-01-30","2026-01-31","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-07","2026-02-09","2026-02-10","2026-02-11","2026-02-12","2026-02-13","2026-02-15","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22","2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-02-28","2026-03-01","2026-03-02","2026-03-03","2026-03-04","2026-03-05","2026-03-06","2026-03-07","2026-03-08","2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-14","2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-21","2026-03-23","2026-03-24","2026-03-25","2026-03-26","2026-03-27","2026-03-28","2026-03-29","2026-03-30","2026-03-31","2026-04-01","2026-04-02","2026-04-03","2026-04-04","2026-04-05","2026-04-06","2026-04-07","2026-04-08","2026-04-09","2026-04-10","2026-04-11","2026-04-12","2026-04-13","2026-04-14","2026-04-15","2026-04-16","2026-04-17","2026-04-18","2026-04-19"],
+          datasets: [
+            { label:'CA pre',  data:[0,0,3,3,3,1,1,3,10,2,0,5,1,3,4,4,0,1,2,3,2,1,1,0,4,1,0,4,1,4,0,3,6,8,3,3,15,4,3,3,1,1,4,7,3,4,5,0,0,0,2,7,1,0,0,2,4,2,3,3,4,5,12,4,11,2,7,2,1,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], borderColor:'rgba(180,180,180,.7)', borderWidth:1.5, borderDash:[4,3], backgroundColor:'transparent', tension:.3, pointRadius:0, spanGaps:false },
+            { label:'CA post', data:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5,2,7,3,0,1,4,3,2,3,0,2,1,1,7,8,5,1,10,7,17,3,3,2,4,12,7,4,4,7,1,4,4,7,2,3,2,3,1], borderColor:'#FFD000', borderWidth:2, backgroundColor:'transparent', tension:.3, pointRadius:0, spanGaps:false },
+            { label:'HT pre',  data:[3,2,10,3,13,8,6,5,15,9,8,14,6,8,5,8,3,3,4,4,7,8,9,2,6,9,6,3,4,12,10,8,8,12,7,5,17,12,8,5,6,1,10,2,5,14,3,2,2,1,6,8,2,1,1,3,1,5,11,8,7,10,23,14,15,9,12,1,1,9,5,3,1,5,4,7,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], borderColor:'rgba(37,99,235,.35)', borderWidth:1.5, borderDash:[4,3], backgroundColor:'transparent', tension:.3, pointRadius:0, spanGaps:false },
+            { label:'HT post', data:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,11,12,7,8,5,9,3,5,8,6,7,1,12,13,11,8,5,10,5,19,15,3,13,7,1,3,9,7,9,5,7,2,1], borderColor:'#2563EB', borderWidth:2, backgroundColor:'transparent', tension:.3, pointRadius:0, spanGaps:false }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          devicePixelRatio: window.devicePixelRatio * 2,
+          plugins: { legend: { position:'top', labels:{ boxWidth:9, font:{ size:8 }, padding:5 } } },
+          scales: {
+            x: { ticks:{ maxTicksLimit:12, maxRotation:35, font:{ size:7 }, color:'#999' }, grid:{ display:false }, border:{ display:false } },
+            y: { beginAtZero:true, ticks:{ font:{ size:7 }, color:'#999' }, grid:{ color:'#f0f0f0' }, border:{ display:false },
+                 title:{ display:true, text:'sellers/día', font:{ size:7 }, color:'#aaa' } }
+          }
+        }
+      });
+
+      new Chart(ctxStack, {
+        type: 'bar',
+        data: {
+          labels: ['Enero','Febrero','Marzo','Abril'],
+          datasets: [
+            { label:'CA pre',  data:[76,87,47,0],   backgroundColor:'rgba(180,180,180,.5)', stack:'CA' },
+            { label:'CA post', data:[0,0,72,94],    backgroundColor:'#FFD000',              stack:'CA', borderRadius:3, borderSkipped:'bottom' },
+            { label:'HT pre',  data:[208,163,94,0], backgroundColor:'rgba(37,99,235,.2)',   stack:'HT' },
+            { label:'HT post', data:[0,0,132,164],  backgroundColor:'#2563EB',              stack:'HT', borderRadius:3, borderSkipped:'bottom' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          devicePixelRatio: window.devicePixelRatio * 2,
+          plugins: { legend: { position:'top', labels:{ boxWidth:9, font:{ size:8 }, padding:5 } } },
+          scales: {
+            x: { stacked:true, ticks:{ font:{ size:8 }, color:'#555' }, grid:{ display:false }, border:{ display:false } },
+            y: { stacked:true, beginAtZero:true, ticks:{ font:{ size:7 }, color:'#999' }, grid:{ color:'#f0f0f0' }, border:{ display:false },
+                 title:{ display:true, text:'sellers/día acum.', font:{ size:7 }, color:'#aaa' } }
+          }
+        }
+      });
+    })();
+
+    // ── Font global para Chart.js ──
+    Chart.defaults.font.family = "'ProximaNova', sans-serif";
+
+    // ── Plugin: líneas divisoras de semana ──
+    const weekDividerPlugin = {
+      id: 'weekDividers',
+      afterDraw(chart) {
+        if (chart.canvas.id !== 'engagementChart') return;
+        const { ctx, scales: { x, y1 } } = chart;
+        // Límites entre semanas Mar 2026: W1=1-8, W2=9-15, W3=16-22, W4=23-31
+        [7.5, 14.5, 21.5].forEach(idx => {
+          const xPos = x.getPixelForValue(idx);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(xPos, y1.top);
+          ctx.lineTo(xPos, y1.bottom);
+          ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 3]);
+          ctx.stroke();
+          ctx.restore();
+        });
+        // Labels de semana — pills grises con texto blanco
+        const weekLabels = ['WEEK 1','WEEK 2','WEEK 3','WEEK 4'];
+        const starts = [0, 8, 15, 22];
+        const ends   = [7, 14, 21, 30];
+        ctx.save();
+        ctx.font = `700 8px ProximaNova, sans-serif`;
+        ctx.textAlign = 'center';
+        weekLabels.forEach((lbl, i) => {
+          const cx = (x.getPixelForValue(starts[i]) + x.getPixelForValue(ends[i])) / 2;
+          const cy = y1.top - 6;
+          const tw = ctx.measureText(lbl).width;
+          const ph = 13, pw = tw + 14, r = ph / 2;
+          // pill background
+          ctx.beginPath();
+          ctx.moveTo(cx - pw/2 + r, cy - ph/2);
+          ctx.arcTo(cx + pw/2, cy - ph/2, cx + pw/2, cy + ph/2, r);
+          ctx.arcTo(cx + pw/2, cy + ph/2, cx - pw/2, cy + ph/2, r);
+          ctx.arcTo(cx - pw/2, cy + ph/2, cx - pw/2, cy - ph/2, r);
+          ctx.arcTo(cx - pw/2, cy - ph/2, cx + pw/2, cy - ph/2, r);
+          ctx.closePath();
+          ctx.fillStyle = '#555';
+          ctx.fill();
+          // texto centrado
+          ctx.fillStyle = '#fff';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(lbl, cx, cy);
+        });
+        ctx.restore();
+      }
+    };
+    Chart.register(weekDividerPlugin);
+
+    // ── Engagement & Growth chart ──
+    const ctx = document.getElementById('engagementChart');
+    if (ctx) {
+      const labels = ['1/03','2/03','3/03','4/03','5/03','6/03','7/03','8/03','9/03','10/03','11/03','12/03','13/03','14/03','15/03','16/03','17/03','18/03','19/03','20/03','21/03','22/03','23/03','24/03','25/03','26/03','27/03','28/03','29/03','30/03','31/03'];
+      const ctr    = [1.26,1.22,2.34,0.89,1.15,1.10,1.11,1.43,1.75,1.43,1.14,0.84,0.75,0.77,0.90,1.11,1.41,1.16,1.00,1.02,1.04,1.08,1.47,1.45,1.07,0.99,1.16,1.42,1.51,1.22,1.19];
+      const prints = [8.7,11.9,12.4,11.3,12.0,11.6,9.4,9.3,12.9,11.8,11.3,11.3,10.5,8.8,8.9,11.9,13.0,11.7,10.2,9.3,6.7,6.8,11.6,8.8,11.2,10.8,10.5,8.8,8.9,12.4,11.5];
+      const nmv    = [4.5,4.4,7.2,2.2,3.7,4.2,3.5,3.6,8.0,7.3,7.7,6.6,5.8,4.7,4.8,6.1,5.5,5.1,2.3,2.6,2.0,2.0,2.1,1.7,2.3,2.6,3.0,2.5,2.5,3.5,2.9];
+
+      new Chart(ctx, {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'bar', label: 'Prints (M)', data: prints,
+              backgroundColor: 'rgba(180,180,180,0.6)', borderColor: 'rgba(180,180,180,0.9)',
+              borderWidth: 0, yAxisID: 'y1', barPercentage: 0.7, categoryPercentage: 0.6,
+              order: 2
+            },
+            {
+              type: 'bar', label: 'NMV (M)', data: nmv,
+              backgroundColor: 'rgba(255,208,0,0.85)', borderColor: '#FFD000',
+              borderWidth: 0, yAxisID: 'y1', barPercentage: 0.7, categoryPercentage: 0.6,
+              order: 1
+            },
+            {
+              type: 'line', label: 'CTR %', data: ctr,
+              borderColor: '#2563EB', borderWidth: 2,
+              pointRadius: 3, pointBackgroundColor: '#2563EB', pointBorderColor: '#fff', pointBorderWidth: 1,
+              yAxisID: 'y2', tension: 0.3, order: 0,
+              datalabels: {
+                display: true,
+                align: 'top', anchor: 'top',
+                formatter: v => v.toFixed(2) + '%',
+                font: { size: 7, weight: '600' },
+                color: '#2563EB',
+                offset: 2
+              }
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          devicePixelRatio: window.devicePixelRatio * 2,
+          animation: false,
+          layout: { padding: { top: 18 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 7 }, color: '#999', maxRotation: 0, autoSkip: false },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y1: {
+              display: false, min: 0, max: 22
+            },
+            y2: {
+              display: false, min: 0, max: 3
+            }
+          }
+        }
+      });
+    }
+
+    // ── Slide 9: Rabbit Hole Home ──
+    (function() {
+      const ids = ['s9-clicks','s9-orders','s9-views','s9-ctrcvr','s9-prints','s9-ctrpp'];
+      if (!ids.every(id => document.getElementById(id))) return;
+
+
+      const labels = ['Jul-25','Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26'];
+      const clicks = [247051,496118,424740,2983641,6624156,30196460,50326818,47147061,55305972];
+      const orders = [731,2669,2819,13046,41342,231985,374156,293657,295990];
+      const views  = [53996658,46921703,21475728,141663349,289798278,1306832778,2289584030,2156034984,2559557191];
+      const ctr    = [0.46,1.06,1.98,2.11,2.29,2.31,2.20,2.19,2.16];
+      const cvr    = [0.30,0.54,0.66,0.44,0.62,0.77,0.74,0.62,0.54];
+      const prints = [46002760,42044756,38938090,44858204,42553050,92269885,117465320,111537434,148557446];
+      const ctr2   = [1.75,1.73,1.67,1.68,1.22,1.21,1.21,1.26,1.18];
+
+      const fmtM = v => v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(v<1e7?1:0)+'M':(v/1e3).toFixed(0)+'K';
+      const fmtK = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(v<1e4?1:0)+'K':String(v);
+      const fmtP = v => v.toFixed(2)+'%';
+
+      // ── Growth annotation plugin (mismo del HTML original) ──
+      const growthPlugin = { id:'s9-growth',
+        afterDraw(chart) {
+          const anns = chart.options.plugins.growthAnns;
+          if (!anns||!anns.length) return;
+          const {ctx,scales:{x,y},data} = chart;
+          const ds = data.datasets[0].data;
+          anns.forEach(({fromIdx,toIdx}) => {
+            const pct = Math.round((ds[toIdx]-ds[fromIdx])/ds[fromIdx]*100);
+            const lbl = (pct>=0?'+':'')+pct+'%';
+            const pos = pct>=0;
+            const bg=pos?'#dcfce7':'#fee2e2', bc=pos?'#16a34a':'#dc2626', tc=pos?'#15803d':'#b91c1c';
+            const x1=x.getPixelForValue(fromIdx), x2=x.getPixelForValue(toIdx), xm=(x1+x2)/2;
+            const yTop=Math.min(y.getPixelForValue(ds[fromIdx]),y.getPixelForValue(ds[toIdx]))-30;
+            ctx.save();
+            ctx.font='bold 7px ProximaNova,sans-serif';
+            const tw=ctx.measureText(lbl).width, p=4, bw=tw+p*2, bh=14;
+            const bx=xm-bw/2, by=yTop-bh/2;
+            ctx.beginPath();
+            ctx.moveTo(bx+4,by); ctx.lineTo(bx+bw-4,by); ctx.arcTo(bx+bw,by,bx+bw,by+4,4);
+            ctx.lineTo(bx+bw,by+bh-4); ctx.arcTo(bx+bw,by+bh,bx+bw-4,by+bh,4);
+            ctx.lineTo(bx+4,by+bh); ctx.arcTo(bx,by+bh,bx,by+bh-4,4);
+            ctx.lineTo(bx,by+4); ctx.arcTo(bx,by,bx+4,by,4); ctx.closePath();
+            ctx.fillStyle=bg; ctx.fill(); ctx.strokeStyle=bc; ctx.lineWidth=1.5; ctx.stroke();
+            ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(lbl,xm,yTop);
+            const ly2=Math.min(y.getPixelForValue(ds[fromIdx]),y.getPixelForValue(ds[toIdx]))-5;
+            ctx.beginPath(); ctx.moveTo(xm,by+bh); ctx.lineTo(xm,ly2);
+            ctx.strokeStyle=bc; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+            // flecha
+            ctx.beginPath(); ctx.moveTo(xm-4,ly2-5); ctx.lineTo(xm,ly2); ctx.lineTo(xm+4,ly2-5);
+            ctx.strokeStyle=bc; ctx.lineWidth=1.5; ctx.stroke();
+            ctx.restore();
+          });
+        }
+      };
+
+      // ── Opciones base idénticas al HTML original, escaladas ──
+      const baseOpts = (formatter, anns) => ({
+        responsive:true, maintainAspectRatio:false, animation:false,
+        devicePixelRatio:window.devicePixelRatio*2,
+        layout:{padding:{top:38,right:22,left:2,bottom:2}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{mode:'index',intersect:false},
+          datalabels:{
+            align:'top', anchor:'end',
+            font:{size:7, weight:'bold', family:'ProximaNova,sans-serif'},
+            color:'#2c3e50',
+            formatter
+          },
+          growthAnns: anns||null
+        },
+        scales:{
+          x:{ticks:{font:{size:6,family:'ProximaNova,sans-serif'},color:'#666',maxRotation:45,minRotation:45},grid:{display:false},border:{display:false}},
+          y:{ticks:{font:{size:6,family:'ProximaNova,sans-serif'},color:'#666',callback:formatter},grid:{color:'rgba(0,0,0,.06)'},border:{display:false}}
+        }
+      });
+
+      const mkDs = (data) => [{
+        data, borderColor:'#EAB308',
+        backgroundColor:'rgba(234,179,8,0.15)',
+        borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#EAB308',
+        pointBorderColor:'#fff', pointBorderWidth:1.5,
+        fill:true, tension:0.3
+      }];
+
+      const anns = [{fromIdx:7,toIdx:8}];
+      const DL = ChartDataLabels;
+
+      const s9Charts = [];
+      s9Charts.push(new Chart(document.getElementById('s9-clicks'),{type:'line',data:{labels,datasets:mkDs(clicks)},options:baseOpts(fmtM,anns),plugins:[DL,growthPlugin]}));
+      s9Charts.push(new Chart(document.getElementById('s9-orders'),{type:'line',data:{labels,datasets:mkDs(orders)},options:baseOpts(fmtK,anns),plugins:[DL,growthPlugin]}));
+      s9Charts.push(new Chart(document.getElementById('s9-views'), {type:'line',data:{labels,datasets:mkDs(views)}, options:baseOpts(fmtM,anns),plugins:[DL,growthPlugin]}));
+
+      // CTR+CVR con leyenda
+      const ctrCvrOpts = {
+        responsive:true, maintainAspectRatio:false, animation:false,
+        devicePixelRatio:window.devicePixelRatio*2,
+        layout:{padding:{top:24,right:22,left:2,bottom:2}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{mode:'index',intersect:false},
+          datalabels:{align:'top',anchor:'end',font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'},
+            color:ctx=>ctx.dataset.borderColor, formatter:v=>v.toFixed(2)+'%'},
+          growthAnns:null
+        },
+        scales:{
+          x:{ticks:{font:{size:6,family:'ProximaNova,sans-serif'},color:'#666',maxRotation:45,minRotation:45},grid:{display:false},border:{display:false}},
+          y:{ticks:{font:{size:6,family:'ProximaNova,sans-serif'},color:'#666',callback:v=>v.toFixed(2)+'%'},grid:{color:'rgba(0,0,0,.06)'},border:{display:false}}
+        }
+      };
+      s9Charts.push(new Chart(document.getElementById('s9-ctrcvr'),{type:'line',data:{labels,datasets:[
+        {data:ctr,label:'CTR (%)',borderColor:'#EAB308',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#EAB308',pointBorderColor:'#fff',pointBorderWidth:1.5,fill:false,tension:0.3},
+        {data:cvr,label:'CVR (%)',borderColor:'#9ca3af',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#9ca3af',pointBorderColor:'#fff',pointBorderWidth:1.5,fill:false,tension:0.3}
+      ]},options:ctrCvrOpts,plugins:[DL]}));
+
+      s9Charts.push(new Chart(document.getElementById('s9-prints'),{type:'line',data:{labels,datasets:mkDs(prints)},options:baseOpts(fmtM,anns),plugins:[DL,growthPlugin]}));
+      s9Charts.push(new Chart(document.getElementById('s9-ctrpp'), {type:'line',data:{labels,datasets:mkDs(ctr2)}, options:baseOpts(fmtP,null),plugins:[DL]}));
+
+      const fixS9 = () => setTimeout(() => {
+        s9Charts.forEach(chart => {
+          if (!chart||!chart.canvas) return;
+          const p = chart.canvas.parentElement;
+          if (p) chart.resize(p.offsetWidth, p.offsetHeight);
+        });
+      }, 150);
+      document.addEventListener('fullscreenchange', fixS9);
+      document.addEventListener('webkitfullscreenchange', fixS9);
+    }());
+
+    // ── Slide 10: Rabbit Hole Tabs ──
+    (function() {
+      const ids = ['s10-clicks','s10-orders','s10-views','s10-ctrcvr','s10-nmv','s10-ctrpp'];
+      if (!ids.every(id => document.getElementById(id))) return;
+
+      const labels = ['Jul-25','Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26'];
+      const clicks = [247051,496118,424740,2983641,6624156,30196460,50326818,47147061,55305972];
+      const orders = [731,2669,2819,13046,41342,231985,374156,293657,295990];
+      const views  = [53996658,46921703,21475728,141663349,289798278,1306832778,2289584030,2156034984,2559557191];
+      const ctr    = [0.46,1.06,1.98,2.11,2.29,2.31,2.20,2.19,2.16];
+      const cvr    = [0.30,0.54,0.66,0.44,0.62,0.77,0.74,0.62,0.54];
+      const prints = [46002760,42044756,38938090,44858204,42553050,92269885,117465320,111537434,148557446];
+      const ctr2   = [1.75,1.73,1.67,1.68,1.22,1.21,1.21,1.26,1.18];
+
+      const fmtM = v => v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(v<1e7?1:0)+'M':(v/1e3).toFixed(0)+'K';
+      const fmtK = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(v<1e4?1:0)+'K':String(v);
+      const fmtP = v => v.toFixed(2)+'%';
+      const DL = ChartDataLabels;
+
+      const growthPlugin10 = { id:'s10-growth',
+        afterDraw(chart) {
+          const anns = chart.options.plugins.growthAnns;
+          if (!anns||!anns.length) return;
+          const {ctx,scales:{x,y},data} = chart;
+          const ds = chart.options.plugins.growthAnnsValues || data.datasets[0].data;
+          anns.forEach(({fromIdx,toIdx}) => {
+            const pct = Math.round((ds[toIdx]-ds[fromIdx])/ds[fromIdx]*100);
+            const lbl = (pct>=0?'+':'')+pct+'%';
+            const pos = pct>=0;
+            const bg=pos?'#dcfce7':'#fee2e2', bc=pos?'#16a34a':'#dc2626', tc=pos?'#15803d':'#b91c1c';
+            const x1=x.getPixelForValue(fromIdx), x2=x.getPixelForValue(toIdx), xm=(x1+x2)/2;
+            const yTop=Math.min(y.getPixelForValue(ds[fromIdx]),y.getPixelForValue(ds[toIdx]))-26;
+            ctx.save(); ctx.font='700 7px ProximaNova,sans-serif';
+            const tw=ctx.measureText(lbl).width, p=4, bw=tw+p*2, bh=14;
+            const bx=xm-bw/2, by=yTop-bh/2;
+            ctx.beginPath(); ctx.moveTo(bx+4,by); ctx.lineTo(bx+bw-4,by); ctx.arcTo(bx+bw,by,bx+bw,by+4,4);
+            ctx.lineTo(bx+bw,by+bh-4); ctx.arcTo(bx+bw,by+bh,bx+bw-4,by+bh,4);
+            ctx.lineTo(bx+4,by+bh); ctx.arcTo(bx,by+bh,bx,by+bh-4,4);
+            ctx.lineTo(bx,by+4); ctx.arcTo(bx,by,bx+4,by,4); ctx.closePath();
+            ctx.fillStyle=bg; ctx.fill(); ctx.strokeStyle=bc; ctx.lineWidth=1.5; ctx.stroke();
+            ctx.fillStyle=tc; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(lbl,xm,yTop);
+            const ly2=Math.min(y.getPixelForValue(ds[fromIdx]),y.getPixelForValue(ds[toIdx]))-5;
+            ctx.beginPath(); ctx.moveTo(xm,by+bh); ctx.lineTo(xm,ly2);
+            ctx.strokeStyle=bc; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+            ctx.beginPath(); ctx.moveTo(xm-4,ly2-5); ctx.lineTo(xm,ly2); ctx.lineTo(xm+4,ly2-5);
+            ctx.strokeStyle=bc; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+          });
+        }
+      };
+
+      const baseOpts10 = (formatter, anns) => ({
+        responsive:true, maintainAspectRatio:false, animation:false,
+        devicePixelRatio:window.devicePixelRatio*2,
+        layout:{padding:{top:38,right:22,left:2,bottom:2}},
+        plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false},
+          datalabels:{ align:'top', anchor:'end', font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'}, color:'#2c3e50', formatter },
+          growthAnns:anns||null },
+        scales:{
+          x:{ticks:{font:{size:6,family:'ProximaNova, sans-serif'},color:'#666',maxRotation:45,minRotation:45},grid:{display:false},border:{display:false}},
+          y:{ticks:{font:{size:6,family:'ProximaNova, sans-serif'},color:'#666',callback:formatter},grid:{color:'rgba(0,0,0,.06)'},border:{display:false}}
+        }
+      });
+
+      const mkDs10 = data => [{
+        data, borderColor:'#EAB308', backgroundColor:'rgba(234,179,8,0.15)',
+        borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#EAB308',
+        pointBorderColor:'#fff', pointBorderWidth:1.5, fill:true, tension:0.3
+      }];
+      const mkBar10 = data => [{
+        data, backgroundColor:'rgba(234,179,8,0.85)', borderColor:'#EAB308',
+        borderWidth:1, borderRadius:4, barPercentage:0.65, categoryPercentage:0.8
+      }];
+
+      const labels10  = ['Ene-26','Feb-26','Mar-26'];
+      const anns10    = [{fromIdx:1,toIdx:2}];
+      const clicksS10 = [252160,  345857,  446779];
+      const ordersS10 = [1143, 1565, 2028];
+      const viewsS10  = [29475403, 39432568, 46742015];
+      const ctrS10    = [0.86, 0.88, 0.96];
+      const cvrS10    = [0.45, 0.45, 0.45];
+      const printsS10 = [117465320, 111537434, 148557446];
+      const ctr2S10   = [1.21, 1.26, 1.18];
+
+      const s10Charts = [];
+      s10Charts.push(new Chart(document.getElementById('s10-clicks'),{type:'bar',data:{labels:labels10,datasets:mkBar10(clicksS10)},options:baseOpts10(fmtM,anns10),plugins:[DL,growthPlugin10]}));
+      s10Charts.push(new Chart(document.getElementById('s10-orders'),{type:'bar',data:{labels:labels10,datasets:mkBar10(ordersS10)},options:baseOpts10(fmtK,anns10),plugins:[DL,growthPlugin10]}));
+      s10Charts.push(new Chart(document.getElementById('s10-views'), {type:'bar',data:{labels:labels10,datasets:mkBar10(viewsS10)}, options:baseOpts10(fmtM,anns10),plugins:[DL,growthPlugin10]}));
+
+      const ctrCvrOpts10 = { ...baseOpts10(fmtP,null),
+        plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false}, growthAnns:null,
+          datalabels:{ align:'top', anchor:'end', font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'},
+            color:ctx=>ctx.dataset.borderColor, formatter:fmtP } } };
+      s10Charts.push(new Chart(document.getElementById('s10-ctrcvr'),{type:'line',data:{labels:labels10,datasets:[
+        {data:ctrS10,label:'CTR (%)',borderColor:'#EAB308',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#EAB308',pointBorderColor:'#fff',pointBorderWidth:1.5,fill:false,tension:0.3},
+        {data:cvrS10,label:'CVR (%)',borderColor:'#9ca3af',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#9ca3af',pointBorderColor:'#fff',pointBorderWidth:1.5,fill:false,tension:0.3}
+      ]},options:ctrCvrOpts10,plugins:[DL]}));
+      const nmvLanding = [585363, 530453, 668169];
+      const nmvRH      = [59866,  155007, 190453];
+      const nmvTotals  = nmvLanding.map((v,i) => v + nmvRH[i]);
+      const fmtKnd = v => (v/1e3).toFixed(0)+'K';
+      s10Charts.push(new Chart(document.getElementById('s10-nmv'),{type:'bar',
+        data:{labels:labels10,datasets:[
+          {label:'NMV RH',   data:nmvRH,      backgroundColor:'#6366f1', borderRadius:0, stack:'s', barPercentage:0.6,
+           datalabels:{align:'center',anchor:'center',font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'},color:'#fff',formatter:fmtKnd}},
+          {label:'NMV Landing',data:nmvLanding,backgroundColor:'#EAB308', borderRadius:4, stack:'s', barPercentage:0.6,
+           datalabels:{labels:{
+             value:{align:'center',anchor:'center',font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'},color:'#333',formatter:fmtKnd},
+             total:{align:'top',anchor:'end',font:{size:7,weight:'bold',family:'ProximaNova,sans-serif'},color:'#2c3e50',
+               formatter:(v,ctx)=>fmtKnd(nmvTotals[ctx.dataIndex])}
+           }}}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,animation:false,
+          devicePixelRatio:window.devicePixelRatio*2,
+          layout:{padding:{top:38,right:22,left:2,bottom:2}},
+          plugins:{legend:{display:true,position:'bottom',labels:{font:{size:7,family:'ProximaNova,sans-serif'},color:'#555',padding:4,usePointStyle:true,pointStyleWidth:5}},
+            tooltip:{enabled:false}, datalabels:{},
+            growthAnns:[{fromIdx:1,toIdx:2}], growthAnnsValues:nmvTotals},
+          scales:{
+            x:{stacked:true,ticks:{font:{size:6,family:'ProximaNova, sans-serif'},color:'#666',maxRotation:0},grid:{display:false},border:{display:false}},
+            y:{stacked:true,ticks:{font:{size:6,family:'ProximaNova, sans-serif'},color:'#666',callback:fmtKnd},grid:{color:'rgba(0,0,0,.06)'},border:{display:false}}
+          }},
+        plugins:[DL,growthPlugin10]}));
+      const labelsWeek = ['04-Ene','11-Ene','18-Ene','25-Ene','01-Feb','08-Feb','15-Feb','22-Feb','01-Mar','08-Mar','15-Mar','22-Mar','29-Mar'];
+      const printsWeek = [104403,115389,204260,203828,125153,100967,107887,35718,136590,54776,2,365,98];
+      const fmtKnd10 = v => v >= 1000 ? Math.round(v/1e3)+'K' : String(v);
+      s10Charts.push(new Chart(document.getElementById('s10-ctrpp'),{type:'line',
+        data:{labels:labelsWeek,datasets:[{
+          data:printsWeek, borderColor:'#EAB308', backgroundColor:'rgba(234,179,8,0.15)',
+          borderWidth:2, pointRadius:3, pointBackgroundColor:'#EAB308',
+          pointBorderColor:'#fff', pointBorderWidth:1, fill:true, tension:0.3
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,animation:false,
+          devicePixelRatio:window.devicePixelRatio*2,
+          layout:{padding:{top:20,right:8,left:2,bottom:2}},
+          plugins:{legend:{display:false},tooltip:{enabled:false},
+            datalabels:{align:'top',anchor:'end',font:{size:6,weight:'bold',family:'ProximaNova,sans-serif'},color:'#2c3e50',formatter:fmtKnd10},
+            growthAnns:null},
+          scales:{
+            x:{ticks:{font:{size:5.5,family:'ProximaNova, sans-serif'},color:'#666',maxRotation:45,minRotation:45},grid:{display:false},border:{display:false}},
+            y:{ticks:{font:{size:6,family:'ProximaNova, sans-serif'},color:'#666',callback:fmtKnd10},grid:{color:'rgba(0,0,0,.06)'},border:{display:false}}
+          }},
+        plugins:[DL]}));
+
+      const fixS10 = () => setTimeout(() => {
+        s10Charts.forEach(chart => {
+          if (!chart||!chart.canvas) return;
+          const p = chart.canvas.parentElement;
+          if (p) chart.resize(p.offsetWidth, p.offsetHeight);
+        });
+      }, 150);
+      document.addEventListener('fullscreenchange', fixS10);
+      document.addEventListener('webkitfullscreenchange', fixS10);
+    }());
+
+    // ── Slide 11: QA Segmentados ──
+    (function() {
+      const ctxSess = document.getElementById('s11-sess');
+      const ctxNmv  = document.getElementById('s11-nmv');
+      if (!ctxSess || !ctxNmv) return;
+
+      const weekLabels = ['02/03', '16/03', '06/04'];
+      const sessM  = [291478, 93917,  89140];
+      const sessMo = [0,      175284, 134004];
+      const sessTot = sessM.map((v,i) => v + sessMo[i]);
+      const nmvM   = [82264, 33681,  75330];
+      const nmvMo  = [0,     56538,  63798];
+      const nmvTot = nmvM.map((v,i) => v + nmvMo[i]);
+
+      function fmtV(v) { return v >= 1000000 ? (v/1000000).toFixed(1)+'M' : (v/1000).toFixed(0)+'K'; }
+
+      const scalesBase = {
+        x: { stacked:true, ticks:{color:'#777',font:{size:11,weight:'600',family:'ProximaNova, sans-serif'}}, grid:{color:'rgba(0,0,0,.05)'}, border:{color:'rgba(0,0,0,.12)'} },
+        y: { stacked:true, ticks:{color:'#777',font:{size:11,weight:'600',family:'ProximaNova, sans-serif'}, callback:fmtV}, grid:{color:'rgba(0,0,0,.06)'}, border:{color:'rgba(0,0,0,.12)'} }
+      };
+
+      function barLabelPlugin(totals) {
+        return { id:'s11-bl'+Math.random(), afterDatasetsDraw(chart) {
+          const {ctx,data}=chart;
+          data.datasets.forEach((ds,di)=>{
+            if(di>1) return;
+            const meta=chart.getDatasetMeta(di);
+            meta.data.forEach((bar,i)=>{
+              const val=ds.data[i]; if(!val||val===0) return;
+              if(val/totals[i]<0.08) return;
+              const cy=(bar.y+bar.base)/2;
+              ctx.save(); ctx.font='700 9px ProximaNova,sans-serif';
+              ctx.fillStyle=di===0?'#7a5c00':'#fff';
+              ctx.textAlign='center'; ctx.textBaseline='middle';
+              ctx.fillText(fmtV(val),bar.x,cy); ctx.restore();
+            });
+          });
+        }};
+      }
+
+      function starsPlugin(totals) {
+        const base=totals[0];
+        return { id:'s11-st'+Math.random(), afterDraw(chart) {
+          const ctx=chart.ctx, ys=chart.scales.y, meta=chart.getDatasetMeta(0);
+          [1,2].forEach(i=>{
+            const bar=meta.data[i]; if(!bar) return;
+            const x=bar.x, yTop=ys.getPixelForValue(totals[i]);
+            const pct=(totals[i]-base)/base*100, sign=pct>=0?'+':'';
+            const col=pct>=0?'rgba(30,150,90,.95)':'#dc2626';
+            ctx.save(); ctx.textAlign='center';
+            ctx.font='700 7.5px ProximaNova,sans-serif'; ctx.fillStyle=col;
+            ctx.fillText(sign+pct.toFixed(0)+'%',x,yTop-16);
+            ctx.font='600 9px ProximaNova,sans-serif';
+            ctx.fillText('★',x,yTop-6);
+            ctx.restore();
+          });
+        }};
+      }
+
+      const qaLinePlugin = { id:'s11-qa', afterDraw(chart) {
+        const ctx=chart.ctx, meta=chart.getDatasetMeta(0);
+        if(!meta.data.length) return;
+        const aTop=chart.chartArea.top;
+        const yOf=v=>(aTop-6)-(v/100)*34;
+        const draw=(vals,color,labelBelow=false)=>{
+          const pts=vals.map((v,i)=>v!=null?{x:meta.data[i].x,y:yOf(v),v}:null).filter(p=>p);
+          if(!pts.length) return;
+          ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1.8; ctx.lineJoin='round';
+          ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+          pts.forEach(p=>{
+            ctx.fillStyle=color; ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle=color; ctx.font='700 10px ProximaNova,sans-serif';
+            const labelY = labelBelow ? p.y+14 : p.y-7;
+            ctx.textAlign='center'; ctx.fillText(p.v.toFixed(1)+'%',p.x,labelY);
+          });
+          ctx.restore();
+        };
+        ctx.save(); ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(chart.chartArea.left,aTop-2); ctx.lineTo(chart.chartArea.right,aTop-2); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle='#aaa'; ctx.font='600 7px ProximaNova,sans-serif';
+        ctx.textAlign='left'; ctx.fillText('Attr QA (%)',chart.chartArea.left,aTop-14); ctx.restore();
+        draw([18.2,63.9,61.7],'rgba(160,100,0,.90)',false);
+        draw([null,30.2,44.0],'rgba(60,60,90,.85)',true);
+      }};
+
+      new Chart(ctxSess,{type:'bar',data:{labels:weekLabels,datasets:[
+        {label:'MUNDIAL',data:sessM, backgroundColor:'rgba(255,220,0,.85)',borderColor:'#FFD000',borderWidth:1,stack:'s',barPercentage:0.55,categoryPercentage:0.7},
+        {label:'MODA',   data:sessMo,backgroundColor:'rgba(100,100,115,.75)',borderColor:'#787880',borderWidth:1,stack:'s',barPercentage:0.55,categoryPercentage:0.7}
+      ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+        layout:{padding:{top:52,left:8,right:8}},
+        plugins:{legend:{display:false},tooltip:{enabled:false}},scales:scalesBase},
+        plugins:[barLabelPlugin(sessTot),starsPlugin(sessTot),qaLinePlugin]});
+
+      new Chart(ctxNmv,{type:'bar',data:{labels:weekLabels,datasets:[
+        {label:'MUNDIAL',data:nmvM, backgroundColor:'rgba(255,220,0,.85)',borderColor:'#FFD000',borderWidth:1,stack:'n',barPercentage:0.55,categoryPercentage:0.7},
+        {label:'MODA',   data:nmvMo,backgroundColor:'rgba(100,100,115,.75)',borderColor:'#787880',borderWidth:1,stack:'n',barPercentage:0.55,categoryPercentage:0.7}
+      ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+        layout:{padding:{top:28,left:8,right:8}},
+        plugins:{legend:{display:false},tooltip:{enabled:false}},scales:scalesBase},
+        plugins:[barLabelPlugin(nmvTot),starsPlugin(nmvTot)]})
+    }());
+
+    // ── Slide 16: Big Push Estímulos Onsite ──
+    (function() {
+      const ctxImp = document.getElementById('impresionesChart');
+      const ctxOrd = document.getElementById('ordersChart');
+
+      function drawBracket(ctx, x1, y1, x2, y2, label, lineY) {
+        if (lineY === undefined) lineY = Math.min(y1, y2) - 10;
+        const mx = (x1 + x2) / 2;
+        ctx.save();
+        ctx.strokeStyle = '#888'; ctx.lineWidth = 1.2; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(x1, lineY); ctx.lineTo(x2, lineY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x1, lineY); ctx.lineTo(x1, y1); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, lineY); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.font = '700 7px ProximaNova, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const tw = ctx.measureText(label).width;
+        const rw = tw + 10, rh = 13, r = 4;
+        const rx = mx - rw/2, ry = lineY - rh/2;
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(rx+r,ry); ctx.lineTo(rx+rw-r,ry); ctx.arcTo(rx+rw,ry,rx+rw,ry+r,r);
+        ctx.lineTo(rx+rw,ry+rh-r); ctx.arcTo(rx+rw,ry+rh,rx+rw-r,ry+rh,r);
+        ctx.lineTo(rx+r,ry+rh); ctx.arcTo(rx,ry+rh,rx,ry+rh-r,r);
+        ctx.lineTo(rx,ry+r); ctx.arcTo(rx,ry,rx+r,ry,r); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#333'; ctx.fillText(label, mx, lineY);
+        ctx.restore();
+      }
+
+      if (ctxImp) {
+        new Chart(ctxImp, {
+          type:'bar',
+          data:{ labels:['BP','BP Nov','LM'],
+                 datasets:[{data:[160.6,99.9,119.7],backgroundColor:['#FFD000','#aaa','#aaa'],borderRadius:3,barPercentage:0.62}] },
+          options:{ responsive:true,maintainAspectRatio:false,animation:false,
+                    devicePixelRatio:window.devicePixelRatio*2,
+                    plugins:{legend:{display:false},tooltip:{enabled:false}},
+                    scales:{ x:{ticks:{font:{size:8},color:'#555',maxRotation:0},grid:{display:false},border:{display:false}},
+                             y:{display:false,min:0,max:175} },
+                    layout:{padding:{top:28}} },
+          plugins:[{ id:'impLabels',
+            afterDatasetsDraw(chart){
+              const {ctx,data}=chart, meta=chart.getDatasetMeta(0);
+              ctx.save(); ctx.textAlign='center'; ctx.font='700 8px ProximaNova, sans-serif';
+              ctx.textBaseline='top';
+              meta.data.forEach((bar,i)=>{ ctx.fillStyle=i===0?'#333':'#fff'; ctx.fillText(data.datasets[0].data[i]+'M',bar.x,bar.y+6); });
+              ctx.restore();
+              const b0=meta.data[0],b1=meta.data[1],b2=meta.data[2];
+              const lineY_imp = Math.min(b0.y,b1.y,b2.y) - 10;
+              drawBracket(ctx,b0.x,b0.y,b1.x,b1.y,'+61%',lineY_imp);
+              drawBracket(ctx,b1.x,b1.y,b2.x,b2.y,'+34%',lineY_imp);
+            }
+          }]
+        });
+      }
+
+      if (ctxOrd) {
+        new Chart(ctxOrd, {
+          type:'bar',
+          data:{ labels:['BP','BP Nov','LM'],
+                 datasets:[{data:[55.4,22.6,42.4],backgroundColor:['#FFD000','#aaa','#aaa'],borderRadius:3,barPercentage:0.62}] },
+          options:{ responsive:true,maintainAspectRatio:false,animation:false,
+                    devicePixelRatio:window.devicePixelRatio*2,
+                    plugins:{legend:{display:false},tooltip:{enabled:false}},
+                    scales:{ x:{ticks:{font:{size:8},color:'#555',maxRotation:0},grid:{display:false},border:{display:false}},
+                             y:{display:false,min:0,max:60} },
+                    layout:{padding:{top:28}} },
+          plugins:[{ id:'ordLabels',
+            afterDatasetsDraw(chart){
+              const {ctx,data}=chart, meta=chart.getDatasetMeta(0);
+              ctx.save(); ctx.textAlign='center'; ctx.font='700 8px ProximaNova, sans-serif';
+              ctx.textBaseline='top';
+              meta.data.forEach((bar,i)=>{ ctx.fillStyle=i===0?'#333':'#fff'; ctx.fillText(data.datasets[0].data[i]+'K',bar.x,bar.y+6); });
+              ctx.restore();
+              const b0=meta.data[0],b1=meta.data[1],b2=meta.data[2];
+              const lineY_ord = Math.min(b0.y,b1.y,b2.y) - 10;
+              drawBracket(ctx,b0.x,b0.y,b1.x,b1.y,'+145%',lineY_ord);
+              drawBracket(ctx,b1.x,b1.y,b2.x,b2.y,'+31%',lineY_ord);
+            }
+          }]
+        });
+      }
+    }());
+
+  </script>
+</body>
+</html>

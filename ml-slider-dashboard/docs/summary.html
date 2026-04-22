@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summary Home — Dashboard Ejecutivo</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .summary-table thead tr {
+      background: var(--text);
+    }
+
+    .summary-table thead th {
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 12px 20px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .summary-table thead th:first-child { text-align: left; }
+
+    .summary-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+
+    .summary-table tbody tr:last-child { border-bottom: none; }
+    .summary-table tbody tr:hover { background: #fafbff; }
+
+    .summary-table tbody td {
+      padding: 14px 20px;
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    .summary-table tbody td:first-child { text-align: left; }
+
+    .placement-chip {
+      display: inline-block;
+      background: var(--text);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 5px 14px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .metric-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .vs-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .vs-badge.up  { background: var(--up-bg);  color: var(--up); }
+    .vs-badge.dn  { background: var(--dn-bg);  color: var(--dn); }
+    .vs-badge.neutral { background: #f1f2f6; color: #888; }
+
+    .sparkline-cell { width: 200px; min-width: 160px; }
+    .sparkline-wrap { position: relative; height: 48px; width: 100%; }
+  </style>
+</head>
+<body>
+
+<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
+<nav class="top-nav">
+  <div class="nav-brand"><span>◆</span> ML Ads Dashboard</div>
+  <a class="nav-link active" href="summary.html">Summary Home</a>
+  <a class="nav-link" href="index.html">Summary Placements</a>
+  <a class="nav-link" href="placements/main-sliders.html">Main Sliders</a>
+  <a class="nav-link" href="placements/landings.html">Landings</a>
+  <a class="nav-link" href="placements/containers.html">Containers</a>
+  <a class="nav-link" href="placements/rabbit-hole.html">Rabbit Hole</a>
+  <a class="nav-link" href="placements/placement-pers.html">Placement Pers.</a>
+  <a class="nav-link" href="placements/tabs.html">Tabs</a>
+</nav>
+
+<!-- ─── Page ─────────────────────────────────────────────────────────────────── -->
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Summary Home</div>
+      <div class="page-subtitle">Últimas 6 semanas · semana actual vs anterior</div>
+    </div>
+    <div class="freshness">
+      <span class="freshness-dot" id="freshness-dot"></span>
+      <span id="freshness-text">Cargando…</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <table class="summary-table" id="summary-table">
+    <thead>
+      <tr>
+        <th>Real State</th>
+        <th>Prints</th>
+        <th>vs LW</th>
+        <th>CTR</th>
+        <th>vs LW</th>
+        <th style="text-align:center">Evolución Prints</th>
+      </tr>
+    </thead>
+    <tbody id="summary-body">
+      <tr><td colspan="6" class="state-loading">Cargando…</td></tr>
+    </tbody>
+  </table>
+
+</div><!-- /page-wrapper -->
+
+<script type="module">
+import { fmtNum, fmtPct, fmtRefreshed } from './assets/js/utils.js';
+
+const WEEKS_SHOWN = 6;
+const sparkCharts = {};
+
+// ─── Placement config ─────────────────────────────────────────────────────────
+// Para agregar un placement: { key, label, file }
+const PLACEMENTS = [
+  { key: 'qa_home', label: 'QA Home', file: './data-qa-home.json' },
+];
+
+// ─── Load ─────────────────────────────────────────────────────────────────────
+async function loadData() {
+  const dot = document.getElementById('freshness-dot');
+  const txt = document.getElementById('freshness-text');
+
+  const results = await Promise.all(
+    PLACEMENTS.map(p =>
+      fetch(p.file)
+        .then(r => r.json())
+        .then(json => ({ ...p, data: json.data || [], refreshed_at: json.refreshed_at }))
+        .catch(() => ({ ...p, data: [], refreshed_at: null }))
+    )
+  );
+
+  // Freshness: most recent refreshed_at across all placements
+  const timestamps = results.map(r => r.refreshed_at).filter(Boolean);
+  if (timestamps.length) {
+    timestamps.sort();
+    txt.textContent = 'Actualizado ' + fmtRefreshed(timestamps[timestamps.length - 1]);
+    dot.className   = 'freshness-dot';
+  } else {
+    txt.textContent = 'Sin datos';
+    dot.className   = 'freshness-dot error';
+  }
+
+  render(results);
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render(results) {
+  const tbody = document.getElementById('summary-body');
+  const rows  = [];
+
+  for (const p of results) {
+    const data = [...p.data].sort((a, b) => a.WEEK.localeCompare(b.WEEK)).slice(-WEEKS_SHOWN);
+    const last = data[data.length - 1];
+    const prev = data[data.length - 2];
+
+    if (!last) continue;
+
+    const prints     = Number(last.PRINTS) || 0;
+    const printsPrev = Number(prev?.PRINTS) || 0;
+    const taps       = Number(last.TAPS) || 0;
+    const tapsPrev   = Number(prev?.TAPS) || 0;
+
+    const ctr     = prints ? taps / prints : 0;
+    const ctrPrev = printsPrev ? tapsPrev / printsPrev : 0;
+
+    const printsDelta = printsPrev ? (prints - printsPrev) / printsPrev : null;
+    const ctrDelta    = ctrPrev    ? (ctr - ctrPrev) / ctrPrev         : null;
+
+    rows.push({ key: p.key, label: p.label, data, prints, ctr, printsDelta, ctrDelta });
+  }
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><span class="placement-chip">${r.label}</span></td>
+      <td><span class="metric-value">${fmtNum(r.prints)}</span></td>
+      <td>${vsBadge(r.printsDelta)}</td>
+      <td><span class="metric-value">${fmtPct(r.ctr)}</span></td>
+      <td>${vsBadge(r.ctrDelta)}</td>
+      <td class="sparkline-cell"><div class="sparkline-wrap"><canvas id="spark-${r.key}"></canvas></div></td>
+    </tr>
+  `).join('');
+
+  rows.forEach(r => drawSparkline(r.key, r.data));
+}
+
+// ─── vs Badge ────────────────────────────────────────────────────────────────
+function vsBadge(delta) {
+  if (delta == null) return '<span class="vs-badge neutral">—</span>';
+  const sign = delta > 0 ? '+' : '';
+  const pct  = sign + (delta * 100).toFixed(0) + '%';
+  const dir  = delta > 0 ? 'up' : delta < 0 ? 'dn' : 'neutral';
+  return `<span class="vs-badge ${dir}">${pct}</span>`;
+}
+
+// ─── Sparkline ────────────────────────────────────────────────────────────────
+function drawSparkline(key, data) {
+  const canvasId = `spark-${key}`;
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return;
+
+  const labels = data.map(d => {
+    const date = new Date(d.WEEK + 'T00:00:00');
+    return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  });
+  const values = data.map(d => Number(d.PRINTS) || 0);
+
+  if (sparkCharts[key]) {
+    sparkCharts[key].data.labels         = labels;
+    sparkCharts[key].data.datasets[0].data = values;
+    sparkCharts[key].update('active');
+    return;
+  }
+
+  sparkCharts[key] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: values.map((v, i) =>
+          i === values.length - 1 ? '#3b5bdb' : '#c7d0f8'
+        ),
+        borderRadius: 3,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => ' ' + fmtNum(c.parsed.y),
+          },
+        },
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false, beginAtZero: false },
+      },
+    },
+  });
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>

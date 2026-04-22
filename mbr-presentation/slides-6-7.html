@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slides 6 & 7 — Site Merch MBR</title>
+  <style>
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-thin.otf'); font-weight:100; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-light.otf'); font-weight:300; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-regular.otf'); font-weight:400; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-medium.otf'); font-weight:500; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-semibold.otf'); font-weight:600; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-bold.otf'); font-weight:700; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-extrabold.otf'); font-weight:800; }
+    @font-face { font-family:'ProximaNova'; src:url('Proxima 2/proximanova-black.otf'); font-weight:900; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'ProximaNova', sans-serif;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body { display: flex; flex-direction: column; }
+
+    #deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #deck {
+      position: relative;
+      width: 960px;
+      height: 540px;
+      overflow: hidden;
+      flex-shrink: 0;
+      transform-origin: center center;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+    }
+    .slide.active { display: flex; }
+
+    .bg-white-content { background: #FFFFFF; }
+
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px 32px 0;
+      flex-shrink: 0;
+    }
+    .slide-header.dark-text span { color: rgba(0,0,0,.5); }
+    .slide-header span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.75);
+    }
+
+    .ml-logo-icon {
+      position: absolute;
+      bottom: 14px;
+      right: 18px;
+    }
+    .ml-logo-icon img {
+      height: 24px;
+      width: auto;
+      display: block;
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      width: 100%;
+      height: 3px;
+      background: #2a2a2a;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #progress-fill {
+      height: 100%;
+      background: #FFD000;
+      transition: width .3s ease;
+    }
+
+    /* Nav */
+    #nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px 0;
+      background: #111;
+      flex-shrink: 0;
+    }
+    #nav button {
+      background: #FFD000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 24px;
+      font-family: 'ProximaNova', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #111;
+      transition: background .15s, transform .1s;
+    }
+    #nav button:hover  { background: #e6bb00; }
+    #nav button:active { transform: scale(.97); }
+    #nav button:disabled { background: #333; color: #666; cursor: default; }
+    #counter { font-family: 'ProximaNova', sans-serif; font-size: 13px; color: #aaa; min-width: 70px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div id="deck-container">
+  <div id="deck">
+
+    <!-- ══════════════════════════════════════
+         SLIDE 1 — ENGAGEMENT & GROWTH
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content active">
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:6px 24px 6px; border-bottom:2px solid #FFD000; flex-shrink:0;">
+        <span style="font-size:13px; font-weight:800; color:#111;">Engagement &amp; Growth</span>
+        <span style="font-size:11px; font-weight:400; color:#555;"> | CTR 0,99% (+0.22pp VS ENE 26) &amp; NMV ATTR (-19,4% VS ENE 26) Menos días de demand vs ENE 26.</span>
+      </div>
+
+      <div style="flex:0 0 210px; padding:22px 20px 0; position:relative; margin-top:22px;">
+        <canvas id="engagementChart"></canvas>
+      </div>
+
+      <div style="display:flex; gap:8px; padding:6px 20px 36px; align-items:flex-start; overflow:hidden;">
+
+        <!-- WEEK 1 -->
+        <div style="flex:1; border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">DEMAND: DOUBLE DATES 2.2</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 1,17% <span style="color:#2E7D32;">(+0.29pp vs LY)</span><br>
+              • SESIONES | 9.9 M <span style="color:#2E7D32;">(+828% vs LY)</span><br>
+              • NMV | 2.4 M <span style="color:#2E7D32;">(+209% vs LY)</span><br>
+              • NMV ATTR | 0,53% <span style="color:#2E7D32;">(+0.18pp vs LY)</span>
+            </div>
+          </div>
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">BACK TO SCHOOL</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 0,96% <span style="color:#2E7D32;">(+0.13pp vs LY)</span><br>
+              • SESIONES | 379 k <span style="color:#C62828;">(-35% vs LY)</span><br>
+              • NMV | 260 K <span style="color:#C62828;">(-10% vs LY)</span><br>
+              • NMV ATTR | 0,15% <span style="color:#C62828;">(-0.02% vs LY)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 2 -->
+        <div style="flex:1; border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">T3: BACK TO SCHOOL (PPS)</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 0,67% <span style="color:#2E7D32;">(+0.22pp vs LY)</span><br>
+              • SESIONES | 8.3 M <span style="color:#2E7D32;">(+2362% vs LY)</span><br>
+              • NMV | 716 K <span style="color:#2E7D32;">(+96% vs LY)</span><br>
+              • NMV ATTR | 0,36% <span style="color:#2E7D32;">(+0.18pp vs LY)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 3 -->
+        <div style="flex:1; border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">DEMAND: DOUBLE DATES 3.3</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 0,81% <span style="color:#2E7D32;">(+0.20pp vs LY)</span><br>
+              • SESIONES | 502 K <span style="color:#2E7D32;">(48% vs LY)</span><br>
+              • NMV | 697 K <span style="color:#2E7D32;">(86% vs LY)</span><br>
+              • NMV ATTR | 0,52% <span style="color:#2E7D32;">(+0.23pp vs LY)</span>
+            </div>
+          </div>
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">T3: BACK TO SCHOOL (PPS)</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 0,73% <span style="color:#C62828;">(-0.29pp vs LY)</span><br>
+              • SESIONES | 178 K <span style="color:#2E7D32;">(+54% vs LY)</span><br>
+              • NMV | 121 K <span style="color:#2E7D32;">(+48% vs LY)</span><br>
+              • NMV ATTR | 0,07% <span style="color:#2E7D32;">(+0.02pp vs LY)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEK 4 -->
+        <div style="flex:1; border:1px solid #ddd; border-radius:8px; padding:5px 6px; font-size:9px; color:#222; display:flex; flex-direction:column; gap:5px; overflow:hidden; background:#f5f5f5;">
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">DEMAND: DOUBLE DATES 3.3</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 0,89% <span style="color:#C62828;">(-0.03pp vs LY)</span><br>
+              • SESIONES | 8.3 M <span style="color:#2E7D32;">(1796% vs LY)</span><br>
+              • NMV | 1.2 K <span style="color:#2E7D32;">(178% vs LY)</span><br>
+              • NMV ATTR | 0,63% <span style="color:#2E7D32;">(+0.38pp vs LY)</span>
+            </div>
+          </div>
+          <div style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 7px; background:#fafafa;">
+            <div style="font-size:9px; font-weight:800; margin-bottom:3px;">T3: BACK TO SCHOOL (PPS)</div>
+            <div style="color:#555; line-height:1.5;">
+              • CTR | 1,56% <span style="color:#2E7D32;">(+0.68pp vs LY)</span><br>
+              • SESIONES | 82 K <span style="color:#2E7D32;">(+138% vs LY)</span><br>
+              • NMV | 34K <span style="color:#2E7D32;">(+97% vs LY)</span><br>
+              • NMV ATTR | 0,02% <span style="color:#2E7D32;">(+0.01pp vs LY)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SLIDE 2 — NUEVO MODELO MAIN SLIDERS
+    ══════════════════════════════════════ -->
+    <div class="slide bg-white-content">
+      <div class="slide-header dark-text">
+        <span style="display:flex;align-items:center;gap:6px;"><img src="https://flagcdn.com/h20/ar.png" alt="AR" style="height:14px;border-radius:2px;"> Benefits & Site Merch</span>
+        <span>Mar 2026</span>
+      </div>
+
+      <div style="padding:6px 24px 6px; border-bottom:2px solid #FFD000; flex-shrink:0;">
+        <span style="font-size:13px; font-weight:800; color:#111;">Nuevo Modelo Main Sliders</span>
+        <span style="font-size:11px; font-weight:400; color:#555;"> | Segmentación mejora CTR (+0.53pp) vs. no segmentadas, pero aún con baja contribución en NMV.</span>
+      </div>
+
+      <div id="slide7body" style="flex:1; display:flex; gap:0; padding:10px 20px 36px; overflow:hidden; position:relative;">
+
+        <!-- IZQUIERDA: gráfico + next steps -->
+        <div style="flex:0 0 320px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; gap:12px; align-items:center; font-size:9px; color:#555; padding-left:4px;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:10px;background:#FFD000;display:inline-block;border-radius:2px;"></span>NMV ATTR</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="width:16px;height:2px;background:#3B82F6;display:inline-block;"></span>CTR</span>
+          </div>
+          <div style="flex:1; position:relative; min-height:0;">
+            <canvas id="mainSlidersChart"></canvas>
+          </div>
+          <div style="background:#444; border-radius:8px; padding:8px 10px;">
+            <div style="font-size:9px; font-weight:800; color:#fff; margin-bottom:4px;">Next Steps</div>
+            <div style="font-size:8.5px; color:#ddd; line-height:1.5;">
+              • Roadmap: con prioridad en segmentar bucket <strong style="color:#FFD000;">Alto y Medio para capturar volumen.</strong><br>
+              • Producto: Impulsar un <strong style="color:#FFD000;">Catálogo de Audiencias automatizado</strong> para escalar operación.
+            </div>
+          </div>
+        </div>
+
+        <!-- DERECHA: panel vertical -->
+        <div style="flex:1; display:flex; overflow:hidden; gap:0;">
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; overflow:hidden; padding-top:52px;">
+
+            <!-- TOTAL -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelTotal" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">TOTAL</div>
+              <div style="flex:1; border:1.5px solid #FFD000; border-radius:8px; padding:6px 10px; background:#FFFDE7; display:flex; align-items:center; gap:16px;">
+                <div style="font-size:8px; font-weight:800; color:#111; letter-spacing:.04em; white-space:nowrap;">MAIN SLIDERS</div>
+                <div style="font-size:8px; color:#333; line-height:1.6;">
+                  CTR: <strong>0,99%</strong> &nbsp;|&nbsp; NMV ATTR: <strong>95 M</strong> &nbsp;|&nbsp; N° Campañas: <strong>138</strong> &nbsp;|&nbsp; N° Campañas SEG: <strong style="color:#E65100;">79 (57%)</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- ALL AUDIENCIA -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelAllAud" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">ALL AUDIENCIA</div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:5px; font-size:8px;">
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">CTR 0,95%</span>
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">NMV 88.7 M <span style="color:#888;">(93%)</span></span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">MS GENERAL</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>1,42%</strong> &nbsp; NMV ATTR: <strong>56.9 M</strong> <span style="color:#888;">(60%)</span></div>
+                    </div>
+                    <div style="width:48px; height:34px; background:#FFD000; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; color:#111; flex-shrink:0;">3/3</div>
+                  </div>
+                  <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">MS SATÉLITES &amp; MS T3</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>0,76%</strong> &nbsp; NMV ATTR: <strong>31.8 M</strong> <span style="color:#888;">(33%)</span></div>
+                    </div>
+                    <div style="width:48px; height:34px; background:#1B5E20; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; flex-shrink:0; text-align:center; line-height:1.2;">FÚTBOL</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEGMENTADO -->
+            <div style="display:flex; align-items:stretch; gap:6px;">
+              <div id="labelSeg" style="writing-mode:vertical-rl; transform:rotate(180deg); font-size:7px; font-weight:800; color:#fff; letter-spacing:.08em; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:4px 5px; background:#FFD000; border-radius:4px;">SEGMENTADO</div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:5px; font-size:8px;">
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">CTR 1,48%</span>
+                  <span style="background:#eee; border-radius:4px; padding:3px 8px; font-weight:700;">NMV 6.3 M <span style="color:#888;">(7%)</span></span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">ALWAYS ON</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>1,47%</strong> &nbsp; NMV ATTR: <strong>6.2 M</strong> <span style="color:#888;">(6,8%)</span></div>
+                    </div>
+                    <div style="width:48px; height:34px; background:#0D47A1; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; flex-shrink:0; text-align:center; line-height:1.2;">OFERTA ELECTRO</div>
+                  </div>
+                  <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:5px 7px; background:#fafafa; display:flex; gap:6px; align-items:center;">
+                    <div style="flex:1;">
+                      <div style="font-size:8px; font-weight:800; color:#111; margin-bottom:2px;">AO ESTRATÉGICOS</div>
+                      <div style="font-size:8px; color:#555; line-height:1.5;">CTR: <strong>5,41%</strong> &nbsp; NMV ATTR: <strong>0.1 M</strong> <span style="color:#888;">(0,2%)</span></div>
+                    </div>
+                    <div style="width:48px; height:34px; background:#4A148C; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; flex-shrink:0; text-align:center; line-height:1.2;">CREADORES</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="ml-logo-icon"><img src="ml-logo-sec.png" alt="Mercado Libre" /></div>
+    </div>
+
+
+  </div><!-- /deck -->
+  </div><!-- /deck-container -->
+
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <div id="nav">
+    <button id="btn-prev" disabled>← Anterior</button>
+    <span id="counter">1 / 2</span>
+    <button id="btn-next">Siguiente →</button>
+  </div>
+
+  <script>
+    Chart.defaults.font.family = "'ProximaNova', sans-serif";
+
+    // ── Plugin: líneas divisoras de semana ──
+    const weekDividerPlugin = {
+      id: 'weekDividers',
+      afterDraw(chart) {
+        if (chart.canvas.id !== 'engagementChart') return;
+        const { ctx, scales: { x, y1 } } = chart;
+        [6.5, 13.5, 20.5].forEach(idx => {
+          const xPos = x.getPixelForValue(idx);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(xPos, y1.top);
+          ctx.lineTo(xPos, y1.bottom);
+          ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 3]);
+          ctx.stroke();
+          ctx.restore();
+        });
+        const weekLabels = ['WEEK 1','WEEK 2','WEEK 3','WEEK 4'];
+        const starts = [0, 7, 14, 21];
+        const ends   = [6, 13, 20, 27];
+        ctx.save();
+        ctx.font = `700 8px ProximaNova, sans-serif`;
+        ctx.textAlign = 'center';
+        weekLabels.forEach((lbl, i) => {
+          const cx = (x.getPixelForValue(starts[i]) + x.getPixelForValue(ends[i])) / 2;
+          const cy = y1.top - 6;
+          const tw = ctx.measureText(lbl).width;
+          const ph = 13, pw = tw + 14, r = ph / 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - pw/2 + r, cy - ph/2);
+          ctx.arcTo(cx + pw/2, cy - ph/2, cx + pw/2, cy + ph/2, r);
+          ctx.arcTo(cx + pw/2, cy + ph/2, cx - pw/2, cy + ph/2, r);
+          ctx.arcTo(cx - pw/2, cy + ph/2, cx - pw/2, cy - ph/2, r);
+          ctx.arcTo(cx - pw/2, cy - ph/2, cx + pw/2, cy - ph/2, r);
+          ctx.closePath();
+          ctx.fillStyle = '#555';
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(lbl, cx, cy);
+        });
+        ctx.restore();
+      }
+    };
+    Chart.register(weekDividerPlugin);
+
+    // ── Engagement chart ──
+    const ctx = document.getElementById('engagementChart');
+    if (ctx) {
+      const labels = ['1/02','2/02','3/02','4/02','5/02','6/02','7/02','8/02','9/02','10/02','11/02','12/02','13/02','14/02','15/02','16/02','17/02','18/02','19/02','20/02','21/02','22/02','23/02','24/02','25/02','26/02','27/02','28/02'];
+      const ctr    = [1.24,2.29,1.06,0.97,0.92,0.89,0.87,0.93,0.73,0.73,0.84,0.97,0.78,0.77,0.90,0.86,0.83,0.99,0.96,0.93,1.00,1.13,0.95,1.15,0.96,1.05,1.07,1.08];
+      const prints = [9.1,15.3,12.9,12.7,12.6,11.7,9.4,9.1,12.8,12.7,12.5,11.7,10.3,7.7,7.7,8.7,9.5,11.9,11.8,11.2,9.0,8.8,12.5,12.1,11.5,11.3,10.7,8.9];
+      const nmv    = [5.6,11.0,8.4,8.0,8.1,7.5,5.6,5.8,8.6,8.5,8.3,8.3,6.3,4.0,3.9,4.6,5.2,6.2,6.1,6.3,4.6,4.9,6.8,6.6,5.5,5.0,5.5,4.6];
+      new Chart(ctx, {
+        data: { labels, datasets: [
+          { type:'bar', label:'Prints (M)', data:prints, backgroundColor:'rgba(180,180,180,0.6)', borderWidth:0, yAxisID:'y1', barPercentage:0.7, categoryPercentage:0.6, order:2 },
+          { type:'bar', label:'NMV (M)', data:nmv, backgroundColor:'rgba(255,208,0,0.85)', borderWidth:0, yAxisID:'y1', barPercentage:0.7, categoryPercentage:0.6, order:1 },
+          { type:'line', label:'CTR %', data:ctr, borderColor:'#2563EB', borderWidth:2, pointRadius:3, pointBackgroundColor:'#2563EB', pointBorderColor:'#fff', pointBorderWidth:1, yAxisID:'y2', tension:0.3, order:0,
+            datalabels:{ display:true, align:'top', anchor:'top', formatter:v=>v.toFixed(2)+'%', font:{size:7,weight:'600'}, color:'#2563EB', offset:2 } }
+        ]},
+        options: {
+          responsive:true, maintainAspectRatio:false, devicePixelRatio:window.devicePixelRatio*2, animation:false,
+          layout:{padding:{top:18}},
+          plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+          scales:{
+            x:{ ticks:{font:{size:7},color:'#999',maxRotation:0,autoSkip:false}, grid:{display:false}, border:{display:false} },
+            y1:{ display:false, min:0, max:14 },
+            y2:{ display:false, min:0, max:3 }
+          }
+        }
+      });
+    }
+
+    // ── Main Sliders chart ──
+    const ctx2 = document.getElementById('mainSlidersChart');
+    if (ctx2) {
+      const msLabels = ['AGO 25','SEP 25','OCT 25','NOV 25','DIC 25','ENE 26','FEB 26'];
+      const msNMV    = [36, 75, 60, 132, 141, 113, 95];
+      const msCTR    = [0.91, 1.04, 1.29, 1.62, 1.04, 0.77, 0.99];
+      new Chart(ctx2, {
+        data: { labels: msLabels, datasets: [
+          { type:'bar', label:'NMV ATTR (M)', data:msNMV, backgroundColor:'#FFD000', borderRadius:3, yAxisID:'y1', barPercentage:0.6, order:2 },
+          { type:'line', label:'CTR %', data:msCTR, borderColor:'#3B82F6', borderWidth:2, pointRadius:4, pointBackgroundColor:'#3B82F6', pointBorderColor:'#fff', pointBorderWidth:1.5, yAxisID:'y2', tension:0.3, order:1,
+            datalabels:{ display:true, align:'top', anchor:'top', formatter:v=>v.toFixed(2)+'%', font:{size:8,weight:'700'}, color:'#2563EB', offset:2 } }
+        ]},
+        options: {
+          responsive:true, maintainAspectRatio:false, devicePixelRatio:window.devicePixelRatio*2, animation:false,
+          layout:{padding:{top:24,right:8}},
+          plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+          scales:{
+            x:{ ticks:{font:{size:8,family:'ProximaNova, sans-serif'},color:'#555',maxRotation:0}, grid:{display:false}, border:{display:false} },
+            y1:{ display:false, min:0, max:180 },
+            y2:{ display:false, min:0, max:2.5 }
+          }
+        },
+        plugins:[{
+          id:'nmvLabelsAndSplit',
+          afterDatasetsDraw(chart) {
+            const { ctx, scales:{ y1 }, data } = chart;
+            const ds = chart.getDatasetMeta(0);
+            ctx.save();
+            ctx.font = `700 9px ProximaNova, sans-serif`;
+            ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ds.data.forEach((bar,i) => ctx.fillText(data.datasets[0].data[i]+' M', bar.x, bar.y-2));
+            ctx.restore();
+            const lastBar = ds.data[ds.data.length-1];
+            const splitY = y1.getPixelForValue(6.3);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(lastBar.x - lastBar.width/2 - 6, splitY);
+            ctx.lineTo(lastBar.x + lastBar.width/2 + 6, splitY);
+            ctx.strokeStyle = '#E53935'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]); ctx.stroke();
+            ctx.restore();
+          }
+        }]
+      });
+    }
+
+    // ── Navegación ──
+    const slides  = document.querySelectorAll('.slide');
+    let current   = 0;
+    const total   = slides.length;
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const counter = document.getElementById('counter');
+    const fillEl  = document.getElementById('progress-fill');
+
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      current = Math.max(0, Math.min(n, total - 1));
+      slides[current].classList.add('active');
+      counter.textContent = `${current + 1} / ${total}`;
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === total - 1;
+      fillEl.style.width = `${((current + 1) / total) * 100}%`;
+    }
+
+    btnPrev.addEventListener('click', () => goTo(current - 1));
+    btnNext.addEventListener('click', () => goTo(current + 1));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1);
+      if (e.key === 'ArrowLeft') goTo(current - 1);
+    });
+
+    const deck = document.getElementById('deck');
+    function scaleToFit() {
+      const container = document.getElementById('deck-container');
+      const scale = Math.min(container.clientWidth / 960, container.clientHeight / 540);
+      deck.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleToFit);
+    scaleToFit();
+    goTo(0);
+  </script>
+</body>
+</html>

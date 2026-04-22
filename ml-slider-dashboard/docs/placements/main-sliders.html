@@ -13,6 +13,8 @@
 <!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
 <nav class="top-nav">
   <div class="nav-brand"><span>◆</span> ML Ads Dashboard</div>
+  <a class="nav-link" href="../summary.html">Summary Home</a>
+  <a class="nav-link" href="../index.html">Summary Placements</a>
   <a class="nav-link active" href="main-sliders.html">Main Sliders</a>
   <a class="nav-link" href="landings.html">Landings</a>
   <a class="nav-link" href="containers.html">Containers</a>
@@ -181,6 +183,7 @@ async function loadData() {
 
     render();
   } catch (e) {
+    console.error('loadData error:', e);
     document.getElementById('freshness-text').textContent = 'Error al cargar datos';
     document.getElementById('freshness-dot').className    = 'freshness-dot error';
   }

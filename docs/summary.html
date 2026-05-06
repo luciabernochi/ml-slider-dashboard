@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summary Home — Dashboard Ejecutivo</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+
+    /* ── Users section ───────────────────────────────────────────────────────── */
+    .users-section {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) { .users-section { grid-template-columns: 1fr; } }
+
+    .user-card-home {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .user-card-home .uc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .user-card-home .uc-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .user-card-home .uc-period {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .placements-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 700px) { .placements-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .user-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+    }
+
+    .user-card .uc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .user-card .uc-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .user-card .uc-period {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ── Heatmap ─────────────────────────────────────────────────────────────── */
+    .heatmap-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 28px 20px;
+      overflow-x: auto;
+    }
+
+    .heatmap-table {
+      border-collapse: separate;
+      border-spacing: 5px;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .heatmap-table th.col-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px 4px 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .heatmap-table td.row-label {
+      width: 80px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      padding: 4px 12px 4px 0;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .heatmap-table td.cell {
+      height: 52px;
+      border-radius: 10px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: default;
+      transition: transform .12s, box-shadow .12s;
+      position: relative;
+    }
+
+    .heatmap-table td.cell:hover {
+      transform: scale(1.06);
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      z-index: 10;
+    }
+
+    .cell-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100;
+      line-height: 1.6;
+    }
+
+    .heatmap-table td.cell:hover .cell-tooltip { display: block; }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .legend-label { font-size: 11px; color: #b0bec5; }
+
+    .legend-bar {
+      width: 130px;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, hsl(222,35%,94%), hsl(222,80%,22%));
+    }
+
+    /* ── Filter bar ──────────────────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-range input[type="date"] {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .date-range span { font-size: 12px; color: var(--text-muted); }
+
+    .chk-dropdown { position: relative; }
+
+    .chk-trigger {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 12px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .chk-trigger:hover { border-color: var(--accent); }
+    .chk-trigger.open  { border-color: var(--accent); }
+
+    .chk-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      min-width: 180px;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 200;
+      padding: 6px 0;
+    }
+
+    .chk-menu.open { display: block; }
+
+    .chk-menu-actions {
+      display: flex;
+      gap: 8px;
+      padding: 6px 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chk-menu-actions button {
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      background: none;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .chk-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: background .1s;
+    }
+
+    .chk-item:hover { background: var(--bg); }
+    .chk-item input[type="checkbox"] { cursor: pointer; accent-color: var(--accent); }
+
+    .period-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .period-chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      transition: all .12s;
+      white-space: nowrap;
+    }
+
+    .period-chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .period-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .btn-reset {
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .12s;
+    }
+    .btn-reset:hover { background: var(--bg); color: var(--text); }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
+  <a class="nav-link active" href="summary.html">Summary Home</a>
+  <a class="nav-link" href="placements/tabs.html">Tabs</a>
+  <a class="nav-link" href="placements/main-sliders.html">Main Sliders</a>
+  <a class="nav-link" href="placements/quick-access.html">Quick Access</a>
+  <a class="nav-link" href="placements/rabbit-hole.html">Rabbit Hole</a>
+  <a class="nav-link" href="index.html">Summary Placements</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Summary Home</div>
+      <div class="page-subtitle">Usuarios únicos y share de clicks · MLA</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="toggle-group" id="grain-toggle">
+        <button data-grain="day">Día</button>
+        <button data-grain="week" class="active">Semana</button>
+        <button data-grain="month">Mes</button>
+      </div>
+      <div class="freshness">
+        <span class="freshness-dot" id="freshness-dot"></span>
+        <span id="freshness-text">Cargando…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Usuarios únicos ──────────────────────────────────────────────────── -->
+  <div class="section-title" id="users-period-label">Usuarios únicos</div>
+  <div class="users-section" id="users-section">
+    <div class="user-card-home">
+      <div class="uc-label">Usuarios Home</div>
+      <div class="uc-value" id="val-HOME">—</div>
+      <div class="uc-period" id="period-HOME"></div>
+    </div>
+    <div class="placements-grid">
+      <div class="user-card"><div class="uc-label">Usuarios Tabs</div><div class="uc-value" id="val-Tabs">—</div><div class="uc-period" id="period-Tabs"></div></div>
+      <div class="user-card"><div class="uc-label">Usuarios MS</div><div class="uc-value" id="val-MS">—</div><div class="uc-period" id="period-MS"></div></div>
+      <div class="user-card"><div class="uc-label">Usuarios QA</div><div class="uc-value" id="val-QA">—</div><div class="uc-period" id="period-QA"></div></div>
+      <div class="user-card"><div class="uc-label">Usuarios THB</div><div class="uc-value" id="val-THB">—</div><div class="uc-period" id="period-THB"></div></div>
+      <div class="user-card"><div class="uc-label">Usuarios DA</div><div class="uc-value" id="val-DA">—</div><div class="uc-period" id="period-DA"></div></div>
+      <div class="user-card"><div class="uc-label">Usuarios RH</div><div class="uc-value" id="val-RH">—</div><div class="uc-period" id="period-RH"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Penetración vs Home ─────────────────────────────────────────────── -->
+  <div class="section-title">Usuarios placement / Usuarios Home</div>
+
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <div class="heatmap-wrap" style="margin-bottom:24px;">
+    <table class="heatmap-table" id="users-heatmap-table"></table>
+    <div class="heatmap-legend">
+      <span class="legend-label">Menor %</span>
+      <div class="legend-bar" style="background:linear-gradient(to right,hsl(160,30%,94%),hsl(160,70%,25%))"></div>
+      <span class="legend-label">Mayor %</span>
+    </div>
+  </div>
+
+  <!-- ── Share de clicks ──────────────────────────────────────────────────── -->
+  <div class="section-title">Share de clicks por real state</div>
+
+  <div class="heatmap-wrap">
+    <table class="heatmap-table" id="heatmap-table"></table>
+    <div class="heatmap-legend">
+      <span class="legend-label">Menor share</span>
+      <div class="legend-bar"></div>
+      <span class="legend-label">Mayor share</span>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { fmtNum, fmtRefreshed } from './assets/js/utils.js';
+
+const PLACEMENTS_HEATMAP = [
+  { key: 'Tabs', label: 'TABS'    },
+  { key: 'MS',   label: 'MS'      },
+  { key: 'QA',   label: 'QA'      },
+  { key: 'THB',  label: 'THB'     },
+  { key: 'DA',   label: 'DA'      },
+  { key: 'RH',   label: 'RH HOME' },
+];
+
+const USERS_PLACEMENTS = ['HOME', 'Tabs', 'MS', 'QA', 'THB', 'DA', 'RH'];
+
+const DEFAULTS = { day: 10, week: 8, month: null };
+
+let clicksData  = [];
+let usersData   = [];
+let currentGrain = 'week';
+let allPeriods   = [];
+let selectedSet  = new Set();
+
+async function loadData() {
+  const dot = document.getElementById('freshness-dot');
+  const txt = document.getElementById('freshness-text');
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch('./data-summary-home.json'),
+      fetch('./data-summary-home-users.json'),
+    ]);
+    const j1 = await r1.json();
+    const j2 = await r2.json();
+    clicksData = j1.data || [];
+    usersData  = j2.data || [];
+
+    const ts = j1.refreshed_at || j2.refreshed_at;
+    if (ts) {
+      txt.textContent = 'Actualizado ' + fmtRefreshed(ts);
+      dot.className   = 'freshness-dot';
+    } else {
+      txt.textContent = 'Sin datos';
+      dot.className   = 'freshness-dot error';
+    }
+  } catch {
+    txt.textContent = 'Error al cargar datos';
+    dot.className   = 'freshness-dot error';
+  }
+  rebuildPeriods();
+}
+
+function rebuildPeriods() {
+  const colKey = colKeyFor(currentGrain);
+  const set = new Set();
+  for (const row of clicksData) set.add(row[colKey]);
+  allPeriods = [...set].sort();
+  applyDefault();
+}
+
+function colKeyFor(grain) {
+  return grain === 'day' ? 'ds' : grain === 'week' ? 'week' : 'month';
+}
+
+function applyDefault() {
+  const n = DEFAULTS[currentGrain];
+  selectedSet = n === null ? new Set(allPeriods) : new Set(allPeriods.slice(-n));
+  renderUsers();
+  renderFilter();
+  renderUsersHeatmap();
+  renderHeatmap();
+}
+
+function fmtPeriod(str) {
+  const d = new Date(str + 'T00:00:00');
+  if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  if (currentGrain === 'week')  return 'Semana ' + d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  return d.toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' });
+}
+
+function renderUsers() {
+  const grainData = usersData.filter(r => r.grain === currentGrain);
+  if (!grainData.length) {
+    USERS_PLACEMENTS.forEach(p => { const el = document.getElementById(`val-${p}`); if (el) el.textContent = '—'; });
+    return;
+  }
+  const lastPeriod = [...new Set(grainData.map(r => r.period))].sort().pop();
+  document.getElementById('users-period-label').textContent = `Usuarios únicos · ${fmtPeriod(lastPeriod)}`;
+  const byPlacement = {};
+  grainData.filter(r => r.period === lastPeriod).forEach(r => { byPlacement[r.placement] = Number(r.unique_users); });
+  USERS_PLACEMENTS.forEach(p => {
+    const val = document.getElementById(`val-${p}`);
+    const per = document.getElementById(`period-${p}`);
+    if (val) val.textContent = byPlacement[p] != null ? fmtNum(byPlacement[p]) : '—';
+    if (per) per.textContent = lastPeriod ? fmtPeriod(lastPeriod) : '';
+  });
+}
+
+function renderFilter() {
+  const bar = document.getElementById('filter-bar');
+  if (currentGrain === 'day')        renderDayFilter(bar);
+  else if (currentGrain === 'week')  renderWeekFilter(bar);
+  else                               renderMonthFilter(bar);
+}
+
+function renderDayFilter(bar) {
+  const minDate  = allPeriods[0] || '';
+  const maxDate  = allPeriods[allPeriods.length - 1] || '';
+  const fromDate = allPeriods.slice(-DEFAULTS.day)[0] || minDate;
+  bar.innerHTML = `
+    <div class="date-range">
+      <input type="date" id="date-from" min="${minDate}" max="${maxDate}" value="${fromDate}">
+      <span>→</span>
+      <input type="date" id="date-to" min="${minDate}" max="${maxDate}" value="${maxDate}">
+    </div>
+    <button class="btn-reset" id="btn-reset">Por defecto</button>
+  `;
+  bar.querySelector('#date-from').addEventListener('change', applyDateRange);
+  bar.querySelector('#date-to').addEventListener('change', applyDateRange);
+  bar.querySelector('#btn-reset').addEventListener('click', applyDefault);
+}
+
+function applyDateRange() {
+  const from = document.getElementById('date-from')?.value;
+  const to   = document.getElementById('date-to')?.value;
+  if (!from || !to) return;
+  selectedSet = new Set(allPeriods.filter(p => p >= from && p <= to));
+  if (!selectedSet.size) selectedSet = new Set(allPeriods.slice(-DEFAULTS.day));
+  renderUsersHeatmap();
+  renderHeatmap();
+}
+
+function renderWeekFilter(bar) {
+  const count = selectedSet.size;
+  bar.innerHTML = `
+    <div class="chk-dropdown" id="week-dropdown">
+      <button class="chk-trigger" id="week-trigger">${count} semana${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''} ▾</button>
+      <div class="chk-menu" id="week-menu">
+        <div class="chk-menu-actions">
+          <button id="chk-all">Todas</button>
+          <button id="chk-default">Últimas ${DEFAULTS.week}</button>
+        </div>
+        ${allPeriods.map(p => `<label class="chk-item"><input type="checkbox" value="${p}" ${selectedSet.has(p) ? 'checked' : ''}>${fmtPeriod(p)}</label>`).join('')}
+      </div>
+    </div>
+    <button class="btn-reset" id="btn-reset">Por defecto</button>
+  `;
+  const trigger = bar.querySelector('#week-trigger');
+  const menu    = bar.querySelector('#week-menu');
+  trigger.addEventListener('click', e => { e.stopPropagation(); trigger.classList.toggle('open'); menu.classList.toggle('open'); });
+  bar.querySelector('#chk-all').addEventListener('click', e => { e.stopPropagation(); selectedSet = new Set(allPeriods); bar.querySelectorAll('#week-menu input').forEach(c => c.checked = true); updateWeekTrigger(); renderUsersHeatmap(); renderHeatmap(); });
+  bar.querySelector('#chk-default').addEventListener('click', e => { e.stopPropagation(); selectedSet = new Set(allPeriods.slice(-DEFAULTS.week)); bar.querySelectorAll('#week-menu input').forEach(c => { c.checked = selectedSet.has(c.value); }); updateWeekTrigger(); renderUsersHeatmap(); renderHeatmap(); });
+  bar.querySelectorAll('#week-menu input').forEach(chk => {
+    chk.addEventListener('change', e => { e.stopPropagation(); if (chk.checked) selectedSet.add(chk.value); else if (selectedSet.size > 1) selectedSet.delete(chk.value); else chk.checked = true; updateWeekTrigger(); renderUsersHeatmap(); renderHeatmap(); });
+  });
+  bar.querySelector('#btn-reset').addEventListener('click', applyDefault);
+  document.addEventListener('click', closeWeekMenu);
+}
+
+function updateWeekTrigger() {
+  const t = document.getElementById('week-trigger');
+  if (!t) return;
+  const n = selectedSet.size;
+  t.textContent = `${n} semana${n !== 1 ? 's' : ''} seleccionada${n !== 1 ? 's' : ''} ▾`;
+}
+
+function closeWeekMenu(e) {
+  const d = document.getElementById('week-dropdown');
+  if (d && !d.contains(e.target)) { document.getElementById('week-trigger')?.classList.remove('open'); document.getElementById('week-menu')?.classList.remove('open'); }
+}
+
+function renderMonthFilter(bar) {
+  bar.innerHTML = `
+    <div class="period-chips" id="month-chips">
+      ${allPeriods.map(p => `<button class="period-chip ${selectedSet.has(p) ? 'active' : ''}" data-period="${p}">${fmtPeriod(p)}</button>`).join('')}
+    </div>
+    <button class="btn-reset" id="btn-reset">Todos</button>
+  `;
+  bar.querySelector('#month-chips').addEventListener('click', e => {
+    const chip = e.target.closest('[data-period]');
+    if (!chip) return;
+    const p = chip.dataset.period;
+    if (selectedSet.has(p)) { if (selectedSet.size > 1) selectedSet.delete(p); } else selectedSet.add(p);
+    chip.classList.toggle('active', selectedSet.has(p));
+    renderUsersHeatmap();
+    renderHeatmap();
+  });
+  bar.querySelector('#btn-reset').addEventListener('click', () => { selectedSet = new Set(allPeriods); renderFilter(); renderUsersHeatmap(); renderHeatmap(); });
+}
+
+function cellBg(t)      { return `hsl(222, ${Math.round(35 + t * 45)}%, ${Math.round(94 - t * 72)}%)`; }
+function cellFg(t)      { return t > 0.42 ? '#fff' : '#1e293b'; }
+function cellBgGreen(t) { return `hsl(160, ${Math.round(30 + t * 40)}%, ${Math.round(94 - t * 69)}%)`; }
+function cellFgGreen(t) { return t > 0.45 ? '#fff' : '#1e293b'; }
+
+function renderUsersHeatmap() {
+  const grainData = usersData.filter(r => r.grain === currentGrain);
+  const table     = document.getElementById('users-heatmap-table');
+  table.innerHTML = '';
+  if (!grainData.length) { table.innerHTML = '<tr><td style="padding:24px;color:#888;font-size:13px">Sin datos</td></tr>'; return; }
+
+  const map = {};
+  PLACEMENTS_HEATMAP.forEach(p => { map[p.key] = {}; });
+  map['HOME'] = {};
+  for (const row of grainData) {
+    if (!selectedSet.has(row.period)) continue;
+    if (map[row.placement] !== undefined) map[row.placement][row.period] = Number(row.unique_users);
+  }
+
+  const periods = allPeriods.filter(p => selectedSet.has(p));
+  if (!periods.length) { table.innerHTML = '<tr><td style="padding:24px;color:#888;font-size:13px">Sin datos</td></tr>'; return; }
+
+  let maxRatio = 0;
+  PLACEMENTS_HEATMAP.forEach(pl => {
+    periods.forEach(p => {
+      const home = map['HOME'][p] || 0;
+      const ratio = home ? (map[pl.key][p] || 0) / home * 100 : 0;
+      if (ratio > maxRatio) maxRatio = ratio;
+    });
+  });
+
+  const thead = table.createTHead();
+  const tr0 = thead.insertRow();
+  const thE = document.createElement('th');
+  thE.style.width = '80px';
+  tr0.appendChild(thE);
+  periods.forEach(p => { const th = document.createElement('th'); th.className = 'col-header'; th.textContent = fmtPeriodShort(p); tr0.appendChild(th); });
+
+  const tbody = table.createTBody();
+  PLACEMENTS_HEATMAP.forEach(pl => {
+    const tr = tbody.insertRow();
+    const label = document.createElement('td');
+    label.className = 'row-label';
+    label.textContent = pl.label;
+    tr.appendChild(label);
+    periods.forEach(p => {
+      const home  = map['HOME'][p] || 0;
+      const users = map[pl.key][p] || 0;
+      const ratio = home ? users / home * 100 : 0;
+      const t     = maxRatio ? ratio / maxRatio : 0;
+      const td    = document.createElement('td');
+      td.className        = 'cell';
+      td.style.background = cellBgGreen(t);
+      td.style.color      = cellFgGreen(t);
+      td.innerHTML = `${ratio.toFixed(1)}%<span class="cell-tooltip">${pl.label} · ${fmtPeriodShort(p)}<br>${ratio.toFixed(2)}% &nbsp;|&nbsp; ${fmtNum(users)} usuarios</span>`;
+      tr.appendChild(td);
+    });
+  });
+}
+
+function renderHeatmap() {
+  const colKey  = colKeyFor(currentGrain);
+  const periods = allPeriods.filter(p => selectedSet.has(p));
+  const table   = document.getElementById('heatmap-table');
+  table.innerHTML = '';
+  if (!periods.length) { table.innerHTML = '<tr><td style="padding:24px;color:#888;font-size:13px">Sin datos</td></tr>'; return; }
+
+  const map = {};
+  PLACEMENTS_HEATMAP.forEach(p => { map[p.key] = {}; });
+  for (const row of clicksData) {
+    if (!selectedSet.has(row[colKey])) continue;
+    const pl = row.placement;
+    if (!map[pl]) continue;
+    map[pl][row[colKey]] = (map[pl][row[colKey]] || 0) + Number(row.clicks);
+  }
+
+  const totals = {};
+  periods.forEach(p => { totals[p] = PLACEMENTS_HEATMAP.reduce((s, pl) => s + (map[pl.key][p] || 0), 0); });
+
+  let maxShare = 0;
+  PLACEMENTS_HEATMAP.forEach(pl => { periods.forEach(p => { const s = totals[p] ? (map[pl.key][p] || 0) / totals[p] * 100 : 0; if (s > maxShare) maxShare = s; }); });
+
+  const thead = table.createTHead();
+  const tr0 = thead.insertRow();
+  const thE = document.createElement('th');
+  thE.style.width = '80px';
+  tr0.appendChild(thE);
+  periods.forEach(p => { const th = document.createElement('th'); th.className = 'col-header'; th.textContent = fmtPeriodShort(p); tr0.appendChild(th); });
+
+  const tbody = table.createTBody();
+  PLACEMENTS_HEATMAP.forEach(pl => {
+    const tr = tbody.insertRow();
+    const label = document.createElement('td');
+    label.className = 'row-label';
+    label.textContent = pl.label;
+    tr.appendChild(label);
+    periods.forEach(p => {
+      const clicks = map[pl.key][p] || 0;
+      const share  = totals[p] ? clicks / totals[p] * 100 : 0;
+      const t      = maxShare ? share / maxShare : 0;
+      const td     = document.createElement('td');
+      td.className        = 'cell';
+      td.style.background = cellBg(t);
+      td.style.color      = cellFg(t);
+      td.innerHTML = `${share.toFixed(1)}%<span class="cell-tooltip">${pl.label} · ${fmtPeriodShort(p)}<br>${share.toFixed(2)}% &nbsp;|&nbsp; ${fmtNum(clicks)} clicks</span>`;
+      tr.appendChild(td);
+    });
+  });
+}
+
+function fmtPeriodShort(str) {
+  const d = new Date(str + 'T00:00:00');
+  if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' });
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+}
+
+document.getElementById('grain-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('[data-grain]');
+  if (!btn) return;
+  document.removeEventListener('click', closeWeekMenu);
+  currentGrain = btn.dataset.grain;
+  document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rebuildPeriods();
+});
+
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>

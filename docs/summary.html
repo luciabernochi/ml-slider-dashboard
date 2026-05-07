@@ -612,7 +612,7 @@ function renderUsersHeatmap() {
     if (map[row.placement] !== undefined) map[row.placement][row.period] = Number(row.unique_users);
   }
 
-  const periods = allPeriods.filter(p => selectedSet.has(p));
+  const periods = allPeriods.filter(p => selectedSet.has(p) && (map['HOME'][p] || 0) > 0);
   if (!periods.length) { table.innerHTML = '<tr><td style="padding:24px;color:#888;font-size:13px">Sin datos</td></tr>'; return; }
 
   let maxRatio = 0;

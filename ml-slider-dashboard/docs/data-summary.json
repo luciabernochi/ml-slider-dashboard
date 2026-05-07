@@ -1,0 +1,16 @@
+{
+  "placements": {
+    "qa_home": {
+      "label": "QA Home",
+      "data": [
+        { "WEEK": "2026-03-03", "PRINTS": 45000000, "TAPS": 520000 },
+        { "WEEK": "2026-03-10", "PRINTS": 48000000, "TAPS": 550000 },
+        { "WEEK": "2026-03-17", "PRINTS": 44000000, "TAPS": 490000 },
+        { "WEEK": "2026-03-24", "PRINTS": 51000000, "TAPS": 610000 },
+        { "WEEK": "2026-03-31", "PRINTS": 53000000, "TAPS": 640000 },
+        { "WEEK": "2026-04-07", "PRINTS": 49000000, "TAPS": 580000 }
+      ]
+    }
+  },
+  "refreshed_at": null
+}

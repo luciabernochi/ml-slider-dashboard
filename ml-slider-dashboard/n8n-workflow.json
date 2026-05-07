@@ -1,0 +1,98 @@
+{
+  "name": "ML Slider Dashboard — Hourly Refresh V2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 29
+            }
+          ]
+        }
+      },
+      "id": "6e52a188-9a58-4764-ab98-6ea595160e78",
+      "name": "Schedule Trigger1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [160, 80],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "projectId": "meli-bi-data",
+        "sqlQuery": "WITH\n  base AS (\n    SELECT\n      m.SIT_SITE_ID AS site,\n      CASE\n        WHEN DATE_TRUNC(EVENT_LOCAL_DT, WEEK(MONDAY)) BETWEEN DATE_ADD(DATE_TRUNC(CURRENT_DATE - 7, WEEK(MONDAY)), INTERVAL -51 WEEK) AND DATE_TRUNC(CURRENT_DATE - 7, WEEK(MONDAY)) THEN 'CY'\n        WHEN DATE_TRUNC(EVENT_LOCAL_DT, WEEK(MONDAY)) BETWEEN DATE_ADD(DATE_TRUNC(CURRENT_DATE - 7, WEEK(MONDAY)), INTERVAL -103 WEEK) AND DATE_ADD(DATE_TRUNC(CURRENT_DATE - 7, WEEK(MONDAY)), INTERVAL -51 WEEK) THEN 'LY'\n        ELSE NULL\n      END AS YEAR_FROM_WEEK,\n      DATE_TRUNC(EVENT_LOCAL_DT, MONTH)                                                        AS MONTH,\n      CONCAT('Q', CAST(EXTRACT(QUARTER FROM EVENT_LOCAL_DT) AS STRING), '-', CAST(EXTRACT(YEAR FROM EVENT_LOCAL_DT) AS STRING)) AS Q,\n      DATE_TRUNC(EVENT_LOCAL_DT, WEEK(MONDAY))                                                 AS WEEK,\n      EXTRACT(WEEK FROM EVENT_LOCAL_DT) + 1                                                    AS WEEK_NUMBER,\n      EVENT_LOCAL_DT                                                                            AS DAY,\n      M.CAMPAIGN_NAME,\n      CASE\n        WHEN (LI.LINE_ITEM_AUDIENCE_DMP IS NOT NULL)\n          OR (JSON_VALUE(LINE_ITEM_SITES_DISPLAYED) IS NOT NULL)\n        THEN 'SEGMENTADO' ELSE 'NO SEGMENTADO'\n      END AS SEGMENTATION,\n      LI.LINE_ITEM_NAME,\n      CASE\n        WHEN m.ACCOUNT_NAME LIKE '%MELIPLAY%' THEN 'PLAY'\n        WHEN ACCOUNT_TYPE = 'MARKETING'       THEN 'MKTPLACE'\n        ELSE 'ADS'\n      END AS CAMPAING_TYPE,\n      SUM(COALESCE(m.CLICKS_QTY, 0))          AS MKTPLACE_CLICKS,\n      SUM(COALESCE(m.IMPRESSION_VIEWS_QTY, 0)) AS MKTPLACE_PRINTS,\n      ROUND(SUM(ATT_EVENT_GMV_USD), 2)         AS MKTPLACE_GMV,\n      'ads' AS source\n    FROM `meli-bi-data.WHOWNER.BT_ADS_DISP_METRICS_DAILY` m\n    INNER JOIN `meli-bi-data.WHOWNER.LK_ADS_LINE_ITEMS`  LI ON LI.LINE_ITEM_ID  = M.LINE_ITEM_ID\n    INNER JOIN `meli-bi-data.WHOWNER.LK_ADS_ACCOUNTS`    a  ON a.account_id     = m.ACCOUNT_ID\n    INNER JOIN `meli-bi-data.WHOWNER.LK_ADS_CAMPAIGNS`   C  ON C.CAMPAIGN_ID    = M.CAMPAIGN_ID\n    WHERE\n      m.EVENT_LOCAL_DT BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 13 WEEK) AND CURRENT_DATE() - 1\n      AND M.SIT_SITE_ID IN ('MLA','MLB','MLM','MLC','MLU','MCO','MPE')\n      AND PLACEMENT LIKE '%MAIN-SLIDER_HOME%'\n      AND ACCOUNT_TYPE = 'MARKETING'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_A_HS_Cont_ID%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_B_HS_Cont_ID%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_C_HS_Cont_ID%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_HS_Cont_ID%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_AcqHS%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_EngHS%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_HS_%'\n      AND M.CAMPAIGN_NAME NOT LIKE '%MS_A_AcqHS%'\n    GROUP BY ALL\n    HAVING SUM(m.PRINTS_QTY) > 0\n  ),\n\n  filtered AS (\n    SELECT * FROM base WHERE YEAR_FROM_WEEK IS NOT NULL\n  )\n\nSELECT\n  TO_BASE64(CAST(\n    CONCAT(\n      '{\"data\":',\n      (SELECT TO_JSON_STRING(ARRAY_AGG(STRUCT(\n        site, YEAR_FROM_WEEK, CAST(MONTH AS STRING) AS MONTH,\n        Q, CAST(WEEK AS STRING) AS WEEK, WEEK_NUMBER,\n        CAST(DAY AS STRING) AS DAY,\n        CAMPAIGN_NAME, SEGMENTATION, LINE_ITEM_NAME, CAMPAING_TYPE,\n        MKTPLACE_CLICKS, MKTPLACE_PRINTS, MKTPLACE_GMV, source\n      ))) FROM filtered),\n      ',\"refreshed_at\":\"',\n      FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%S', CURRENT_TIMESTAMP(), 'America/Argentina/Buenos_Aires'),\n      '\"}'\n    )\n  AS BYTES)) AS data_b64",
+        "options": {
+          "location": "US"
+        }
+      },
+      "id": "3fcfdd2e-f95d-434e-94d2-b1cee28eb859",
+      "name": "BQ Main Sliders",
+      "type": "n8n-nodes-base.googleBigQuery",
+      "maxTries": 5,
+      "position": [336, 80],
+      "retryOnFail": true,
+      "typeVersion": 2.1,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleGenericOAuth2Api": {
+          "id": "rxm5L6gkK7cW1GoT",
+          "name": "Google account NkZe-67xCIwNvYiIH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/Nikocan96/ml-slider-dashboard/contents/docs/data.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{YOUR_GITHUB_TOKEN}}" },
+            { "name": "User-Agent",     "value": "n8n-ml-dashboard" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28f82732-c133-4ba3-8ed7-41828b427825",
+      "name": "Get File SHA",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [496, 80],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/Nikocan96/ml-slider-dashboard/contents/docs/data.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{YOUR_GITHUB_TOKEN}}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "User-Agent",    "value": "n8n-ml-dashboard" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "message", "value": "chore: refresh data.json [skip ci]" },
+            { "name": "content", "value": "={{ $('BQ Main Sliders').first().json.data_b64.replace(/\\n/g, '').replace(/\\r/g, '') }}" },
+            { "name": "sha",     "value": "={{ $json.sha }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c0e1804e-6b49-4fdb-911c-fd9e3049bee3",
+      "name": "Push to GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [656, 80],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Schedule Trigger1": { "main": [[{ "node": "BQ Main Sliders", "type": "main", "index": 0 }]] },
+    "BQ Main Sliders":   { "main": [[{ "node": "Get File SHA",    "type": "main", "index": 0 }]] },
+    "Get File SHA":      { "main": [[{ "node": "Push to GitHub",  "type": "main", "index": 0 }]] }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" }
+}

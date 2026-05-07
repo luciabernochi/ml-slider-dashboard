@@ -10,12 +10,13 @@
     /* ── Users section ───────────────────────────────────────────────────────── */
     .users-section {
       display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 16px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
       margin-bottom: 24px;
     }
 
-    @media (max-width: 900px) { .users-section { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .users-section { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px)  { .users-section { grid-template-columns: 1fr; } }
 
     .user-card-home {
       background: var(--card);
@@ -367,19 +368,17 @@
       <div class="uc-value" id="val-HOME">—</div>
       <div class="uc-period" id="period-HOME"></div>
     </div>
+    <div class="user-card"><div class="uc-label">Usuarios Tabs</div><div class="uc-value" id="val-Tabs">—</div><div class="uc-period" id="period-Tabs"></div></div>
+    <div class="user-card"><div class="uc-label">Usuarios MS</div><div class="uc-value" id="val-MS">—</div><div class="uc-period" id="period-MS"></div></div>
+    <div class="user-card"><div class="uc-label">Usuarios QA</div><div class="uc-value" id="val-QA">—</div><div class="uc-period" id="period-QA"></div></div>
     <div class="user-card-home">
       <div class="uc-label">Usuarios Home Search</div>
       <div class="uc-value" id="val-HOME_SEARCH">—</div>
       <div class="uc-period" id="period-HOME_SEARCH"></div>
     </div>
-    <div class="placements-grid">
-      <div class="user-card"><div class="uc-label">Usuarios Tabs</div><div class="uc-value" id="val-Tabs">—</div><div class="uc-period" id="period-Tabs"></div></div>
-      <div class="user-card"><div class="uc-label">Usuarios MS</div><div class="uc-value" id="val-MS">—</div><div class="uc-period" id="period-MS"></div></div>
-      <div class="user-card"><div class="uc-label">Usuarios QA</div><div class="uc-value" id="val-QA">—</div><div class="uc-period" id="period-QA"></div></div>
-      <div class="user-card"><div class="uc-label">Usuarios THB</div><div class="uc-value" id="val-THB">—</div><div class="uc-period" id="period-THB"></div></div>
-      <div class="user-card"><div class="uc-label">Usuarios DA</div><div class="uc-value" id="val-DA">—</div><div class="uc-period" id="period-DA"></div></div>
-      <div class="user-card"><div class="uc-label">Usuarios RH</div><div class="uc-value" id="val-RH">—</div><div class="uc-period" id="period-RH"></div></div>
-    </div>
+    <div class="user-card"><div class="uc-label">Usuarios THB</div><div class="uc-value" id="val-THB">—</div><div class="uc-period" id="period-THB"></div></div>
+    <div class="user-card"><div class="uc-label">Usuarios DA</div><div class="uc-value" id="val-DA">—</div><div class="uc-period" id="period-DA"></div></div>
+    <div class="user-card"><div class="uc-label">Usuarios RH</div><div class="uc-value" id="val-RH">—</div><div class="uc-period" id="period-RH"></div></div>
   </div>
 
   <!-- ── Penetración vs Home ─────────────────────────────────────────────── -->

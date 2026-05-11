@@ -361,7 +361,10 @@
   </div>
 
   <!-- ── Usuarios únicos ──────────────────────────────────────────────────── -->
-  <div class="section-title" id="users-period-label">Usuarios únicos</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div class="section-title" id="users-period-label" style="margin-bottom:0;">Usuarios únicos</div>
+    <div id="user-period-selector" style="display:flex;align-items:center;gap:8px;"></div>
+  </div>
   <div class="users-section" id="users-section">
     <div class="user-card-home">
       <div class="uc-label">Usuarios Home</div>
@@ -425,11 +428,12 @@ const USERS_PLACEMENTS = ['HOME', 'HOME_SEARCH', 'Tabs', 'MS', 'QA', 'THB', 'DA'
 
 const DEFAULTS = { day: 10, week: 8, month: null };
 
-let clicksData  = [];
-let usersData   = [];
-let currentGrain = 'week';
-let allPeriods   = [];
-let selectedSet  = new Set();
+let clicksData       = [];
+let usersData        = [];
+let currentGrain     = 'week';
+let allPeriods       = [];
+let selectedSet      = new Set();
+let selectedUserPeriod = null;
 
 async function loadData() {
   const dot = document.getElementById('freshness-dot');
@@ -474,7 +478,9 @@ function colKeyFor(grain) {
 function applyDefault() {
   const n = DEFAULTS[currentGrain];
   selectedSet = n === null ? new Set(allPeriods) : new Set(allPeriods.slice(-n));
+  selectedUserPeriod = null;
   renderUsers();
+  renderUserPeriodSelector();
   renderFilter();
   renderUsersHeatmap();
   renderHeatmap();
@@ -493,16 +499,54 @@ function renderUsers() {
     USERS_PLACEMENTS.forEach(p => { const el = document.getElementById(`val-${p}`); if (el) el.textContent = '—'; });
     return;
   }
-  const lastPeriod = [...new Set(grainData.map(r => r.period))].sort().pop();
-  document.getElementById('users-period-label').textContent = `Usuarios únicos · ${fmtPeriod(lastPeriod)}`;
+  const availablePeriods = [...new Set(grainData.map(r => r.period))].sort();
+  const period = (selectedUserPeriod && availablePeriods.includes(selectedUserPeriod))
+    ? selectedUserPeriod
+    : availablePeriods[availablePeriods.length - 1];
+  document.getElementById('users-period-label').textContent = `Usuarios únicos · ${fmtPeriod(period)}`;
   const byPlacement = {};
-  grainData.filter(r => r.period === lastPeriod).forEach(r => { byPlacement[r.placement] = Number(r.unique_users); });
+  grainData.filter(r => r.period === period).forEach(r => { byPlacement[r.placement] = Number(r.unique_users); });
   USERS_PLACEMENTS.forEach(p => {
     const val = document.getElementById(`val-${p}`);
     const per = document.getElementById(`period-${p}`);
     if (val) val.textContent = byPlacement[p] != null ? fmtNum(byPlacement[p]) : '—';
-    if (per) per.textContent = lastPeriod ? fmtPeriod(lastPeriod) : '';
+    if (per) per.textContent = period ? fmtPeriod(period) : '';
   });
+}
+
+function renderUserPeriodSelector() {
+  const bar = document.getElementById('user-period-selector');
+  if (!bar) return;
+  const grainData = usersData.filter(r => r.grain === currentGrain);
+  const available = [...new Set(grainData.map(r => r.period))].sort().filter(p => {
+    const grainUsers = usersData.filter(r => r.grain === currentGrain && r.period === p && r.placement === 'HOME');
+    return grainUsers.length > 0 && grainUsers[0].unique_users > 0;
+  });
+  if (!available.length) { bar.innerHTML = ''; return; }
+  const effective = (selectedUserPeriod && available.includes(selectedUserPeriod)) ? selectedUserPeriod : available[available.length - 1];
+
+  if (currentGrain === 'day') {
+    bar.innerHTML = `
+      <input type="date" id="user-day-picker" min="${available[0]}" max="${available[available.length-1]}" value="${effective}"
+        style="font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;background:var(--card);color:var(--text);cursor:pointer;">
+      <button id="user-reset-btn" class="btn-reset" style="font-family:inherit;font-size:12px;">Por defecto</button>
+    `;
+    bar.querySelector('#user-day-picker').addEventListener('change', e => { selectedUserPeriod = e.target.value || null; renderUsers(); });
+    bar.querySelector('#user-reset-btn').addEventListener('click', () => { selectedUserPeriod = null; renderUsers(); renderUserPeriodSelector(); });
+
+  } else if (currentGrain === 'week') {
+    bar.innerHTML = `
+      <select id="user-week-select" style="font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;background:var(--card);color:var(--text);cursor:pointer;min-width:140px;">
+        ${available.map(p => `<option value="${p}" ${p === effective ? 'selected' : ''}>${fmtPeriod(p)}</option>`).join('')}
+      </select>
+      <button id="user-reset-btn" class="btn-reset" style="font-family:inherit;font-size:12px;">Por defecto</button>
+    `;
+    bar.querySelector('#user-week-select').addEventListener('change', e => { selectedUserPeriod = e.target.value; renderUsers(); });
+    bar.querySelector('#user-reset-btn').addEventListener('click', () => { selectedUserPeriod = null; renderUsers(); renderUserPeriodSelector(); });
+
+  } else {
+    bar.innerHTML = '';
+  }
 }
 
 function renderFilter() {

@@ -368,6 +368,7 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
         legend: { display: false },
         tooltip: { callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) } },
         datalabels: {
+          display: 'auto',
           align: 'top',
           anchor: 'end',
           color: c => chartPeriods[c.dataIndex] === effective ? '#e53e3e' : '#555',

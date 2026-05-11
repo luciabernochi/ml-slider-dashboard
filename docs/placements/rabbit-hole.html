@@ -424,6 +424,13 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
   }
 }
 
+// ── Destroy all charts (needed when grain or CBT changes) ────────────────────
+function destroyCharts() {
+  Object.keys(charts).forEach(id => {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  });
+}
+
 // ── Toggles ───────────────────────────────────────────────────────────────────
 document.getElementById('grain-toggle').addEventListener('click', e => {
   const btn = e.target.closest('[data-grain]');
@@ -431,6 +438,7 @@ document.getElementById('grain-toggle').addEventListener('click', e => {
   currentGrain   = btn.dataset.grain;
   selectedPeriod = null;
   document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  destroyCharts();
   render();
 });
 
@@ -439,6 +447,7 @@ document.getElementById('cbt-toggle').addEventListener('click', e => {
   if (!btn) return;
   currentCbt = btn.dataset.cbt;
   document.querySelectorAll('#cbt-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  destroyCharts();
   render();
 });
 

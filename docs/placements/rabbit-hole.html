@@ -10,28 +10,39 @@
   <style>
     .charts-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-top: 20px;
     }
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 1000px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .charts-grid { grid-template-columns: 1fr; } }
 
-    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
     .chart-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 14px 18px 10px;
     }
-    .chart-card-title { font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .5px; }
-    .chart-badges { display: flex; gap: 6px; }
+    .chart-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .chart-badge { display: flex; gap: 6px; align-items: center; }
     .chart-card-body { padding: 4px 14px 14px; }
-    .chart-canvas-wrap { position: relative; height: 200px; }
+    .chart-canvas-wrap { position: relative; height: 180px; }
   </style>
 </head>
 <body>
 
-<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
 <nav class="top-nav">
   <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
   <a class="nav-link" href="../summary.html">Summary Home</a>
@@ -42,18 +53,28 @@
   <a class="nav-link" href="../index.html">Summary Placements</a>
 </nav>
 
-<!-- ─── Page ─────────────────────────────────────────────────────────────────── -->
 <div class="page-wrapper">
 
-  <!-- Header -->
   <div class="page-header">
     <div>
       <div class="page-title">Rabbit Hole</div>
-      <div class="page-subtitle">Métricas semanales · últimas 6 semanas</div>
+      <div class="page-subtitle">Clicks, Views, Órdenes, NMV, CTR y CVR · MLA</div>
     </div>
-    <div id="freshness-badge" class="freshness">
-      <span class="freshness-dot" id="freshness-dot"></span>
-      <span id="freshness-text">Cargando…</span>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="toggle-group" id="cbt-toggle">
+        <button data-cbt="all" class="active">Total</button>
+        <button data-cbt="false">No CBT</button>
+        <button data-cbt="true">CBT</button>
+      </div>
+      <div class="toggle-group" id="grain-toggle">
+        <button data-grain="day">Día</button>
+        <button data-grain="week" class="active">Semana</button>
+        <button data-grain="month">Mes</button>
+      </div>
+      <div class="freshness">
+        <span class="freshness-dot" id="freshness-dot"></span>
+        <span id="freshness-text">Cargando…</span>
+      </div>
     </div>
   </div>
 
@@ -64,87 +85,111 @@
     <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
     <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
     <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
   </div>
 
-  <!-- Charts 2x2 -->
+  <!-- Charts 3x2 -->
   <div class="charts-grid">
-
-    <!-- Clicks -->
     <div class="chart-card">
       <div class="chart-card-header">
-        <span class="chart-card-title">Clicks por Semana</span>
-        <div class="chart-badges" id="badges-clicks"></div>
+        <span class="chart-card-title">Clicks</span>
+        <div class="chart-badge" id="badge-clicks"></div>
       </div>
-      <div class="chart-card-body">
-        <div class="chart-canvas-wrap"><canvas id="chart-clicks"></canvas></div>
-      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-clicks"></canvas></div></div>
     </div>
-
-    <!-- Views -->
     <div class="chart-card">
       <div class="chart-card-header">
-        <span class="chart-card-title">Views por Semana</span>
-        <div class="chart-badges" id="badges-views"></div>
+        <span class="chart-card-title">Views</span>
+        <div class="chart-badge" id="badge-views"></div>
       </div>
-      <div class="chart-card-body">
-        <div class="chart-canvas-wrap"><canvas id="chart-views"></canvas></div>
-      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-views"></canvas></div></div>
     </div>
-
-    <!-- Orders -->
     <div class="chart-card">
       <div class="chart-card-header">
-        <span class="chart-card-title">Órdenes por Semana</span>
-        <div class="chart-badges" id="badges-orders"></div>
+        <span class="chart-card-title">Órdenes</span>
+        <div class="chart-badge" id="badge-orders"></div>
       </div>
-      <div class="chart-card-body">
-        <div class="chart-canvas-wrap"><canvas id="chart-orders"></canvas></div>
-      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-orders"></canvas></div></div>
     </div>
-
-    <!-- CTR + CVR -->
     <div class="chart-card">
       <div class="chart-card-header">
-        <span class="chart-card-title">CTR y CVR por Semana</span>
-        <div class="chart-badges" id="badges-rates"></div>
+        <span class="chart-card-title">NMV</span>
+        <div class="chart-badge" id="badge-nmv"></div>
       </div>
-      <div class="chart-card-body">
-        <div class="chart-canvas-wrap"><canvas id="chart-rates"></canvas></div>
-      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-nmv"></canvas></div></div>
     </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">CTR</span>
+        <div class="chart-badge" id="badge-ctr"></div>
+      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-ctr"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">CVR</span>
+        <div class="chart-badge" id="badge-cvr"></div>
+      </div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cvr"></canvas></div></div>
+    </div>
+  </div>
 
-  </div><!-- /charts-grid -->
-</div><!-- /page-wrapper -->
+</div>
 
 <script type="module">
 import {
-  fmtNum, fmtPct, calcDelta, deltaBadge, fmtWeekLabel, fmtRefreshed
+  fmtNum, fmtPct, fmtUSD, calcDelta, deltaBadge, fmtWeekLabel, fmtRefreshed
 } from '../assets/js/utils.js';
 
 Chart.register(ChartDataLabels);
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let allData = [];
-const charts = {};
-const WEEKS_SHOWN = 6;
-
 const YELLOW      = '#f5c800';
 const YELLOW_FILL = 'rgba(245,200,0,.12)';
-const GRAY        = '#94a3b8';
-const GRAY_FILL   = 'rgba(148,163,184,.08)';
 const FONT        = { family: "'Proxima Nova','proxima-nova','Segoe UI',sans-serif", size: 11 };
+const DEFAULTS    = { day: 10, week: 8, month: null };
 
-// ─── Aggregation ──────────────────────────────────────────────────────────────
-function aggregateByWeek(rows) {
+let allData      = [];
+let currentGrain = 'week';
+let currentCbt   = 'all';
+const charts     = {};
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch('../data-rabbit-hole.json');
+    const json = await res.json();
+    allData = json.data || [];
+    const ts  = json.refreshed_at;
+    const dot = document.getElementById('freshness-dot');
+    const txt = document.getElementById('freshness-text');
+    txt.textContent = ts ? 'Actualizado ' + fmtRefreshed(ts) : 'Sin datos';
+    dot.className   = ts ? 'freshness-dot' : 'freshness-dot error';
+    render();
+  } catch {
+    document.getElementById('freshness-text').textContent = 'Error al cargar datos';
+    document.getElementById('freshness-dot').className    = 'freshness-dot error';
+  }
+}
+
+// ── Filter + Aggregate ────────────────────────────────────────────────────────
+function filterByCbt(data) {
+  if (currentCbt === 'all')  return data;
+  if (currentCbt === 'true') return data.filter(r => r.CBT_FLAG === true);
+  return data.filter(r => r.CBT_FLAG === false);
+}
+
+function aggregate(data) {
+  const keyField = currentGrain === 'day' ? 'DS' : currentGrain === 'week' ? 'WEEK' : 'MONTH';
   const map = new Map();
-  for (const r of rows) {
-    const key = r.WEEK;
-    if (!map.has(key)) map.set(key, { prints: 0, views: 0, clicks: 0, orders: 0, year: r.YEAR_FROM_WEEK });
+  for (const r of data) {
+    const key = r[keyField];
+    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, nmv: 0 });
     const acc = map.get(key);
+    acc.clicks += Number(r.CLICKS) || 0;
     acc.prints += Number(r.PRINTS) || 0;
     acc.views  += Number(r.VIEWS)  || 0;
-    acc.clicks += Number(r.CLICKS) || 0;
     acc.orders += Number(r.ORDERS) || 0;
+    acc.nmv    += Number(r.NMV)    || 0;
   }
   map.forEach(v => {
     v.ctr = v.prints ? v.clicks / v.prints : 0;
@@ -153,123 +198,79 @@ function aggregateByWeek(rows) {
   return map;
 }
 
-function getWeeks(weekMap, yearTag) {
-  return [...weekMap.entries()]
-    .filter(([, v]) => v.year === yearTag)
-    .map(([k]) => k)
-    .sort();
+function getPeriods(map) {
+  const sorted = [...map.keys()].sort();
+  const n = DEFAULTS[currentGrain];
+  return n ? sorted.slice(-n) : sorted;
 }
 
-function getWeeklyKPIs(weekMap) {
-  const cyWeeks = getWeeks(weekMap, 'CY');
-  if (!cyWeeks.length) return { curr: null, prev: null };
-  const currWeek = cyWeeks[cyWeeks.length - 1];
-  const prevWeek = cyWeeks.length > 1 ? cyWeeks[cyWeeks.length - 2] : null;
-  return {
-    curr: { ...weekMap.get(currWeek), week: currWeek },
-    prev: prevWeek ? { ...weekMap.get(prevWeek), week: prevWeek } : null,
-  };
+function fmtPeriodLabel(str) {
+  const d = new Date(str + 'T00:00:00');
+  if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' });
+  if (currentGrain === 'week')  return fmtWeekLabel(str);
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
 }
 
-// ─── Load data ────────────────────────────────────────────────────────────────
-async function loadData() {
-  try {
-    const res  = await fetch('../data-rabbit-hole.json');
-    const json = await res.json();
-    allData    = json.data || [];
-
-    const ts  = json.refreshed_at;
-    const dot = document.getElementById('freshness-dot');
-    const txt = document.getElementById('freshness-text');
-    if (ts) {
-      txt.textContent = 'Actualizado ' + fmtRefreshed(ts);
-      dot.className   = 'freshness-dot';
-    } else {
-      txt.textContent = 'Sin datos';
-      dot.className   = 'freshness-dot error';
-    }
-
-    render();
-  } catch (e) {
-    console.error('loadData error:', e);
-    document.getElementById('freshness-text').textContent = 'Error al cargar datos';
-    document.getElementById('freshness-dot').className    = 'freshness-dot error';
-  }
-}
-
-// ─── Render ───────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
-  const weekMap = aggregateByWeek(allData);
-  const cyWeeks = getWeeks(weekMap, 'CY').slice(-WEEKS_SHOWN);
-
-  renderKPIs(weekMap);
-  renderAreaChart('chart-clicks',  'badges-clicks',  weekMap, cyWeeks, 'clicks',  fmtNum,  YELLOW, YELLOW_FILL);
-  renderAreaChart('chart-views',   'badges-views',   weekMap, cyWeeks, 'views',   fmtNum,  YELLOW, YELLOW_FILL);
-  renderAreaChart('chart-orders',  'badges-orders',  weekMap, cyWeeks, 'orders',  fmtNum,  YELLOW, YELLOW_FILL);
-  renderRatesChart('chart-rates',  'badges-rates',   weekMap, cyWeeks);
+  const map     = aggregate(filterByCbt(allData));
+  const periods = getPeriods(map);
+  renderKPIs(map, periods);
+  renderChart('chart-clicks',  'badge-clicks',  map, periods, 'clicks',  fmtNum,  false);
+  renderChart('chart-views',   'badge-views',   map, periods, 'views',   fmtNum,  false);
+  renderChart('chart-orders',  'badge-orders',  map, periods, 'orders',  fmtNum,  false);
+  renderChart('chart-nmv',     'badge-nmv',     map, periods, 'nmv',     fmtUSD,  false);
+  renderChart('chart-ctr',     'badge-ctr',     map, periods, 'ctr',     fmtPct,  true);
+  renderChart('chart-cvr',     'badge-cvr',     map, periods, 'cvr',     fmtPct,  true);
 }
 
-// ─── KPIs ─────────────────────────────────────────────────────────────────────
-function renderKPIs(weekMap) {
-  const { curr, prev } = getWeeklyKPIs(weekMap);
+function renderKPIs(map, periods) {
   const grid = document.getElementById('kpi-grid');
-
-  if (!curr) {
+  if (!periods.length) {
     grid.innerHTML = '<div class="kpi-card"><div class="state-empty">Sin datos</div></div>';
     return;
   }
-
-  const currCvr = curr.clicks ? curr.orders / curr.clicks : 0;
-  const prevCvr = prev?.clicks ? prev.orders / prev.clicks : 0;
-
+  const curr = map.get(periods[periods.length - 1]);
+  const prev = periods.length > 1 ? map.get(periods[periods.length - 2]) : null;
   const kpis = [
     { label: 'Clicks',  value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
     { label: 'Views',   value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
     { label: 'Órdenes', value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
+    { label: 'NMV',     value: fmtUSD(curr.nmv),    delta: calcDelta(curr.nmv,    prev?.nmv)    },
     { label: 'CTR',     value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr)    },
-    { label: 'CVR',     value: fmtPct(currCvr),     delta: calcDelta(currCvr,     prevCvr)      },
+    { label: 'CVR',     value: fmtPct(curr.cvr),    delta: calcDelta(curr.cvr,    prev?.cvr)    },
   ];
-
   grid.innerHTML = kpis.map(k => `
     <div class="kpi-card">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
-      <div class="kpi-footer">
-        ${deltaBadge(k.delta)}
-        <span>vs semana anterior</span>
-      </div>
-    </div>
-  `).join('');
+      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs período anterior</span></div>
+    </div>`).join('');
 }
 
-// ─── WoW badges ───────────────────────────────────────────────────────────────
-function renderBadges(badgesId, weekMap, cyWeeks, metric, fmtFn) {
-  const el = document.getElementById(badgesId);
-  if (!el || cyWeeks.length < 2) { if (el) el.innerHTML = ''; return; }
-
-  const last = cyWeeks[cyWeeks.length - 1];
-  const prev = cyWeeks[cyWeeks.length - 2];
-  const vLast = weekMap.get(last)?.[metric] ?? 0;
-  const vPrev = weekMap.get(prev)?.[metric] ?? 0;
-  const delta = calcDelta(vLast, vPrev);
-
+function renderBadge(badgeId, map, periods, metric, fmtFn, isPct) {
+  const el = document.getElementById(badgeId);
+  if (!el || periods.length < 2) { if (el) el.innerHTML = ''; return; }
+  const last  = map.get(periods[periods.length - 1])?.[metric] ?? 0;
+  const prev  = map.get(periods[periods.length - 2])?.[metric] ?? 0;
+  const delta = calcDelta(last, prev);
   const sign  = delta.pct > 0 ? '+' : '';
-  const pctStr = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
-  const color  = delta.dir === 'up' ? 'var(--up)' : delta.dir === 'dn' ? 'var(--dn)' : '#888';
-  const bg     = delta.dir === 'up' ? 'var(--up-bg)' : delta.dir === 'dn' ? 'var(--dn-bg)' : '#f1f2f6';
-
+  const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
+  const color = delta.dir === 'up' ? 'var(--up)' : delta.dir === 'dn' ? 'var(--dn)' : '#888';
+  const bg    = delta.dir === 'up' ? 'var(--up-bg)' : delta.dir === 'dn' ? 'var(--dn-bg)' : '#f1f2f6';
   el.innerHTML = `
-    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:${bg};color:${color}">${pctStr}</span>
-    <span style="font-size:11px;color:var(--text-muted)">${fmtFn(vLast)}</span>
-  `;
+    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:${bg};color:${color}">${pct}</span>
+    <span style="font-size:11px;color:var(--text-muted)">${fmtFn(last)}</span>`;
 }
 
-// ─── Area chart (single metric) ───────────────────────────────────────────────
-function renderAreaChart(canvasId, badgesId, weekMap, cyWeeks, metric, fmtFn, color, fillColor) {
-  const labels = cyWeeks.map(w => fmtWeekLabel(w));
-  const data   = cyWeeks.map(w => weekMap.get(w)?.[metric] ?? 0);
+function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
+  const labels = periods.map(p => fmtPeriodLabel(p));
+  const data   = periods.map(p => {
+    const v = map.get(p)?.[metric] ?? 0;
+    return isPct ? +(v * 100).toFixed(4) : v;
+  });
 
-  renderBadges(badgesId, weekMap, cyWeeks, metric, fmtFn);
+  renderBadge(badgeId, map, periods, metric, fmtFn, isPct);
 
   const config = {
     type: 'line',
@@ -277,11 +278,11 @@ function renderAreaChart(canvasId, badgesId, weekMap, cyWeeks, metric, fmtFn, co
       labels,
       datasets: [{
         data,
-        borderColor: color,
-        backgroundColor: fillColor,
+        borderColor: YELLOW,
+        backgroundColor: YELLOW_FILL,
         borderWidth: 2,
         pointRadius: 4,
-        pointBackgroundColor: color,
+        pointBackgroundColor: YELLOW,
         tension: 0.3,
         fill: true,
       }],
@@ -292,21 +293,21 @@ function renderAreaChart(canvasId, badgesId, weekMap, cyWeeks, metric, fmtFn, co
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: { label: c => ' ' + fmtFn(c.parsed.y) },
+          callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) },
         },
         datalabels: {
           align: 'top',
           anchor: 'end',
           color: '#555',
           font: { ...FONT, weight: '600' },
-          formatter: v => fmtFn(v),
+          formatter: v => fmtFn(isPct ? v / 100 : v),
         },
       },
       scales: {
         x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
         y: {
           grid: { color: '#eaecf5' },
-          ticks: { font: FONT, callback: v => fmtFn(v) },
+          ticks: { font: FONT, callback: v => isPct ? v.toFixed(2) + '%' : fmtFn(v) },
           beginAtZero: false,
         },
       },
@@ -314,96 +315,31 @@ function renderAreaChart(canvasId, badgesId, weekMap, cyWeeks, metric, fmtFn, co
   };
 
   if (charts[canvasId]) {
-    charts[canvasId].data.labels         = labels;
+    charts[canvasId].data.labels          = labels;
     charts[canvasId].data.datasets[0].data = data;
     charts[canvasId].update('active');
   } else {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    charts[canvasId] = new Chart(ctx, config);
+    charts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
   }
 }
 
-// ─── Dual line chart (CTR + CVR) ──────────────────────────────────────────────
-function renderRatesChart(canvasId, badgesId, weekMap, cyWeeks) {
-  const labels  = cyWeeks.map(w => fmtWeekLabel(w));
-  const ctrData = cyWeeks.map(w => weekMap.get(w)?.ctr ?? 0);
-  const cvrData = cyWeeks.map(w => weekMap.get(w)?.cvr ?? 0);
+// ── Toggles ───────────────────────────────────────────────────────────────────
+document.getElementById('grain-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('[data-grain]');
+  if (!btn) return;
+  currentGrain = btn.dataset.grain;
+  document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
 
-  // Badges for CTR
-  renderBadges(badgesId, weekMap, cyWeeks, 'ctr', fmtPct);
+document.getElementById('cbt-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('[data-cbt]');
+  if (!btn) return;
+  currentCbt = btn.dataset.cbt;
+  document.querySelectorAll('#cbt-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
 
-  const config = {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'CTR (%)',
-          data: ctrData.map(v => +(v * 100).toFixed(2)),
-          borderColor: YELLOW,
-          backgroundColor: YELLOW_FILL,
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: YELLOW,
-          tension: 0.3,
-          fill: false,
-        },
-        {
-          label: 'CVR (%)',
-          data: cvrData.map(v => +(v * 100).toFixed(2)),
-          borderColor: GRAY,
-          backgroundColor: GRAY_FILL,
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: GRAY,
-          tension: 0.3,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'bottom',
-          labels: { font: FONT, boxWidth: 10, padding: 12 },
-        },
-        tooltip: {
-          callbacks: { label: c => ` ${c.dataset.label}  ${c.parsed.y.toFixed(2)}%` },
-        },
-        datalabels: {
-          align: 'top',
-          anchor: 'end',
-          color: c => c.datasetIndex === 0 ? '#b38f00' : '#64748b',
-          font: { ...FONT, weight: '600' },
-          formatter: v => v.toFixed(2) + '%',
-        },
-      },
-      scales: {
-        x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
-        y: {
-          grid: { color: '#eaecf5' },
-          ticks: { font: FONT, callback: v => v + '%' },
-          beginAtZero: true,
-        },
-      },
-    },
-  };
-
-  if (charts[canvasId]) {
-    charts[canvasId].data.labels              = labels;
-    charts[canvasId].data.datasets[0].data    = ctrData.map(v => +(v * 100).toFixed(2));
-    charts[canvasId].data.datasets[1].data    = cvrData.map(v => +(v * 100).toFixed(2));
-    charts[canvasId].update('active');
-  } else {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    charts[canvasId] = new Chart(ctx, config);
-  }
-}
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
 loadData();
 setInterval(loadData, 5 * 60 * 1000);
 </script>

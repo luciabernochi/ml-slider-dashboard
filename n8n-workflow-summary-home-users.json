@@ -1,0 +1,96 @@
+{
+  "name": "ML Slider Dashboard — Summary Home Users Refresh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "b1c2d3e4-0002-0002-0002-000000000001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [160, 80],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "projectId": "calm-mariner-105612",
+        "sqlQuery": "WITH\n\nraw_HOME AS (\n  SELECT ds, DATE_TRUNC(ds, WEEK(MONDAY)) AS week, DATE_TRUNC(ds, MONTH) AS month, 'HOME' AS placement, usr.uid AS uid\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA' AND bu = 'mercadolibre'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n    AND path = '/home' AND type = 'view'\n),\nraw_QA AS (\n  SELECT ds, DATE_TRUNC(ds, WEEK(MONDAY)) AS week, DATE_TRUNC(ds, MONTH) AS month, 'QA' AS placement, usr.uid AS uid\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA' AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/quick-access'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n),\nraw_TABS AS (\n  SELECT ds, DATE_TRUNC(ds, WEEK(MONDAY)) AS week, DATE_TRUNC(ds, MONTH) AS month, 'Tabs' AS placement, usr.uid AS uid\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA' AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/tabs'\n    AND JSON_EXTRACT_SCALAR(event_data, '$.tab.title') IS NOT NULL\n    AND JSON_EXTRACT_SCALAR(event_data, '$.tab.title') != 'Todo'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n),\nraw_DA AS (\n  SELECT ds, DATE_TRUNC(ds, WEEK(MONDAY)) AS week, DATE_TRUNC(ds, MONTH) AS month, 'DA' AS placement, usr.uid AS uid\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA' AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/dynamic_access'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n),\nraw_SEARCH AS (\n  SELECT DISTINCT ds, usr.uid AS uid\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA' AND bu = 'mercadolibre'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n    AND path = '/search' AND type = 'view'\n),\nraw_HOME_SEARCH AS (\n  SELECT h.ds, h.week, h.month, 'HOME_SEARCH' AS placement, h.uid\n  FROM raw_HOME h\n  INNER JOIN raw_SEARCH s ON s.ds = h.ds AND s.uid = h.uid\n),\nraw_RH AS (\n  SELECT ds, DATE_TRUNC(ds, WEEK(MONDAY)) AS week, DATE_TRUNC(ds, MONTH) AS month, 'RH' AS placement, UID_ID AS uid\n  FROM `meli-bi-data.WHOWNER.BT_RH_CARD_CLICKS`\n  WHERE ds BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND SITE_ID = 'MLA' AND PLACEMENT_TYPE = 'HOME'\n),\nraw_MS_THB AS (\n  SELECT DS_DT AS ds, DATE_TRUNC(DS_DT, WEEK(MONDAY)) AS week, DATE_TRUNC(DS_DT, MONTH) AS month,\n    CASE WHEN PLACEMENT IN ('MAIN-SLIDER_HOME_ANDROID','MAIN-SLIDER_HOME_IOS') THEN 'MS'\n         WHEN PLACEMENT IN ('THB_HOME_ANDROID_1','THB_HOME_IOS_1') THEN 'THB' END AS placement,\n    USER.USER_UID AS uid\n  FROM `meli-bi-data.WHOWNER.BT_ADS_DISP_EVENTS`\n  WHERE DS_DT BETWEEN '2026-03-01' AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND SIT_SITE_ID = 'MLA' AND EVENT_NAME = 'clicks'\n    AND PLACEMENT IN ('MAIN-SLIDER_HOME_ANDROID','MAIN-SLIDER_HOME_IOS','THB_HOME_ANDROID_1','THB_HOME_IOS_1')\n),\nall_raw AS (\n  SELECT * FROM raw_HOME\n  UNION ALL SELECT * FROM raw_HOME_SEARCH\n  UNION ALL SELECT * FROM raw_QA\n  UNION ALL SELECT * FROM raw_TABS\n  UNION ALL SELECT * FROM raw_DA\n  UNION ALL SELECT * FROM raw_RH\n  UNION ALL SELECT * FROM raw_MS_THB\n),\ndaily   AS (SELECT 'day'   AS grain, CAST(ds    AS STRING) AS period, placement, COUNT(DISTINCT uid) AS unique_users FROM all_raw GROUP BY 1,2,3),\nweekly  AS (SELECT 'week'  AS grain, CAST(week  AS STRING) AS period, placement, COUNT(DISTINCT uid) AS unique_users FROM all_raw GROUP BY 1,2,3),\nmonthly AS (SELECT 'month' AS grain, CAST(month AS STRING) AS period, placement, COUNT(DISTINCT uid) AS unique_users FROM all_raw GROUP BY 1,2,3),\nall_data AS (\n  SELECT * FROM daily UNION ALL SELECT * FROM weekly UNION ALL SELECT * FROM monthly\n)\n\nSELECT\n  TO_BASE64(CAST(\n    CONCAT(\n      '{\"data\":',\n      (SELECT TO_JSON_STRING(ARRAY_AGG(STRUCT(\n        grain, period, placement, unique_users\n      ))) FROM all_data),\n      ',\"refreshed_at\":\"',\n      FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%S', CURRENT_TIMESTAMP(), 'America/Argentina/Buenos_Aires'),\n      '\"}'\n    )\n  AS BYTES)) AS data_b64",
+        "options": {
+          "location": "US"
+        }
+      },
+      "id": "b1c2d3e4-0002-0002-0002-000000000002",
+      "name": "BQ Summary Home Users",
+      "type": "n8n-nodes-base.googleBigQuery",
+      "maxTries": 3,
+      "position": [336, 80],
+      "retryOnFail": true,
+      "typeVersion": 2.1,
+      "waitBetweenTries": 10000,
+      "credentials": {
+        "googleGenericOAuth2Api": {
+          "id": "rxm5L6gkK7cW1GoT",
+          "name": "Google account NkZe-67xCIwNvYiIH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/luciabernochi/ml-slider-dashboard/contents/docs/data-summary-home-users.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "lavh-s9Efs8OhTMI8",
+            "name": "Header Auth account lavh-s9Efs8OhTMI8"
+          }
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-0002-0002-0002-000000000003",
+      "name": "Get File SHA SH Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [496, 80],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/luciabernochi/ml-slider-dashboard/contents/docs/data-summary-home-users.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "lavh-s9Efs8OhTMI8",
+            "name": "Header Auth account lavh-s9Efs8OhTMI8"
+          }
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"message\": \"chore: refresh data-summary-home-users.json [skip ci]\", \"content\": $('BQ Summary Home Users').first().json.data_b64.replace(/\\n/g, '').replace(/\\r/g, ''), \"sha\": $('Get File SHA SH Users').first().json.sha }) }}",
+        "options": {}
+      },
+      "id": "b1c2d3e4-0002-0002-0002-000000000004",
+      "name": "Push to GitHub SH Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [656, 80],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Schedule Trigger":        { "main": [[{ "node": "BQ Summary Home Users",   "type": "main", "index": 0 }]] },
+    "BQ Summary Home Users":   { "main": [[{ "node": "Get File SHA SH Users",   "type": "main", "index": 0 }]] },
+    "Get File SHA SH Users":   { "main": [[{ "node": "Push to GitHub SH Users", "type": "main", "index": 0 }]] }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" }
+}

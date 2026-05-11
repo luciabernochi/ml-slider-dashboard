@@ -1,0 +1,100 @@
+{
+  "name": "ML Slider Dashboard — Summary Home Refresh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [160, 80],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "projectId": "calm-mariner-105612",
+        "sqlQuery": "WITH\n\ntaps_QA AS (\n  SELECT\n    ds,\n    DATE_TRUNC(ds, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(ds, MONTH) AS month,\n    'QA' AS placement,\n    COUNT(usr.uid) AS clicks\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA'\n    AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/quick-access'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n  GROUP BY 1, 2, 3, 4\n),\n\ntaps_TABS AS (\n  SELECT\n    ds,\n    DATE_TRUNC(ds, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(ds, MONTH) AS month,\n    'Tabs' AS placement,\n    COUNT(usr.uid) AS clicks\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA'\n    AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/tabs'\n    AND JSON_EXTRACT_SCALAR(event_data, '$.tab.title') IS NOT NULL\n    AND JSON_EXTRACT_SCALAR(event_data, '$.tab.title') != 'Todo'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n  GROUP BY 1, 2, 3, 4\n),\n\ntaps_DA AS (\n  SELECT\n    ds,\n    DATE_TRUNC(ds, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(ds, MONTH) AS month,\n    'DA' AS placement,\n    COUNT(usr.uid) AS clicks\n  FROM `meli-bi-data.MELIDATA.TRACKS`\n  WHERE ds BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND site = 'MLA'\n    AND path = '/home/tap'\n    AND JSON_VALUE(event_data, '$.c_id') = '/home/dynamic_access'\n    AND device.platform IN ('/mobile/ios', '/mobile/android')\n  GROUP BY 1, 2, 3, 4\n),\n\nclicks_RH AS (\n  SELECT\n    ds,\n    DATE_TRUNC(ds, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(ds, MONTH) AS month,\n    'RH' AS placement,\n    COUNT(*) AS clicks\n  FROM `meli-bi-data.WHOWNER.BT_RH_CARD_CLICKS`\n  WHERE ds BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND SITE_ID = 'MLA'\n    AND PLACEMENT_TYPE = 'HOME'\n  GROUP BY 1, 2, 3, 4\n),\n\nclicks_MS AS (\n  SELECT\n    EVENT_LOCAL_DT AS ds,\n    DATE_TRUNC(EVENT_LOCAL_DT, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(EVENT_LOCAL_DT, MONTH) AS month,\n    'MS' AS placement,\n    SUM(CLICKS_QTY) AS clicks\n  FROM `meli-bi-data.WHOWNER.BT_ADS_DISP_METRICS_DAILY`\n  WHERE EVENT_LOCAL_DT BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND SIT_SITE_ID = 'MLA'\n    AND PLACEMENT LIKE '%MAIN-SLIDER_HOME%'\n    AND DEVICE_PLATFORM IN ('/mobile/ios', '/mobile/android')\n  GROUP BY 1, 2, 3, 4\n),\n\nclicks_THB AS (\n  SELECT\n    EVENT_LOCAL_DT AS ds,\n    DATE_TRUNC(EVENT_LOCAL_DT, WEEK(MONDAY)) AS week,\n    DATE_TRUNC(EVENT_LOCAL_DT, MONTH) AS month,\n    'THB' AS placement,\n    SUM(CLICKS_QTY) AS clicks\n  FROM `meli-bi-data.WHOWNER.BT_ADS_DISP_METRICS_DAILY`\n  WHERE EVENT_LOCAL_DT BETWEEN '2026-03-01'\n    AND DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)\n    AND SIT_SITE_ID = 'MLA'\n    AND PLACEMENT LIKE '%THB%'\n    AND DEVICE_PLATFORM IN ('/mobile/ios', '/mobile/android')\n  GROUP BY 1, 2, 3, 4\n),\n\nall_data AS (\n  SELECT * FROM taps_QA\n  UNION ALL SELECT * FROM taps_TABS\n  UNION ALL SELECT * FROM taps_DA\n  UNION ALL SELECT * FROM clicks_RH\n  UNION ALL SELECT * FROM clicks_MS\n  UNION ALL SELECT * FROM clicks_THB\n)\n\nSELECT\n  TO_BASE64(CAST(\n    CONCAT(\n      '{\"data\":',\n      (SELECT TO_JSON_STRING(ARRAY_AGG(STRUCT(\n        CAST(ds AS STRING) AS ds,\n        CAST(week AS STRING) AS week,\n        CAST(month AS STRING) AS month,\n        placement,\n        clicks\n      ))) FROM all_data),\n      ',\"refreshed_at\":\"',\n      FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%S', CURRENT_TIMESTAMP(), 'America/Argentina/Buenos_Aires'),\n      '\"}'\n    )\n  AS BYTES)) AS data_b64",
+        "options": {
+          "location": "US"
+        }
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000002",
+      "name": "BQ Summary Home",
+      "type": "n8n-nodes-base.googleBigQuery",
+      "maxTries": 5,
+      "position": [336, 80],
+      "retryOnFail": true,
+      "typeVersion": 2.1,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleGenericOAuth2Api": {
+          "id": "rxm5L6gkK7cW1GoT",
+          "name": "Google account NkZe-67xCIwNvYiIH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/luciabernochi/ml-slider-dashboard/contents/docs/data-summary-home.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "lavh-s9Efs8OhTMI8",
+            "name": "Header Auth account lavh-s9Efs8OhTMI8"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000003",
+      "name": "Get File SHA",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [496, 80],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/luciabernochi/ml-slider-dashboard/contents/docs/data-summary-home.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "lavh-s9Efs8OhTMI8",
+            "name": "Header Auth account lavh-s9Efs8OhTMI8"
+          }
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "message", "value": "chore: refresh data-summary-home.json [skip ci]" },
+            { "name": "content", "value": "={{ $('BQ Summary Home').first().json.data_b64.replace(/\\n/g, '').replace(/\\r/g, '') }}" },
+            { "name": "sha",     "value": "={{ $json.sha }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000004",
+      "name": "Push to GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [656, 80],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "BQ Summary Home", "type": "main", "index": 0 }]] },
+    "BQ Summary Home":  { "main": [[{ "node": "Get File SHA",    "type": "main", "index": 0 }]] },
+    "Get File SHA":     { "main": [[{ "node": "Push to GitHub",  "type": "main", "index": 0 }]] }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" }
+}

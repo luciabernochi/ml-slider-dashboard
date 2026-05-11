@@ -17,28 +17,50 @@
     @media (max-width: 1000px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px)  { .charts-grid { grid-template-columns: 1fr; } }
 
-    .chart-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .chart-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px 10px;
-    }
-    .chart-card-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .chart-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 10px; }
+    .chart-card-title { font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .5px; }
     .chart-badge { display: flex; gap: 6px; align-items: center; }
     .chart-card-body { padding: 4px 14px 14px; }
     .chart-canvas-wrap { position: relative; height: 180px; }
+
+    .period-selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .period-selector-bar label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    #day-picker {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    #week-select {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      min-width: 140px;
+    }
   </style>
 </head>
 <body>
@@ -78,6 +100,9 @@
     </div>
   </div>
 
+  <!-- Period selector -->
+  <div class="period-selector-bar" id="period-selector-bar"></div>
+
   <!-- KPI Cards -->
   <div class="kpi-grid" id="kpi-grid">
     <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
@@ -91,45 +116,27 @@
   <!-- Charts 3x2 -->
   <div class="charts-grid">
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">Clicks</span>
-        <div class="chart-badge" id="badge-clicks"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">Clicks</span><div class="chart-badge" id="badge-clicks"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-clicks"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">Views</span>
-        <div class="chart-badge" id="badge-views"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">Views</span><div class="chart-badge" id="badge-views"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-views"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">Órdenes</span>
-        <div class="chart-badge" id="badge-orders"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">Órdenes</span><div class="chart-badge" id="badge-orders"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-orders"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">NMV</span>
-        <div class="chart-badge" id="badge-nmv"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">NMV</span><div class="chart-badge" id="badge-nmv"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-nmv"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">CTR</span>
-        <div class="chart-badge" id="badge-ctr"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">CTR</span><div class="chart-badge" id="badge-ctr"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-ctr"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-card-title">CVR</span>
-        <div class="chart-badge" id="badge-cvr"></div>
-      </div>
+      <div class="chart-card-header"><span class="chart-card-title">CVR</span><div class="chart-badge" id="badge-cvr"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cvr"></canvas></div></div>
     </div>
   </div>
@@ -146,12 +153,13 @@ Chart.register(ChartDataLabels);
 const YELLOW      = '#f5c800';
 const YELLOW_FILL = 'rgba(245,200,0,.12)';
 const FONT        = { family: "'Proxima Nova','proxima-nova','Segoe UI',sans-serif", size: 11 };
-const DEFAULTS    = { day: 10, week: 8, month: null };
+const N_SHOWN     = { day: 10, week: 8, month: null };
 
-let allData      = [];
-let currentGrain = 'week';
-let currentCbt   = 'all';
-const charts     = {};
+let allData       = [];
+let currentGrain  = 'week';
+let currentCbt    = 'all';
+let selectedPeriod = null;
+const charts      = {};
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
@@ -159,11 +167,9 @@ async function loadData() {
     const res  = await fetch('../data-rabbit-hole.json');
     const json = await res.json();
     allData = json.data || [];
-    const ts  = json.refreshed_at;
-    const dot = document.getElementById('freshness-dot');
-    const txt = document.getElementById('freshness-text');
-    txt.textContent = ts ? 'Actualizado ' + fmtRefreshed(ts) : 'Sin datos';
-    dot.className   = ts ? 'freshness-dot' : 'freshness-dot error';
+    const ts = json.refreshed_at;
+    document.getElementById('freshness-text').textContent = ts ? 'Actualizado ' + fmtRefreshed(ts) : 'Sin datos';
+    document.getElementById('freshness-dot').className   = ts ? 'freshness-dot' : 'freshness-dot error';
     render();
   } catch {
     document.getElementById('freshness-text').textContent = 'Error al cargar datos';
@@ -198,40 +204,116 @@ function aggregate(data) {
   return map;
 }
 
-function getPeriods(map) {
-  const sorted = [...map.keys()].sort();
-  const n = DEFAULTS[currentGrain];
-  return n ? sorted.slice(-n) : sorted;
+function getAllPeriods(map) {
+  return [...map.keys()].sort();
+}
+
+function getEffectivePeriod(all) {
+  if (selectedPeriod && all.includes(selectedPeriod)) return selectedPeriod;
+  return all[all.length - 1];
+}
+
+function getChartPeriods(all, effectivePeriod) {
+  const endIdx = all.indexOf(effectivePeriod);
+  const n = N_SHOWN[currentGrain];
+  const startIdx = n ? Math.max(0, endIdx - n + 1) : 0;
+  return all.slice(startIdx, endIdx + 1);
 }
 
 function fmtPeriodLabel(str) {
   const d = new Date(str + 'T00:00:00');
+  if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  if (currentGrain === 'week')  return 'Semana ' + fmtWeekLabel(str);
+  return d.toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' });
+}
+
+function fmtAxisLabel(str) {
+  const d = new Date(str + 'T00:00:00');
   if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' });
-  if (currentGrain === 'week')  return fmtWeekLabel(str);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  return fmtWeekLabel(str);
+}
+
+// ── Period Selector ───────────────────────────────────────────────────────────
+function renderPeriodSelector(map) {
+  const bar = document.getElementById('period-selector-bar');
+  const all = getAllPeriods(map);
+  const effective = getEffectivePeriod(all);
+
+  if (currentGrain === 'day') {
+    bar.innerHTML = `
+      <label>Día</label>
+      <input type="date" id="day-picker" min="${all[0]}" max="${all[all.length - 1]}" value="${effective}">
+      <button class="btn-reset" id="btn-reset-day">Último día</button>
+    `;
+    bar.querySelector('#day-picker').addEventListener('change', e => {
+      selectedPeriod = e.target.value || null;
+      render();
+    });
+    bar.querySelector('#btn-reset-day').addEventListener('click', () => {
+      selectedPeriod = null;
+      render();
+    });
+
+  } else if (currentGrain === 'week') {
+    bar.innerHTML = `
+      <label>Semana</label>
+      <select id="week-select">
+        ${all.map(p => `<option value="${p}" ${p === effective ? 'selected' : ''}>${fmtPeriodLabel(p)}</option>`).join('')}
+      </select>
+      <button class="btn-reset" id="btn-reset-week">Última semana</button>
+    `;
+    bar.querySelector('#week-select').addEventListener('change', e => {
+      selectedPeriod = e.target.value;
+      render();
+    });
+    bar.querySelector('#btn-reset-week').addEventListener('click', () => {
+      selectedPeriod = null;
+      render();
+    });
+
+  } else {
+    bar.innerHTML = `
+      <label>Mes</label>
+      <div class="period-chips" id="month-chips">
+        ${all.map(p => `<button class="period-chip ${p === effective ? 'active' : ''}" data-period="${p}">${fmtPeriodLabel(p)}</button>`).join('')}
+      </div>
+    `;
+    bar.querySelectorAll('[data-period]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPeriod = btn.dataset.period;
+        render();
+      });
+    });
+  }
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function render() {
-  const map     = aggregate(filterByCbt(allData));
-  const periods = getPeriods(map);
-  renderKPIs(map, periods);
-  renderChart('chart-clicks',  'badge-clicks',  map, periods, 'clicks',  fmtNum,  false);
-  renderChart('chart-views',   'badge-views',   map, periods, 'views',   fmtNum,  false);
-  renderChart('chart-orders',  'badge-orders',  map, periods, 'orders',  fmtNum,  false);
-  renderChart('chart-nmv',     'badge-nmv',     map, periods, 'nmv',     fmtUSD,  false);
-  renderChart('chart-ctr',     'badge-ctr',     map, periods, 'ctr',     fmtPct,  true);
-  renderChart('chart-cvr',     'badge-cvr',     map, periods, 'cvr',     fmtPct,  true);
+  const map       = aggregate(filterByCbt(allData));
+  const all       = getAllPeriods(map);
+  if (!all.length) return;
+
+  const effective = getEffectivePeriod(all);
+  const chartPeriods = getChartPeriods(all, effective);
+  const effectiveIdx = all.indexOf(effective);
+  const prevPeriod   = effectiveIdx > 0 ? all[effectiveIdx - 1] : null;
+
+  renderPeriodSelector(map);
+  renderKPIs(map, effective, prevPeriod);
+  renderChart('chart-clicks',  'badge-clicks',  map, chartPeriods, effective, 'clicks',  fmtNum,  false);
+  renderChart('chart-views',   'badge-views',   map, chartPeriods, effective, 'views',   fmtNum,  false);
+  renderChart('chart-orders',  'badge-orders',  map, chartPeriods, effective, 'orders',  fmtNum,  false);
+  renderChart('chart-nmv',     'badge-nmv',     map, chartPeriods, effective, 'nmv',     fmtUSD,  false);
+  renderChart('chart-ctr',     'badge-ctr',     map, chartPeriods, effective, 'ctr',     fmtPct,  true);
+  renderChart('chart-cvr',     'badge-cvr',     map, chartPeriods, effective, 'cvr',     fmtPct,  true);
 }
 
-function renderKPIs(map, periods) {
+function renderKPIs(map, effective, prevPeriod) {
   const grid = document.getElementById('kpi-grid');
-  if (!periods.length) {
-    grid.innerHTML = '<div class="kpi-card"><div class="state-empty">Sin datos</div></div>';
-    return;
-  }
-  const curr = map.get(periods[periods.length - 1]);
-  const prev = periods.length > 1 ? map.get(periods[periods.length - 2]) : null;
+  const curr = map.get(effective);
+  const prev = prevPeriod ? map.get(prevPeriod) : null;
+  if (!curr) { grid.innerHTML = '<div class="kpi-card"><div class="state-empty">Sin datos</div></div>'; return; }
+
   const kpis = [
     { label: 'Clicks',  value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
     { label: 'Views',   value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
@@ -248,11 +330,11 @@ function renderKPIs(map, periods) {
     </div>`).join('');
 }
 
-function renderBadge(badgeId, map, periods, metric, fmtFn, isPct) {
+function renderBadge(badgeId, map, chartPeriods, metric, fmtFn, isPct) {
   const el = document.getElementById(badgeId);
-  if (!el || periods.length < 2) { if (el) el.innerHTML = ''; return; }
-  const last  = map.get(periods[periods.length - 1])?.[metric] ?? 0;
-  const prev  = map.get(periods[periods.length - 2])?.[metric] ?? 0;
+  if (!el || chartPeriods.length < 2) { if (el) el.innerHTML = ''; return; }
+  const last  = map.get(chartPeriods[chartPeriods.length - 1])?.[metric] ?? 0;
+  const prev  = map.get(chartPeriods[chartPeriods.length - 2])?.[metric] ?? 0;
   const delta = calcDelta(last, prev);
   const sign  = delta.pct > 0 ? '+' : '';
   const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
@@ -263,14 +345,17 @@ function renderBadge(badgeId, map, periods, metric, fmtFn, isPct) {
     <span style="font-size:11px;color:var(--text-muted)">${fmtFn(last)}</span>`;
 }
 
-function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
-  const labels = periods.map(p => fmtPeriodLabel(p));
-  const data   = periods.map(p => {
+function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fmtFn, isPct) {
+  const labels = chartPeriods.map(p => fmtAxisLabel(p));
+  const data   = chartPeriods.map(p => {
     const v = map.get(p)?.[metric] ?? 0;
     return isPct ? +(v * 100).toFixed(4) : v;
   });
 
-  renderBadge(badgeId, map, periods, metric, fmtFn, isPct);
+  renderBadge(badgeId, map, chartPeriods, metric, fmtFn, isPct);
+
+  const pointColors = chartPeriods.map(p => p === effective ? '#e53e3e' : YELLOW);
+  const pointSizes  = chartPeriods.map(p => p === effective ? 6 : 4);
 
   const config = {
     type: 'line',
@@ -281,8 +366,8 @@ function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
         borderColor: YELLOW,
         backgroundColor: YELLOW_FILL,
         borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: YELLOW,
+        pointRadius: pointSizes,
+        pointBackgroundColor: pointColors,
         tension: 0.3,
         fill: true,
       }],
@@ -292,14 +377,12 @@ function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) },
-        },
+        tooltip: { callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) } },
         datalabels: {
           align: 'top',
           anchor: 'end',
-          color: '#555',
-          font: { ...FONT, weight: '600' },
+          color: c => chartPeriods[c.dataIndex] === effective ? '#e53e3e' : '#555',
+          font: c => ({ ...FONT, weight: chartPeriods[c.dataIndex] === effective ? '700' : '600' }),
           formatter: v => fmtFn(isPct ? v / 100 : v),
         },
       },
@@ -315,8 +398,10 @@ function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
   };
 
   if (charts[canvasId]) {
-    charts[canvasId].data.labels          = labels;
-    charts[canvasId].data.datasets[0].data = data;
+    charts[canvasId].data.labels                          = labels;
+    charts[canvasId].data.datasets[0].data                = data;
+    charts[canvasId].data.datasets[0].pointBackgroundColor = pointColors;
+    charts[canvasId].data.datasets[0].pointRadius          = pointSizes;
     charts[canvasId].update('active');
   } else {
     charts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
@@ -327,7 +412,8 @@ function renderChart(canvasId, badgeId, map, periods, metric, fmtFn, isPct) {
 document.getElementById('grain-toggle').addEventListener('click', e => {
   const btn = e.target.closest('[data-grain]');
   if (!btn) return;
-  currentGrain = btn.dataset.grain;
+  currentGrain   = btn.dataset.grain;
+  selectedPeriod = null;
   document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });

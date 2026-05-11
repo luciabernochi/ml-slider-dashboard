@@ -70,6 +70,19 @@
       cursor: pointer;
       min-width: 140px;
     }
+
+    .btn-reset {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 12px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .btn-reset:hover { background: var(--bg); }
   </style>
 </head>
 <body>
@@ -380,8 +393,10 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
         tooltip: { callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) } },
         datalabels: {
           display: 'auto',
+          clamp: true,
           align: 'top',
           anchor: 'end',
+          offset: 2,
           color: c => chartPeriods[c.dataIndex] === effective ? '#e53e3e' : '#555',
           font: c => ({ ...FONT, weight: chartPeriods[c.dataIndex] === effective ? '700' : '600' }),
           formatter: v => fmtFn(isPct ? v / 100 : v),

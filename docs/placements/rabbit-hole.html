@@ -364,6 +364,7 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 24 } },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) } },

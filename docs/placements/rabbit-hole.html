@@ -181,7 +181,29 @@
   </div>
 
   <div class="section-title" style="margin-top:28px;">Placement Personalization</div>
-  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:16px;">Overall Performance</div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:700;color:var(--text);">Overall Performance</div>
+    <div class="toggle-group" id="pp-grain-toggle">
+      <button data-ppgrain="week" class="active">Semana</button>
+      <button data-ppgrain="month">Mes</button>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Clicks</span><div class="chart-badge" id="badge-pp-clicks"></div></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-clicks"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Impresiones</span><div class="chart-badge" id="badge-pp-impr"></div></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-impr"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">CTR</span><div class="chart-badge" id="badge-pp-ctr"></div></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-ctr"></canvas></div></div>
+    </div>
+  </div>
 
 </div>
 
@@ -569,6 +591,107 @@ document.getElementById('grain-toggle').addEventListener('click', e => {
 
 loadData();
 setInterval(loadData, 5 * 60 * 1000);
+
+// ── Placement Personalization ─────────────────────────────────────────────────
+let ppData    = [];
+let ppGrain   = 'week';
+const ppCharts = {};
+
+async function loadPpData() {
+  try {
+    const res  = await fetch('../data-rh-placement.json');
+    const json = await res.json();
+    ppData = json.data || [];
+    renderPp();
+  } catch { /* silencioso */ }
+}
+
+function aggregatePp() {
+  const keyField = ppGrain === 'week' ? 'WEEK' : 'MONTH';
+  const map = new Map();
+  for (const r of ppData) {
+    const key = r[keyField];
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, { clicks: 0, impressions: 0 });
+    const acc = map.get(key);
+    acc.clicks      += Number(r.CLICKS)      || 0;
+    acc.impressions += Number(r.IMPRESSIONS) || 0;
+  }
+  map.forEach(v => { v.ctr = v.impressions ? v.clicks / v.impressions : 0; });
+  return map;
+}
+
+function renderPp() {
+  const map     = aggregatePp();
+  const periods = [...map.keys()].sort();
+  if (!periods.length) return;
+  const labels  = periods.map(p => {
+    const d = new Date(p + 'T00:00:00');
+    return ppGrain === 'month'
+      ? d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' })
+      : fmtWeekLabel(p);
+  });
+
+  renderPpChart('chart-pp-clicks', 'badge-pp-clicks', labels, periods.map(p => map.get(p).clicks),      fmtNum,  false);
+  renderPpChart('chart-pp-impr',   'badge-pp-impr',   labels, periods.map(p => map.get(p).impressions), fmtNum,  false);
+  renderPpChart('chart-pp-ctr',    'badge-pp-ctr',    labels, periods.map(p => +((map.get(p).ctr * 100).toFixed(4))), fmtPct, true);
+}
+
+function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
+  const el = document.getElementById(badgeId);
+  if (el && data.length >= 2) {
+    const last  = data[data.length - 1];
+    const prev  = data[data.length - 2];
+    const delta = calcDelta(isPct ? last / 100 : last, isPct ? prev / 100 : prev);
+    const sign  = delta.pct > 0 ? '+' : '';
+    const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
+    const color = delta.dir === 'up' ? 'var(--up)' : delta.dir === 'dn' ? 'var(--dn)' : '#888';
+    const bg    = delta.dir === 'up' ? 'var(--up-bg)' : delta.dir === 'dn' ? 'var(--dn-bg)' : '#f1f2f6';
+    el.innerHTML = `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:${bg};color:${color}">${pct}</span>
+                    <span style="font-size:11px;color:var(--text-muted)">${fmtFn(isPct ? last / 100 : last)}</span>`;
+  }
+
+  const config = {
+    type: 'line',
+    data: { labels, datasets: [{
+      data,
+      borderColor: YELLOW, backgroundColor: YELLOW_FILL,
+      borderWidth: 2, pointRadius: 4, pointBackgroundColor: YELLOW,
+      tension: 0.3, fill: true,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 24 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ' ' + fmtFn(isPct ? c.parsed.y / 100 : c.parsed.y) } },
+        datalabels: {
+          display: 'auto', clamp: true, align: 'top', anchor: 'end', offset: 2,
+          color: '#555', font: { ...FONT, weight: '600' },
+          formatter: v => fmtFn(isPct ? v / 100 : v),
+        },
+      },
+      scales: {
+        x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => isPct ? v.toFixed(2) + '%' : fmtFn(v) }, beginAtZero: false },
+      },
+    },
+  };
+
+  if (ppCharts[canvasId]) { ppCharts[canvasId].destroy(); }
+  ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+document.getElementById('pp-grain-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('[data-ppgrain]');
+  if (!btn) return;
+  ppGrain = btn.dataset.ppgrain;
+  document.querySelectorAll('#pp-grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  renderPp();
+});
+
+loadPpData();
+setInterval(loadPpData, 5 * 60 * 1000);
 </script>
 </body>
 </html>

@@ -205,6 +205,23 @@
     </div>
   </div>
 
+  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:24px;">Share por Advertiser</div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share Clicks</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-adv-clicks"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share Impresiones</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-adv-impr"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">CTR Aperturado</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-adv-ctr"></canvas></div></div>
+    </div>
+  </div>
+
   <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:24px;">Share RH Merch vs No Merch</div>
 
   <div class="charts-grid">
@@ -674,6 +691,7 @@ function renderPp() {
   const merchCtr     = periods.map(p => +((mapMerch.get(p)?.ctr   || 0) * 100).toFixed(4));
   const nomCtr       = periods.map(p => +((mapNoMerch.get(p)?.ctr || 0) * 100).toFixed(4));
 
+  renderPpAdvCharts(labels, periods);
   renderPpShareChart('chart-pp-share-clicks', labels, merchClicks, nomClicks);
   renderPpShareChart('chart-pp-share-impr',   labels, merchImpr,   nomImpr);
   renderPpDualChart('chart-pp-share-ctr',     labels, merchCtr,    nomCtr);
@@ -722,6 +740,96 @@ function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
 
   if (ppCharts[canvasId]) { ppCharts[canvasId].destroy(); }
   ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+// ── Share por Advertiser ──────────────────────────────────────────────────────
+const ADV_COLORS = ['#f5c800','rgba(59,91,219,.8)','#16a34a','#f97316','#7c3aed','#94a3b8'];
+
+function getTop5Advertisers() {
+  const totals = new Map();
+  for (const r of ppData) {
+    const adv = r.ADVERTISER_NAME || 'N/A';
+    totals.set(adv, (totals.get(adv) || 0) + (Number(r.CLICKS) || 0));
+  }
+  return [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
+}
+
+function renderPpAdvCharts(labels, periods) {
+  const keyField = ppGrain === 'week' ? 'WEEK' : 'MONTH';
+  const top5 = getTop5Advertisers();
+
+  const advMap = {};
+  [...top5, 'Others'].forEach(a => { advMap[a] = new Map(); });
+
+  for (const r of ppData) {
+    const key = r[keyField];
+    if (!key) continue;
+    const adv = top5.includes(r.ADVERTISER_NAME) ? r.ADVERTISER_NAME : 'Others';
+    if (!advMap[adv].has(key)) advMap[adv].set(key, { clicks: 0, impressions: 0 });
+    advMap[adv].get(key).clicks      += Number(r.CLICKS)      || 0;
+    advMap[adv].get(key).impressions += Number(r.IMPRESSIONS) || 0;
+  }
+  Object.values(advMap).forEach(m => m.forEach(v => { v.ctr = v.impressions ? v.clicks / v.impressions : 0; }));
+
+  const advList = [...top5, 'Others'];
+
+  // Stacked share for clicks and impressions
+  ['chart-pp-adv-clicks', 'chart-pp-adv-impr'].forEach((canvasId, idx) => {
+    const metricKey = idx === 0 ? 'clicks' : 'impressions';
+    const totals = periods.map(p => advList.reduce((s, a) => s + (advMap[a].get(p)?.[metricKey] || 0), 0));
+    const datasets = advList.map((adv, i) => ({
+      label: adv,
+      data: periods.map((p, pi) => totals[pi] ? +((advMap[adv].get(p)?.[metricKey] || 0) / totals[pi] * 100).toFixed(2) : 0),
+      backgroundColor: ADV_COLORS[i],
+      stack: 's',
+    }));
+    const config = {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 8 } },
+        plugins: {
+          legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 6 } },
+          tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}%` } },
+          datalabels: { display: false },
+        },
+        scales: {
+          x: { stacked: true, grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+          y: { stacked: true, max: 100, grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v + '%' } },
+        },
+      },
+    };
+    if (ppCharts[canvasId]) ppCharts[canvasId].destroy();
+    ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+  });
+
+  // Multi-line CTR
+  const datasets = advList.map((adv, i) => ({
+    label: adv,
+    data: periods.map(p => +((advMap[adv].get(p)?.ctr || 0) * 100).toFixed(4)),
+    borderColor: ADV_COLORS[i], backgroundColor: ADV_COLORS[i] + '22',
+    borderWidth: 2, pointRadius: 3, pointBackgroundColor: ADV_COLORS[i], tension: 0.3, fill: false,
+  }));
+  const ctrConfig = {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 6 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%` } },
+        datalabels: { display: false },
+      },
+      scales: {
+        x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v.toFixed(2) + '%' }, beginAtZero: false },
+      },
+    },
+  };
+  if (ppCharts['chart-pp-adv-ctr']) ppCharts['chart-pp-adv-ctr'].destroy();
+  ppCharts['chart-pp-adv-ctr'] = new Chart(document.getElementById('chart-pp-adv-ctr').getContext('2d'), ctrConfig);
 }
 
 function renderPpShareChart(canvasId, labels, merchVals, nomVals) {

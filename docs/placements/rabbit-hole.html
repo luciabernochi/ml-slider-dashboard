@@ -233,17 +233,18 @@ function aggregate(data) {
   const map = new Map();
   for (const r of data) {
     const key = r[keyField];
-    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, nmv: 0 });
+    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, orders_metrics: 0, nmv: 0 });
     const acc = map.get(key);
-    acc.clicks += Number(r.CLICKS) || 0;
-    acc.prints += Number(r.PRINTS) || 0;
-    acc.views  += Number(r.VIEWS)  || 0;
-    acc.orders += Number(r.ORDERS) || 0;
-    acc.nmv    += Number(r.NMV)    || 0;
+    acc.clicks         += Number(r.CLICKS)         || 0;
+    acc.prints         += Number(r.PRINTS)         || 0;
+    acc.views          += Number(r.VIEWS)          || 0;
+    acc.orders         += Number(r.ORDERS)         || 0;
+    acc.orders_metrics += Number(r.ORDERS_METRICS) || 0;
+    acc.nmv            += Number(r.NMV)            || 0;
   }
   map.forEach(v => {
-    v.ctr = v.prints ? v.clicks / v.prints : 0;
-    v.cvr = v.clicks ? v.orders / v.clicks : 0;
+    v.ctr = v.views   ? v.clicks         / v.views   : 0;
+    v.cvr = v.clicks  ? v.orders_metrics / v.clicks  : 0;
   });
   return map;
 }
@@ -452,17 +453,18 @@ function aggregateByCbt(cbtValue) {
   const map = new Map();
   for (const r of allData.filter(row => row.CBT_FLAG === cbtValue)) {
     const key = r[keyField];
-    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, nmv: 0 });
+    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, orders_metrics: 0, nmv: 0 });
     const acc = map.get(key);
-    acc.clicks += Number(r.CLICKS) || 0;
-    acc.prints += Number(r.PRINTS) || 0;
-    acc.views  += Number(r.VIEWS)  || 0;
-    acc.orders += Number(r.ORDERS) || 0;
-    acc.nmv    += Number(r.NMV)    || 0;
+    acc.clicks         += Number(r.CLICKS)         || 0;
+    acc.prints         += Number(r.PRINTS)         || 0;
+    acc.views          += Number(r.VIEWS)          || 0;
+    acc.orders         += Number(r.ORDERS)         || 0;
+    acc.orders_metrics += Number(r.ORDERS_METRICS) || 0;
+    acc.nmv            += Number(r.NMV)            || 0;
   }
   map.forEach(v => {
-    v.ctr = v.prints ? v.clicks / v.prints : 0;
-    v.cvr = v.clicks ? v.orders / v.clicks : 0;
+    v.ctr = v.views  ? v.clicks         / v.views  : 0;
+    v.cvr = v.clicks ? v.orders_metrics / v.clicks : 0;
   });
   return map;
 }

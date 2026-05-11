@@ -239,6 +239,14 @@
     </div>
   </div>
 
+  <div class="section-title" style="margin-top:28px;">ESPECIAL - Hot Sale Campañas</div>
+  <div id="hotsale-table-wrap" style="margin-top:12px;overflow-x:auto;">
+    <table class="data-table" id="hotsale-table">
+      <thead><tr><th>Campaign</th><th>Clicks</th><th>Impresiones</th><th>CTR</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script type="module">
@@ -692,6 +700,7 @@ function renderPp() {
   const nomCtr       = periods.map(p => +((mapNoMerch.get(p)?.ctr || 0) * 100).toFixed(4));
 
   renderPpAdvCharts(labels, periods);
+  renderHotSaleTable();
   renderPpShareChart('chart-pp-share-clicks', labels, merchClicks, nomClicks);
   renderPpShareChart('chart-pp-share-impr',   labels, merchImpr,   nomImpr);
   renderPpDualChart('chart-pp-share-ctr',     labels, merchCtr,    nomCtr);
@@ -894,6 +903,34 @@ document.getElementById('pp-grain-toggle').addEventListener('click', e => {
   document.querySelectorAll('#pp-grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
   renderPp();
 });
+
+function renderHotSaleTable() {
+  const tbody = document.querySelector('#hotsale-table tbody');
+  if (!tbody) return;
+
+  const map = new Map();
+  for (const r of ppData) {
+    if (r.ADVERTISER_NAME !== 'ALL_USERS') continue;
+    const key = r.CAMPAIGN_NAME || '—';
+    if (!map.has(key)) map.set(key, { clicks: 0, impressions: 0 });
+    map.get(key).clicks      += Number(r.CLICKS)      || 0;
+    map.get(key).impressions += Number(r.IMPRESSIONS) || 0;
+  }
+
+  const rows = [...map.entries()]
+    .map(([campaign, v]) => ({ campaign, ...v, ctr: v.impressions ? v.clicks / v.impressions : 0 }))
+    .sort((a, b) => b.clicks - a.clicks);
+
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;color:#888;text-align:center">Sin datos</td></tr>'; return; }
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.campaign}</td>
+      <td>${fmtNum(r.clicks)}</td>
+      <td>${fmtNum(r.impressions)}</td>
+      <td>${fmtPct(r.ctr)}</td>
+    </tr>`).join('');
+}
 
 loadPpData();
 setInterval(loadPpData, 5 * 60 * 1000);

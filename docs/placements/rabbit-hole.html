@@ -478,8 +478,8 @@ function renderShareChart(canvasId, labels, trueVals, falseVals) {
     data: {
       labels,
       datasets: [
-        { label: 'CBT', data: trueShare,  backgroundColor: YELLOW,               stack: 'share' },
-        { label: 'No CBT', data: falseShare, backgroundColor: 'rgba(148,163,184,.5)', stack: 'share' },
+        { label: 'No CBT', data: falseShare, backgroundColor: YELLOW,               stack: 'share' },
+        { label: 'CBT',    data: trueShare,  backgroundColor: 'rgba(59,91,219,.8)', stack: 'share' },
       ],
     },
     options: {
@@ -508,8 +508,8 @@ function renderDualCbtChart(canvasId, labels, trueVals, falseVals, metricLabel) 
     data: {
       labels,
       datasets: [
-        { label: 'CBT',    data: trueVals,  borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
-        { label: 'No CBT', data: falseVals, borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
+        { label: 'No CBT', data: falseVals, borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
+        { label: 'CBT',    data: trueVals,  borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
       ],
     },
     options: {

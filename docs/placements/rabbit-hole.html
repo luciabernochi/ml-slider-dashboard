@@ -166,6 +166,25 @@
 
   <div class="section-title" style="margin-top:28px;">Share CBT</div>
 
+  <div class="charts-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share Views</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cbt-views"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share NMV</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cbt-nmv"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">CTR por CBT</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cbt-ctr"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">CVR por CBT</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-cbt-cvr"></canvas></div></div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -320,6 +339,7 @@ function render() {
   renderChart('chart-nmv',     'badge-nmv',     map, chartPeriods, effective, 'nmv',     fmtUSD,  false);
   renderChart('chart-ctr',     'badge-ctr',     map, chartPeriods, effective, 'ctr',     fmtPct,  true);
   renderChart('chart-cvr',     'badge-cvr',     map, chartPeriods, effective, 'cvr',     fmtPct,  true);
+  renderCbtCharts(chartPeriods);
 }
 
 function renderKPIs(map, effective, prevPeriod) {
@@ -424,6 +444,108 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
   } else {
     charts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
   }
+}
+
+// ── CBT comparison charts ─────────────────────────────────────────────────────
+function aggregateByCbt(cbtValue) {
+  const keyField = currentGrain === 'day' ? 'DS' : currentGrain === 'week' ? 'WEEK' : 'MONTH';
+  const map = new Map();
+  for (const r of allData.filter(row => row.CBT_FLAG === cbtValue)) {
+    const key = r[keyField];
+    if (!map.has(key)) map.set(key, { clicks: 0, prints: 0, views: 0, orders: 0, nmv: 0 });
+    const acc = map.get(key);
+    acc.clicks += Number(r.CLICKS) || 0;
+    acc.prints += Number(r.PRINTS) || 0;
+    acc.views  += Number(r.VIEWS)  || 0;
+    acc.orders += Number(r.ORDERS) || 0;
+    acc.nmv    += Number(r.NMV)    || 0;
+  }
+  map.forEach(v => {
+    v.ctr = v.prints ? v.clicks / v.prints : 0;
+    v.cvr = v.clicks ? v.orders / v.clicks : 0;
+  });
+  return map;
+}
+
+function renderShareChart(canvasId, labels, trueVals, falseVals) {
+  const trueShare  = trueVals.map((t, i)  => { const s = t + falseVals[i]; return s ? +(t / s * 100).toFixed(2) : 0; });
+  const falseShare = falseVals.map((f, i) => { const s = trueVals[i] + f;  return s ? +(f / s * 100).toFixed(2) : 0; });
+
+  const config = {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'CBT', data: trueShare,  backgroundColor: YELLOW,               stack: 'share' },
+        { label: 'No CBT', data: falseShare, backgroundColor: 'rgba(148,163,184,.5)', stack: 'share' },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}%` } },
+        datalabels: { display: false },
+      },
+      scales: {
+        x: { stacked: true, grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { stacked: true, max: 100, grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v + '%' } },
+      },
+    },
+  };
+  if (charts[canvasId]) { charts[canvasId].destroy(); }
+  charts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+function renderDualCbtChart(canvasId, labels, trueVals, falseVals, metricLabel) {
+  const BLUE = 'rgba(59,91,219,.8)';
+  const BLUE_FILL = 'rgba(59,91,219,.08)';
+  const config = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'CBT',    data: trueVals,  borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
+        { label: 'No CBT', data: falseVals, borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%` } },
+        datalabels: { display: false },
+      },
+      scales: {
+        x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v.toFixed(2) + '%' }, beginAtZero: false },
+      },
+    },
+  };
+  if (charts[canvasId]) { charts[canvasId].destroy(); }
+  charts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+function renderCbtCharts(chartPeriods) {
+  const mapTrue  = aggregateByCbt(true);
+  const mapFalse = aggregateByCbt(false);
+  const labels   = chartPeriods.map(p => fmtAxisLabel(p));
+
+  const viewsT = chartPeriods.map(p => mapTrue.get(p)?.views  || 0);
+  const viewsF = chartPeriods.map(p => mapFalse.get(p)?.views || 0);
+  const nmvT   = chartPeriods.map(p => mapTrue.get(p)?.nmv    || 0);
+  const nmvF   = chartPeriods.map(p => mapFalse.get(p)?.nmv   || 0);
+  const ctrT   = chartPeriods.map(p => +((mapTrue.get(p)?.ctr  || 0) * 100).toFixed(4));
+  const ctrF   = chartPeriods.map(p => +((mapFalse.get(p)?.ctr || 0) * 100).toFixed(4));
+  const cvrT   = chartPeriods.map(p => +((mapTrue.get(p)?.cvr  || 0) * 100).toFixed(4));
+  const cvrF   = chartPeriods.map(p => +((mapFalse.get(p)?.cvr || 0) * 100).toFixed(4));
+
+  renderShareChart('chart-cbt-views', labels, viewsT, viewsF);
+  renderShareChart('chart-cbt-nmv',   labels, nmvT,   nmvF);
+  renderDualCbtChart('chart-cbt-ctr', labels, ctrT,   ctrF, 'CTR');
+  renderDualCbtChart('chart-cbt-cvr', labels, cvrT,   cvrF, 'CVR');
 }
 
 // ── Destroy all charts (needed when grain or CBT changes) ────────────────────

@@ -239,12 +239,26 @@
     </div>
   </div>
 
-  <div class="section-title" style="margin-top:28px;">ESPECIAL - Hot Sale Campañas</div>
-  <div id="hotsale-table-wrap" style="margin-top:12px;overflow-x:auto;">
-    <table class="data-table" id="hotsale-table">
-      <thead><tr><th>Campaign</th><th>Clicks</th><th>Impresiones</th><th>CTR</th></tr></thead>
-      <tbody></tbody>
-    </table>
+  <div class="card" style="margin-top:28px;">
+    <div class="card-header">
+      <span class="card-title">ESPECIAL — Hot Sale Campañas</span>
+      <span style="font-size:11px;color:var(--text-muted);">Advertiser: ALL USERS · acumulado del período</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="data-table-wrap">
+        <table class="data-table" id="hotsale-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:16px;">Campaign</th>
+              <th>Clicks</th>
+              <th>Impresiones</th>
+              <th>CTR</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -925,10 +939,10 @@ function renderHotSaleTable() {
 
   tbody.innerHTML = rows.map(r => `
     <tr>
-      <td>${r.campaign}</td>
+      <td class="td-main" style="padding-left:16px;">${r.campaign}</td>
       <td>${fmtNum(r.clicks)}</td>
       <td>${fmtNum(r.impressions)}</td>
-      <td>${fmtPct(r.ctr)}</td>
+      <td><span class="badge neutral" style="font-size:11px;">${fmtPct(r.ctr)}</span></td>
     </tr>`).join('');
 }
 

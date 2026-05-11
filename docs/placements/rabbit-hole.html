@@ -272,18 +272,7 @@ function renderPeriodSelector(map) {
     });
 
   } else {
-    bar.innerHTML = `
-      <label>Mes</label>
-      <div class="period-chips" id="month-chips">
-        ${all.map(p => `<button class="period-chip ${p === effective ? 'active' : ''}" data-period="${p}">${fmtPeriodLabel(p)}</button>`).join('')}
-      </div>
-    `;
-    bar.querySelectorAll('[data-period]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedPeriod = btn.dataset.period;
-        render();
-      });
-    });
+    bar.innerHTML = '';
   }
 }
 

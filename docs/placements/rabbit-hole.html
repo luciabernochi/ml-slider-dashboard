@@ -205,6 +205,23 @@
     </div>
   </div>
 
+  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:24px;">Share RH Merch vs No Merch</div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share Clicks</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-share-clicks"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">Share Impresiones</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-share-impr"></canvas></div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><span class="chart-card-title">CTR Aperturado</span></div>
+      <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-pp-share-ctr"></canvas></div></div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -635,6 +652,31 @@ function renderPp() {
   renderPpChart('chart-pp-clicks', 'badge-pp-clicks', labels, periods.map(p => map.get(p).clicks),      fmtNum,  false);
   renderPpChart('chart-pp-impr',   'badge-pp-impr',   labels, periods.map(p => map.get(p).impressions), fmtNum,  false);
   renderPpChart('chart-pp-ctr',    'badge-pp-ctr',    labels, periods.map(p => +((map.get(p).ctr * 100).toFixed(4))), fmtPct, true);
+
+  // Share charts
+  const keyField  = ppGrain === 'week' ? 'WEEK' : 'MONTH';
+  const mapMerch  = new Map();
+  const mapNoMerch = new Map();
+  for (const r of ppData) {
+    const key = r[keyField];
+    if (!key) continue;
+    const target = r.PLACEMENT_GROUP === 'RH_MERCH' ? mapMerch : mapNoMerch;
+    if (!target.has(key)) target.set(key, { clicks: 0, impressions: 0 });
+    target.get(key).clicks      += Number(r.CLICKS)      || 0;
+    target.get(key).impressions += Number(r.IMPRESSIONS) || 0;
+  }
+  [mapMerch, mapNoMerch].forEach(m => m.forEach(v => { v.ctr = v.impressions ? v.clicks / v.impressions : 0; }));
+
+  const merchClicks  = periods.map(p => mapMerch.get(p)?.clicks      || 0);
+  const nomClicks    = periods.map(p => mapNoMerch.get(p)?.clicks    || 0);
+  const merchImpr    = periods.map(p => mapMerch.get(p)?.impressions  || 0);
+  const nomImpr      = periods.map(p => mapNoMerch.get(p)?.impressions || 0);
+  const merchCtr     = periods.map(p => +((mapMerch.get(p)?.ctr   || 0) * 100).toFixed(4));
+  const nomCtr       = periods.map(p => +((mapNoMerch.get(p)?.ctr || 0) * 100).toFixed(4));
+
+  renderPpShareChart('chart-pp-share-clicks', labels, merchClicks, nomClicks);
+  renderPpShareChart('chart-pp-share-impr',   labels, merchImpr,   nomImpr);
+  renderPpDualChart('chart-pp-share-ctr',     labels, merchCtr,    nomCtr);
 }
 
 function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
@@ -679,6 +721,61 @@ function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
   };
 
   if (ppCharts[canvasId]) { ppCharts[canvasId].destroy(); }
+  ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+function renderPpShareChart(canvasId, labels, merchVals, nomVals) {
+  const BLUE = 'rgba(59,91,219,.8)';
+  const shareM = merchVals.map((m, i) => { const t = m + nomVals[i]; return t ? +(m / t * 100).toFixed(2) : 0; });
+  const shareN = nomVals.map((n, i)   => { const t = n + merchVals[i]; return t ? +(n / t * 100).toFixed(2) : 0; });
+  const config = {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'RH Merch',    data: shareM, backgroundColor: BLUE,   stack: 's' },
+      { label: 'RH No Merch', data: shareN, backgroundColor: YELLOW, stack: 's' },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}%` } },
+        datalabels: { display: false },
+      },
+      scales: {
+        x: { stacked: true, grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { stacked: true, max: 100, grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v + '%' } },
+      },
+    },
+  };
+  if (ppCharts[canvasId]) ppCharts[canvasId].destroy();
+  ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
+}
+
+function renderPpDualChart(canvasId, labels, merchVals, nomVals) {
+  const BLUE = 'rgba(59,91,219,.8)';
+  const BLUE_FILL = 'rgba(59,91,219,.08)';
+  const config = {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'RH Merch',    data: merchVals, borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
+      { label: 'RH No Merch', data: nomVals,   borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: FONT, boxWidth: 10, padding: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%` } },
+        datalabels: { display: false },
+      },
+      scales: {
+        x: { grid: { color: '#eaecf5' }, ticks: { font: FONT, maxRotation: 0 } },
+        y: { grid: { color: '#eaecf5' }, ticks: { font: FONT, callback: v => v.toFixed(2) + '%' }, beginAtZero: false },
+      },
+    },
+  };
+  if (ppCharts[canvasId]) ppCharts[canvasId].destroy();
   ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
 }
 

@@ -731,8 +731,8 @@ function renderPpShareChart(canvasId, labels, merchVals, nomVals) {
   const config = {
     type: 'bar',
     data: { labels, datasets: [
-      { label: 'RH Merch',    data: shareM, backgroundColor: BLUE,   stack: 's' },
-      { label: 'RH No Merch', data: shareN, backgroundColor: YELLOW, stack: 's' },
+      { label: 'RH Merch',    data: shareM, backgroundColor: YELLOW, stack: 's' },
+      { label: 'RH No Merch', data: shareN, backgroundColor: BLUE,   stack: 's' },
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -758,8 +758,8 @@ function renderPpDualChart(canvasId, labels, merchVals, nomVals) {
   const config = {
     type: 'line',
     data: { labels, datasets: [
-      { label: 'RH Merch',    data: merchVals, borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
-      { label: 'RH No Merch', data: nomVals,   borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
+      { label: 'RH Merch',    data: merchVals, borderColor: YELLOW, backgroundColor: YELLOW_FILL, borderWidth: 2, pointRadius: 3, pointBackgroundColor: YELLOW, tension: 0.3, fill: false },
+      { label: 'RH No Merch', data: nomVals,   borderColor: BLUE,   backgroundColor: BLUE_FILL,   borderWidth: 2, pointRadius: 3, pointBackgroundColor: BLUE,   tension: 0.3, fill: false },
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,

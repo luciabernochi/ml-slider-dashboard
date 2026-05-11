@@ -105,12 +105,7 @@
       <div class="page-subtitle">Clicks, Views, Órdenes, NMV, CTR y CVR · MLA</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div class="toggle-group" id="cbt-toggle">
-        <button data-cbt="all" class="active">Total</button>
-        <button data-cbt="false">No CBT</button>
-        <button data-cbt="true">CBT</button>
-      </div>
-      <div class="toggle-group" id="grain-toggle">
+<div class="toggle-group" id="grain-toggle">
         <button data-grain="day">Día</button>
         <button data-grain="week" class="active">Semana</button>
         <button data-grain="month">Mes</button>
@@ -568,14 +563,6 @@ document.getElementById('grain-toggle').addEventListener('click', e => {
   render();
 });
 
-document.getElementById('cbt-toggle').addEventListener('click', e => {
-  const btn = e.target.closest('[data-cbt]');
-  if (!btn) return;
-  currentCbt = btn.dataset.cbt;
-  document.querySelectorAll('#cbt-toggle button').forEach(b => b.classList.toggle('active', b === btn));
-  destroyCharts();
-  render();
-});
 
 loadData();
 setInterval(loadData, 5 * 60 * 1000);

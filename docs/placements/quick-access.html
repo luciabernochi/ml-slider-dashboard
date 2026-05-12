@@ -188,6 +188,7 @@ function renderTable(effective) {
 
   const sorted = [...map.entries()]
     .map(([card, v]) => ({ card, ...v, ctr: v.prints ? v.taps / v.prints : 0 }))
+    .filter(r => r.prints >= 100)
     .sort((a, b) => b.taps - a.taps);
 
   if (!sorted.length) { renderEmpty(); return; }

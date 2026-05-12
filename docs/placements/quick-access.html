@@ -5,8 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quick Access — Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    .qa-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    #qa-period-selector { display: flex; align-items: center; gap: 8px; }
+    #qa-week-select, #qa-day-picker {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    #qa-week-select { min-width: 150px; }
+  </style>
 </head>
 <body>
+
 <nav class="top-nav">
   <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
   <a class="nav-link" href="../summary.html">Summary Home</a>
@@ -16,18 +39,199 @@
   <a class="nav-link" href="rabbit-hole.html">Rabbit Hole</a>
   <a class="nav-link" href="../index.html">Summary Placements</a>
 </nav>
+
 <div class="page-wrapper">
+
   <div class="page-header">
     <div>
       <div class="page-title">Quick Access</div>
-      <div class="page-subtitle">Próximamente</div>
+      <div class="page-subtitle">Ranking de cards · MLA</div>
+    </div>
+    <div class="freshness">
+      <span class="freshness-dot" id="freshness-dot"></span>
+      <span id="freshness-text">Cargando…</span>
     </div>
   </div>
-  <div class="card" style="max-width:480px">
-    <div class="card-body state-empty">
-      Este placement está en desarrollo. Pasá la query de Quick Access para activarlo.
+
+  <div class="qa-controls">
+    <div class="toggle-group" id="grain-toggle">
+      <button data-grain="day">Día</button>
+      <button data-grain="week" class="active">Semana</button>
+      <button data-grain="month">Mes</button>
     </div>
+    <div id="qa-period-selector"></div>
   </div>
+
+  <div class="section-title" id="qa-period-label">Ranking por Taps</div>
+
+  <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-top:12px;">
+    <table id="qa-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#2d3748;color:#fff;">
+          <th style="width:32px;padding:10px 12px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;"></th>
+          <th style="padding:10px 12px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Card</th>
+          <th style="padding:10px 16px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Taps</th>
+          <th style="padding:10px 16px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:right;">Prints</th>
+          <th style="padding:10px 16px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:right;">CTR</th>
+        </tr>
+      </thead>
+      <tbody id="qa-tbody">
+        <tr><td colspan="5" style="padding:24px;color:#888;text-align:center;">Cargando…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
+
+<script type="module">
+import { fmtNum, fmtPct, fmtWeekLabel, fmtRefreshed } from '../assets/js/utils.js';
+
+let allData      = [];
+let currentGrain = 'week';
+let selectedPeriod = null;
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch('../data-qa-home.json');
+    const json = await res.json();
+    allData = json.data || [];
+    const ts = json.refreshed_at;
+    document.getElementById('freshness-text').textContent = ts ? 'Actualizado ' + fmtRefreshed(ts) : 'Sin datos';
+    document.getElementById('freshness-dot').className   = ts ? 'freshness-dot' : 'freshness-dot error';
+    render();
+  } catch {
+    document.getElementById('freshness-text').textContent = 'Error al cargar datos';
+    document.getElementById('freshness-dot').className    = 'freshness-dot error';
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function keyField() {
+  return currentGrain === 'day' ? 'DS' : currentGrain === 'week' ? 'WEEK' : 'MONTH';
+}
+
+function getAllPeriods() {
+  return [...new Set(allData.map(r => r[keyField()]).filter(Boolean))].sort();
+}
+
+function getEffective(all) {
+  return (selectedPeriod && all.includes(selectedPeriod)) ? selectedPeriod : all[all.length - 1];
+}
+
+function fmtPeriodLabel(str) {
+  if (!str) return '';
+  const d = new Date(str + 'T00:00:00');
+  if (currentGrain === 'month') return d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  if (currentGrain === 'week')  return 'Semana ' + fmtWeekLabel(str);
+  return d.toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const all       = getAllPeriods();
+  if (!all.length) { renderEmpty(); return; }
+  const effective = getEffective(all);
+
+  renderPeriodSelector(all, effective);
+  document.getElementById('qa-period-label').textContent = `Ranking por Taps · ${fmtPeriodLabel(effective)}`;
+  renderTable(effective);
+}
+
+function renderEmpty() {
+  document.getElementById('qa-tbody').innerHTML =
+    '<tr><td colspan="5" style="padding:24px;color:#888;text-align:center;">Sin datos</td></tr>';
+}
+
+function renderPeriodSelector(all, effective) {
+  const bar = document.getElementById('qa-period-selector');
+  if (currentGrain === 'day') {
+    bar.innerHTML = `
+      <input type="date" id="qa-day-picker" min="${all[0]}" max="${all[all.length-1]}" value="${effective}">
+      <button class="btn-reset" id="qa-reset">Por defecto</button>`;
+    bar.querySelector('#qa-day-picker').addEventListener('change', e => { selectedPeriod = e.target.value || null; render(); });
+    bar.querySelector('#qa-reset').addEventListener('click', () => { selectedPeriod = null; render(); });
+  } else if (currentGrain === 'week') {
+    bar.innerHTML = `
+      <select id="qa-week-select">
+        ${all.map(p => `<option value="${p}" ${p === effective ? 'selected' : ''}>${fmtPeriodLabel(p)}</option>`).join('')}
+      </select>
+      <button class="btn-reset" id="qa-reset">Por defecto</button>`;
+    bar.querySelector('#qa-week-select').addEventListener('change', e => { selectedPeriod = e.target.value; render(); });
+    bar.querySelector('#qa-reset').addEventListener('click', () => { selectedPeriod = null; render(); });
+  } else {
+    bar.innerHTML = '';
+  }
+}
+
+function renderTable(effective) {
+  const rows = allData.filter(r => r[keyField()] === effective);
+  const map  = new Map();
+  for (const r of rows) {
+    const card = r.ID_CARD || '—';
+    if (!map.has(card)) map.set(card, { taps: 0, prints: 0 });
+    map.get(card).taps   += Number(r.TAPS)   || 0;
+    map.get(card).prints += Number(r.PRINTS) || 0;
+  }
+
+  const sorted = [...map.entries()]
+    .map(([card, v]) => ({ card, ...v, ctr: v.prints ? v.taps / v.prints : 0 }))
+    .sort((a, b) => b.taps - a.taps);
+
+  if (!sorted.length) { renderEmpty(); return; }
+
+  const maxTaps   = sorted[0].taps;
+  const maxPrints = Math.max(...sorted.map(r => r.prints));
+  const maxCtr    = Math.max(...sorted.map(r => r.ctr));
+  const ROW_BASE  = 'border-bottom:1px solid #f3f4f8;transition:background .1s;';
+
+  document.getElementById('qa-tbody').innerHTML = sorted.map((r, i) => {
+    const tapBarW    = maxTaps   ? Math.round(r.taps   / maxTaps   * 100) : 0;
+    const printBarW  = maxPrints ? Math.round(r.prints / maxPrints * 100) : 0;
+    const ctrBarW    = maxCtr    ? Math.round(r.ctr    / maxCtr    * 100) : 0;
+    return `<tr style="${ROW_BASE}" onmouseover="this.style.background='#fafbff'" onmouseout="this.style.background=''">
+      <td style="padding:10px 12px;color:var(--text-muted);font-size:11px;font-weight:600;">${i + 1}.</td>
+      <td style="padding:10px 12px;font-weight:600;color:var(--text);">${r.card}</td>
+      <td style="padding:10px 16px;text-align:right;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+          <span style="font-weight:600;color:var(--text);min-width:52px;text-align:right;">${fmtNum(r.taps)}</span>
+          <div style="width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+            <div style="width:${tapBarW}%;height:100%;background:#4299e1;border-radius:3px;"></div>
+          </div>
+        </div>
+      </td>
+      <td style="padding:10px 16px;text-align:right;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+          <span style="font-weight:600;color:var(--text);min-width:52px;text-align:right;">${fmtNum(r.prints)}</span>
+          <div style="width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+            <div style="width:${printBarW}%;height:100%;background:#f5c800;border-radius:3px;"></div>
+          </div>
+        </div>
+      </td>
+      <td style="padding:10px 16px;text-align:right;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+          <span style="font-weight:600;color:var(--text);min-width:44px;text-align:right;">${fmtPct(r.ctr)}</span>
+          <div style="width:60px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+            <div style="width:${ctrBarW}%;height:100%;background:#ed64a6;border-radius:3px;"></div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+document.getElementById('grain-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('[data-grain]');
+  if (!btn) return;
+  currentGrain   = btn.dataset.grain;
+  selectedPeriod = null;
+  document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
 </body>
 </html>

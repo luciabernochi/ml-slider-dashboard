@@ -74,6 +74,12 @@
     <div id="qa-period-selector"></div>
   </div>
 
+  <div class="kpi-grid" id="qa-kpi-grid" style="margin-bottom:20px;">
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+  </div>
+
   <div class="section-title" id="qa-period-label">Ranking por Taps</div>
 
   <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-top:12px;">
@@ -96,19 +102,25 @@
 </div>
 
 <script type="module">
-import { fmtNum, fmtPct, fmtWeekLabel, fmtRefreshed } from '../assets/js/utils.js';
+import { fmtNum, fmtPct, fmtWeekLabel, fmtRefreshed, calcDelta, deltaBadge } from '../assets/js/utils.js';
 
 let allData      = [];
+let totalsData   = [];
 let currentGrain = 'week';
 let selectedPeriod = null;
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const res  = await fetch('../data-qa-home.json');
-    const json = await res.json();
-    allData = json.data || [];
-    const ts = json.refreshed_at;
+    const [r1, r2] = await Promise.all([
+      fetch('../data-qa-home.json'),
+      fetch('../data-qa-totals.json'),
+    ]);
+    const j1 = await r1.json();
+    const j2 = await r2.json();
+    allData    = j1.data || [];
+    totalsData = j2.data || [];
+    const ts = j1.refreshed_at || j2.refreshed_at;
     document.getElementById('freshness-text').textContent = ts ? 'Actualizado ' + fmtRefreshed(ts) : 'Sin datos';
     document.getElementById('freshness-dot').className   = ts ? 'freshness-dot' : 'freshness-dot error';
     render();
@@ -146,6 +158,7 @@ function render() {
   const effective = getEffective(all);
 
   renderPeriodSelector(all, effective);
+  renderKPIs(all, effective);
   document.getElementById('qa-period-label').textContent = `Ranking por Taps · ${fmtPeriodLabel(effective)}`;
   renderTable(effective);
 }
@@ -153,6 +166,35 @@ function render() {
 function renderEmpty() {
   document.getElementById('qa-tbody').innerHTML =
     '<tr><td colspan="5" style="padding:24px;color:#888;text-align:center;">Sin datos</td></tr>';
+}
+
+function renderKPIs(all, effective) {
+  const grid = document.getElementById('qa-kpi-grid');
+  const kf   = keyField();
+  const curr = totalsData.filter(r => r[kf] === effective)
+    .reduce((acc, r) => { acc.prints += Number(r.PRINTS)||0; acc.taps += Number(r.TAPS)||0; return acc; }, { prints: 0, taps: 0 });
+
+  const prevPeriod = all[all.indexOf(effective) - 1];
+  const prev = prevPeriod
+    ? totalsData.filter(r => r[kf] === prevPeriod)
+        .reduce((acc, r) => { acc.prints += Number(r.PRINTS)||0; acc.taps += Number(r.TAPS)||0; return acc; }, { prints: 0, taps: 0 })
+    : null;
+
+  const ctr     = curr.prints ? curr.taps / curr.prints : 0;
+  const prevCtr = prev?.prints ? prev.taps / prev.prints : 0;
+
+  const kpis = [
+    { label: 'Clicks',  value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,   prev?.taps)   },
+    { label: 'Prints',  value: fmtNum(curr.prints),  delta: calcDelta(curr.prints, prev?.prints) },
+    { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,         prevCtr)      },
+  ];
+
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs período anterior</span></div>
+    </div>`).join('');
 }
 
 function renderPeriodSelector(all, effective) {

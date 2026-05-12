@@ -71,7 +71,6 @@
       <button data-grain="week" class="active">Semana</button>
       <button data-grain="month">Mes</button>
     </div>
-    <div id="qa-period-selector"></div>
   </div>
 
   <div class="kpi-grid" id="qa-kpi-grid" style="margin-bottom:20px;">
@@ -107,7 +106,6 @@ import { fmtNum, fmtPct, fmtWeekLabel, fmtRefreshed, calcDelta, deltaBadge } fro
 let allData      = [];
 let totalsData   = [];
 let currentGrain = 'week';
-let selectedPeriod = null;
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
@@ -140,7 +138,7 @@ function getAllPeriods() {
 }
 
 function getEffective(all) {
-  return (selectedPeriod && all.includes(selectedPeriod)) ? selectedPeriod : all[all.length - 1];
+  return all[all.length - 1];
 }
 
 function fmtPeriodLabel(str) {
@@ -157,7 +155,6 @@ function render() {
   if (!all.length) { renderEmpty(); return; }
   const effective = getEffective(all);
 
-  renderPeriodSelector(all, effective);
   renderKPIs(all, effective);
   document.getElementById('qa-period-label').textContent = `Ranking por Taps · ${fmtPeriodLabel(effective)}`;
   renderTable(effective);
@@ -197,26 +194,6 @@ function renderKPIs(all, effective) {
     </div>`).join('');
 }
 
-function renderPeriodSelector(all, effective) {
-  const bar = document.getElementById('qa-period-selector');
-  if (currentGrain === 'day') {
-    bar.innerHTML = `
-      <input type="date" id="qa-day-picker" min="${all[0]}" max="${all[all.length-1]}" value="${effective}">
-      <button class="btn-reset" id="qa-reset">Por defecto</button>`;
-    bar.querySelector('#qa-day-picker').addEventListener('change', e => { selectedPeriod = e.target.value || null; render(); });
-    bar.querySelector('#qa-reset').addEventListener('click', () => { selectedPeriod = null; render(); });
-  } else if (currentGrain === 'week') {
-    bar.innerHTML = `
-      <select id="qa-week-select">
-        ${all.map(p => `<option value="${p}" ${p === effective ? 'selected' : ''}>${fmtPeriodLabel(p)}</option>`).join('')}
-      </select>
-      <button class="btn-reset" id="qa-reset">Por defecto</button>`;
-    bar.querySelector('#qa-week-select').addEventListener('change', e => { selectedPeriod = e.target.value; render(); });
-    bar.querySelector('#qa-reset').addEventListener('click', () => { selectedPeriod = null; render(); });
-  } else {
-    bar.innerHTML = '';
-  }
-}
 
 function renderTable(effective) {
   const rows = allData.filter(r => r[keyField()] === effective);
@@ -279,8 +256,7 @@ function renderTable(effective) {
 document.getElementById('grain-toggle').addEventListener('click', e => {
   const btn = e.target.closest('[data-grain]');
   if (!btn) return;
-  currentGrain   = btn.dataset.grain;
-  selectedPeriod = null;
+  currentGrain = btn.dataset.grain;
   document.querySelectorAll('#grain-toggle button').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });

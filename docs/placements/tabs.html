@@ -203,7 +203,7 @@ function renderKPIs(effective, prevPeriod) {
   const prevCtr = prev?.views ? prev.taps / prev.views : 0;
 
   const kpis = [
-    { label: 'Clicks',  value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,  prev?.taps)  },
+    { label: 'Taps',    value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,  prev?.taps)  },
     { label: 'Views',   value: fmtNum(curr.views),   delta: calcDelta(curr.views, prev?.views) },
     { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,        prevCtr)     },
   ];

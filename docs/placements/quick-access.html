@@ -229,7 +229,7 @@ function renderKPIs(all, effective) {
   const prevCtr = prev?.prints ? prev.taps / prev.prints : 0;
 
   const kpis = [
-    { label: 'Clicks',  value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,   prev?.taps)   },
+    { label: 'Taps',    value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,   prev?.taps)   },
     { label: 'Prints',  value: fmtNum(curr.prints),  delta: calcDelta(curr.prints, prev?.prints) },
     { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,         prevCtr)      },
   ];

@@ -919,6 +919,7 @@ function renderHotSaleTable() {
   const map = new Map();
   for (const r of ppData) {
     if (r.ADVERTISER_NAME !== 'ALL_USERS') continue;
+    if (!r.CAMPAIGN_NAME?.includes('DESC_2026_Q2_T1')) continue;
     const key = r.CAMPAIGN_NAME || '—';
     if (!map.has(key)) map.set(key, { clicks: 0, impressions: 0 });
     map.get(key).clicks      += Number(r.CLICKS)      || 0;

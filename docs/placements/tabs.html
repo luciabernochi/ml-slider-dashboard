@@ -156,11 +156,11 @@ function aggregate(period) {
   const map  = new Map();
   for (const r of rows) {
     const tab = r.TAB_TITLE || '—';
-    if (!map.has(tab)) map.set(tab, { taps: 0, prints: 0 });
-    map.get(tab).taps   += Number(r.TAPS)   || 0;
-    map.get(tab).prints += Number(r.PRINTS) || 0;
+    if (!map.has(tab)) map.set(tab, { taps: 0, views: 0 });
+    map.get(tab).taps  += Number(r.TAPS)         || 0;
+    map.get(tab).views += Number(r.USERS_VIEWED) || 0;
   }
-  map.forEach(v => { v.ctr = v.prints ? v.taps / v.prints : 0; });
+  map.forEach(v => { v.ctr = v.views ? v.taps / v.views : 0; });
   return map;
 }
 
@@ -179,16 +179,16 @@ function render() {
 
 function renderKPIs(effective, prevPeriod) {
   const grid = document.getElementById('tabs-kpi-grid');
-  const curr = [...aggregate(effective).values()].reduce((a, v) => ({ taps: a.taps + v.taps, prints: a.prints + v.prints }), { taps: 0, prints: 0 });
-  const prev = prevPeriod ? [...aggregate(prevPeriod).values()].reduce((a, v) => ({ taps: a.taps + v.taps, prints: a.prints + v.prints }), { taps: 0, prints: 0 }) : null;
+  const curr = [...aggregate(effective).values()].reduce((a, v) => ({ taps: a.taps + v.taps, views: a.views + v.views }), { taps: 0, views: 0 });
+  const prev = prevPeriod ? [...aggregate(prevPeriod).values()].reduce((a, v) => ({ taps: a.taps + v.taps, views: a.views + v.views }), { taps: 0, views: 0 }) : null;
 
-  const ctr     = curr.prints ? curr.taps / curr.prints : 0;
-  const prevCtr = prev?.prints ? prev.taps / prev.prints : 0;
+  const ctr     = curr.views ? curr.taps / curr.views : 0;
+  const prevCtr = prev?.views ? prev.taps / prev.views : 0;
 
   const kpis = [
-    { label: 'Clicks',  value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,   prev?.taps)   },
-    { label: 'Views',   value: fmtNum(curr.prints),  delta: calcDelta(curr.prints, prev?.prints) },
-    { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,         prevCtr)      },
+    { label: 'Clicks',  value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,  prev?.taps)  },
+    { label: 'Views',   value: fmtNum(curr.views),   delta: calcDelta(curr.views, prev?.views) },
+    { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,        prevCtr)     },
   ];
 
   grid.innerHTML = kpis.map(k => `
@@ -208,13 +208,13 @@ function renderTable(effective) {
   if (!sorted.length) { renderEmpty(); return; }
 
   const maxTaps   = sorted[0].taps;
-  const maxPrints = Math.max(...sorted.map(r => r.prints));
+  const maxPrints = Math.max(...sorted.map(r => r.views));
   const maxCtr    = Math.max(...sorted.map(r => r.ctr));
   const ROW_BASE  = 'border-bottom:1px solid #f3f4f8;transition:background .1s;';
 
   document.getElementById('tabs-tbody').innerHTML = sorted.map((r, i) => {
     const tapBarW   = maxTaps   ? Math.round(r.taps   / maxTaps   * 100) : 0;
-    const printBarW = maxPrints ? Math.round(r.prints / maxPrints * 100) : 0;
+    const printBarW = maxPrints ? Math.round(r.views  / maxPrints * 100) : 0;
     const ctrBarW   = maxCtr    ? Math.round(r.ctr    / maxCtr    * 100) : 0;
     return `<tr style="${ROW_BASE}" onmouseover="this.style.background='#fafbff'" onmouseout="this.style.background=''">
       <td style="padding:10px 12px;color:var(--text-muted);font-size:11px;font-weight:600;">${i + 1}.</td>
@@ -229,7 +229,7 @@ function renderTable(effective) {
       </td>
       <td style="padding:10px 16px;text-align:right;">
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">
-          <span style="font-weight:600;color:var(--text);min-width:52px;text-align:right;">${fmtNum(r.prints)}</span>
+          <span style="font-weight:600;color:var(--text);min-width:52px;text-align:right;">${fmtNum(r.views)}</span>
           <div style="width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
             <div style="width:${printBarW}%;height:100%;background:#f5c800;border-radius:3px;"></div>
           </div>

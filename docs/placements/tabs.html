@@ -155,10 +155,10 @@ function aggregate(period) {
   const rows = allData.filter(r => r[keyField()] === period);
   const map  = new Map();
   for (const r of rows) {
-    const tab = r.TAB_TITLE || '—';
+    const tab = r.tab || '—';
     if (!map.has(tab)) map.set(tab, { taps: 0, views: 0 });
-    map.get(tab).taps  += Number(r.TAPS)         || 0;
-    map.get(tab).views += Number(r.USERS_VIEWED) || 0;
+    map.get(tab).taps  += Number(r.total_taps) || 0;
+    map.get(tab).views += Number(r.views)      || 0;
   }
   map.forEach(v => { v.ctr = v.views ? v.taps / v.views : 0; });
   return map;

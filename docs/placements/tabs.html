@@ -6,6 +6,23 @@
   <title>Tabs — Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
   <style>
+    .period-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .period-chip {
+      font-family: inherit;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      transition: all .12s;
+      white-space: nowrap;
+    }
+    .period-chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .period-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
     .btn-reset {
       font-family: inherit;
       font-size: 12px;

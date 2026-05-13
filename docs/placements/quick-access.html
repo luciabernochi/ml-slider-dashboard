@@ -230,7 +230,7 @@ function renderKPIs(all, effective) {
 
   const kpis = [
     { label: 'Taps',    value: fmtNum(curr.taps),   delta: calcDelta(curr.taps,   prev?.taps)   },
-    { label: 'Prints',  value: fmtNum(curr.prints),  delta: calcDelta(curr.prints, prev?.prints) },
+    { label: 'Views',   value: fmtNum(curr.prints),  delta: calcDelta(curr.prints, prev?.prints) },
     { label: 'CTR',     value: fmtPct(ctr),          delta: calcDelta(ctr,         prevCtr)      },
   ];
 

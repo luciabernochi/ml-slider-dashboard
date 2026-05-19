@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rabbit Hole â€” Dashboard Ejecutivo</title>
+  <title>Rabbit Hole — Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -88,13 +88,13 @@
 <body>
 
 <nav class="top-nav">
-  <div class="nav-brand"><span>â—†</span> ML Home Dashboard</div>
+  <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
   <a class="nav-link" href="../summary.html">Summary Home</a>
   <a class="nav-link" href="tabs.html">Tabs</a>
   <a class="nav-link" href="main-sliders.html">Main Sliders</a>
   <a class="nav-link" href="quick-access.html">Quick Access</a>
   <a class="nav-link active" href="rabbit-hole.html">Rabbit Hole</a>
-  <a class="nav-link" href="../index.html">Índice</a>
+  <a class="nav-link" href="../index.html">Summary Placements</a>
 </nav>
 
 <div class="page-wrapper">
@@ -102,17 +102,17 @@
   <div class="page-header">
     <div>
       <div class="page-title">Rabbit Hole</div>
-      <div class="page-subtitle">Clicks, Views, Ã“rdenes, NMV, CTR y CVR Â· MLA</div>
+      <div class="page-subtitle">Clicks, Views, Órdenes, NMV, CTR y CVR · MLA</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
 <div class="toggle-group" id="grain-toggle">
-        <button data-grain="day">DÃ­a</button>
+        <button data-grain="day">Día</button>
         <button data-grain="week" class="active">Semana</button>
         <button data-grain="month">Mes</button>
       </div>
       <div class="freshness">
         <span class="freshness-dot" id="freshness-dot"></span>
-        <span id="freshness-text">Cargandoâ€¦</span>
+        <span id="freshness-text">Cargando…</span>
       </div>
     </div>
   </div>
@@ -123,12 +123,12 @@
   <!-- KPI Cards -->
   <div class="section-title">Overall Performance</div>
   <div class="kpi-grid" id="kpi-grid">
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
   </div>
 
   <!-- Charts 3x2 -->
@@ -142,7 +142,7 @@
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-views"></canvas></div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-card-header"><span class="chart-card-title">Ã“rdenes</span><div class="chart-badge" id="badge-orders"></div></div>
+      <div class="chart-card-header"><span class="chart-card-title">Órdenes</span><div class="chart-badge" id="badge-orders"></div></div>
       <div class="chart-card-body"><div class="chart-canvas-wrap"><canvas id="chart-orders"></canvas></div></div>
     </div>
     <div class="chart-card">
@@ -239,7 +239,7 @@
     </div>
   </div>
 
-  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:28px;">ESPECIAL â€” Hot Sale CampaÃ±as</div>
+  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;margin-top:28px;">ESPECIAL — Hot Sale Campañas</div>
   <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);">
     <table id="hotsale-table" style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
@@ -275,7 +275,7 @@ let currentCbt    = 'all';
 let selectedPeriod = null;
 const charts      = {};
 
-// â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const res  = await fetch('../data-rabbit-hole.json');
@@ -291,7 +291,7 @@ async function loadData() {
   }
 }
 
-// â”€â”€ Filter + Aggregate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Filter + Aggregate ────────────────────────────────────────────────────────
 function filterByCbt(data) {
   if (currentCbt === 'all')  return data;
   if (currentCbt === 'true') return data.filter(r => r.CBT_FLAG === true);
@@ -348,7 +348,7 @@ function fmtAxisLabel(str) {
   return fmtWeekLabel(str);
 }
 
-// â”€â”€ Period Selector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Period Selector ───────────────────────────────────────────────────────────
 function renderPeriodSelector(map) {
   const bar = document.getElementById('period-selector-bar');
   const all = getAllPeriods(map);
@@ -356,9 +356,9 @@ function renderPeriodSelector(map) {
 
   if (currentGrain === 'day') {
     bar.innerHTML = `
-      <label>DÃ­a</label>
+      <label>Día</label>
       <input type="date" id="day-picker" min="${all[0]}" max="${all[all.length - 1]}" value="${effective}">
-      <button class="btn-reset" id="btn-reset-day">Ãšltimo dÃ­a</button>
+      <button class="btn-reset" id="btn-reset-day">Último día</button>
     `;
     bar.querySelector('#day-picker').addEventListener('change', e => {
       selectedPeriod = e.target.value || null;
@@ -375,7 +375,7 @@ function renderPeriodSelector(map) {
       <select id="week-select">
         ${all.map(p => `<option value="${p}" ${p === effective ? 'selected' : ''}>${fmtPeriodLabel(p)}</option>`).join('')}
       </select>
-      <button class="btn-reset" id="btn-reset-week">Ãšltima semana</button>
+      <button class="btn-reset" id="btn-reset-week">Última semana</button>
     `;
     bar.querySelector('#week-select').addEventListener('change', e => {
       selectedPeriod = e.target.value;
@@ -391,7 +391,7 @@ function renderPeriodSelector(map) {
   }
 }
 
-// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
   const map       = aggregate(filterByCbt(allData));
   const all       = getAllPeriods(map);
@@ -422,7 +422,7 @@ function renderKPIs(map, effective, prevPeriod) {
   const kpis = [
     { label: 'Clicks',  value: fmtNum(curr.clicks), delta: calcDelta(curr.clicks, prev?.clicks) },
     { label: 'Views',   value: fmtNum(curr.views),  delta: calcDelta(curr.views,  prev?.views)  },
-    { label: 'Ã“rdenes', value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
+    { label: 'Órdenes', value: fmtNum(curr.orders), delta: calcDelta(curr.orders, prev?.orders) },
     { label: 'NMV',     value: fmtUSD(curr.nmv),    delta: calcDelta(curr.nmv,    prev?.nmv)    },
     { label: 'CTR',     value: fmtPct(curr.ctr),    delta: calcDelta(curr.ctr,    prev?.ctr)    },
     { label: 'CVR',     value: fmtPct(curr.cvr),    delta: calcDelta(curr.cvr,    prev?.cvr)    },
@@ -431,7 +431,7 @@ function renderKPIs(map, effective, prevPeriod) {
     <div class="kpi-card">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
-      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs perÃ­odo anterior</span></div>
+      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs período anterior</span></div>
     </div>`).join('');
 }
 
@@ -442,7 +442,7 @@ function renderBadge(badgeId, map, chartPeriods, metric, fmtFn, isPct) {
   const prev  = map.get(chartPeriods[chartPeriods.length - 2])?.[metric] ?? 0;
   const delta = calcDelta(last, prev);
   const sign  = delta.pct > 0 ? '+' : '';
-  const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : 'â€”';
+  const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
   const color = delta.dir === 'up' ? 'var(--up)' : delta.dir === 'dn' ? 'var(--dn)' : '#888';
   const bg    = delta.dir === 'up' ? 'var(--up-bg)' : delta.dir === 'dn' ? 'var(--dn-bg)' : '#f1f2f6';
   el.innerHTML = `
@@ -517,7 +517,7 @@ function renderChart(canvasId, badgeId, map, chartPeriods, effective, metric, fm
   }
 }
 
-// â”€â”€ CBT comparison charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CBT comparison charts ─────────────────────────────────────────────────────
 function aggregateByCbt(cbtValue) {
   const keyField = currentGrain === 'day' ? 'DS' : currentGrain === 'week' ? 'WEEK' : 'MONTH';
   const map = new Map();
@@ -620,14 +620,14 @@ function renderCbtCharts(chartPeriods) {
   renderDualCbtChart('chart-cbt-cvr', labels, cvrT,   cvrF, 'CVR');
 }
 
-// â”€â”€ Destroy all charts (needed when grain or CBT changes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Destroy all charts (needed when grain or CBT changes) ────────────────────
 function destroyCharts() {
   Object.keys(charts).forEach(id => {
     if (charts[id]) { charts[id].destroy(); delete charts[id]; }
   });
 }
 
-// â”€â”€ Toggles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Toggles ───────────────────────────────────────────────────────────────────
 document.getElementById('grain-toggle').addEventListener('click', e => {
   const btn = e.target.closest('[data-grain]');
   if (!btn) return;
@@ -642,7 +642,7 @@ document.getElementById('grain-toggle').addEventListener('click', e => {
 loadData();
 setInterval(loadData, 5 * 60 * 1000);
 
-// â”€â”€ Placement Personalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Placement Personalization ─────────────────────────────────────────────────
 let ppData    = [];
 let ppGrain   = 'week';
 const ppCharts = {};
@@ -721,7 +721,7 @@ function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
     const prev  = data[data.length - 2];
     const delta = calcDelta(isPct ? last / 100 : last, isPct ? prev / 100 : prev);
     const sign  = delta.pct > 0 ? '+' : '';
-    const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : 'â€”';
+    const pct   = delta.pct != null ? sign + (delta.pct * 100).toFixed(0) + '%' : '—';
     const color = delta.dir === 'up' ? 'var(--up)' : delta.dir === 'dn' ? 'var(--dn)' : '#888';
     const bg    = delta.dir === 'up' ? 'var(--up-bg)' : delta.dir === 'dn' ? 'var(--dn-bg)' : '#f1f2f6';
     el.innerHTML = `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:${bg};color:${color}">${pct}</span>
@@ -759,7 +759,7 @@ function renderPpChart(canvasId, badgeId, labels, data, fmtFn, isPct) {
   ppCharts[canvasId] = new Chart(document.getElementById(canvasId).getContext('2d'), config);
 }
 
-// â”€â”€ Share por Advertiser â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Share por Advertiser ──────────────────────────────────────────────────────
 const ADV_COLORS = ['#f5c800','rgba(59,91,219,.8)','#16a34a','#f97316','#7c3aed','#94a3b8'];
 
 function getTop5Advertisers() {
@@ -920,7 +920,7 @@ function renderHotSaleTable() {
   for (const r of ppData) {
     if (r.ADVERTISER_NAME !== 'ALL_USERS') continue;
     if (!r.CAMPAIGN_NAME?.includes('DESC_2026_Q2_T1')) continue;
-    const key = r.CAMPAIGN_NAME || 'â€”';
+    const key = r.CAMPAIGN_NAME || '—';
     if (!map.has(key)) map.set(key, { clicks: 0, impressions: 0 });
     map.get(key).clicks      += Number(r.CLICKS)      || 0;
     map.get(key).impressions += Number(r.IMPRESSIONS) || 0;

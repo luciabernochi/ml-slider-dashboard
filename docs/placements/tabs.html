@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tabs â€” Dashboard Ejecutivo</title>
+  <title>Tabs — Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
   <style>
     .period-chips { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -40,13 +40,13 @@
 <body>
 
 <nav class="top-nav">
-  <div class="nav-brand"><span>â—†</span> ML Home Dashboard</div>
+  <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
   <a class="nav-link" href="../summary.html">Summary Home</a>
   <a class="nav-link active" href="tabs.html">Tabs</a>
   <a class="nav-link" href="main-sliders.html">Main Sliders</a>
   <a class="nav-link" href="quick-access.html">Quick Access</a>
   <a class="nav-link" href="rabbit-hole.html">Rabbit Hole</a>
-  <a class="nav-link" href="../index.html">Índice</a>
+  <a class="nav-link" href="../index.html">Summary Placements</a>
 </nav>
 
 <div class="page-wrapper">
@@ -54,17 +54,17 @@
   <div class="page-header">
     <div>
       <div class="page-title">Tabs</div>
-      <div class="page-subtitle">Ranking de tabs Â· MLA</div>
+      <div class="page-subtitle">Ranking de tabs · MLA</div>
     </div>
     <div class="freshness">
       <span class="freshness-dot" id="freshness-dot"></span>
-      <span id="freshness-text">Cargandoâ€¦</span>
+      <span id="freshness-text">Cargando…</span>
     </div>
   </div>
 
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
     <div class="toggle-group" id="grain-toggle">
-      <button data-grain="day">DÃ­a</button>
+      <button data-grain="day">Día</button>
       <button data-grain="week" class="active">Semana</button>
       <button data-grain="month">Mes</button>
     </div>
@@ -72,9 +72,9 @@
   </div>
 
   <div class="kpi-grid" id="tabs-kpi-grid" style="margin-bottom:20px;">
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
   </div>
 
   <div class="section-title" id="tabs-period-label">Ranking por Taps</div>
@@ -91,7 +91,7 @@
         </tr>
       </thead>
       <tbody id="tabs-tbody">
-        <tr><td colspan="5" style="padding:24px;color:#888;text-align:center;">Cargandoâ€¦</td></tr>
+        <tr><td colspan="5" style="padding:24px;color:#888;text-align:center;">Cargando…</td></tr>
       </tbody>
     </table>
   </div>
@@ -172,7 +172,7 @@ function aggregate(period) {
   const rows = allData.filter(r => r[keyField()] === period);
   const map  = new Map();
   for (const r of rows) {
-    const tab = r.tab || 'â€”';
+    const tab = r.tab || '—';
     if (!map.has(tab)) map.set(tab, { taps: 0, views: 0 });
     map.get(tab).taps  += Number(r.total_taps) || 0;
     map.get(tab).views += Number(r.views)      || 0;
@@ -188,7 +188,7 @@ function render() {
   const prevPeriod = all[all.indexOf(effective) - 1];
 
   renderPeriodSelector(all, effective);
-  document.getElementById('tabs-period-label').textContent = `Ranking por Taps Â· ${fmtPeriodLabel(effective)}`;
+  document.getElementById('tabs-period-label').textContent = `Ranking por Taps · ${fmtPeriodLabel(effective)}`;
 
   renderKPIs(effective, prevPeriod);
   renderTable(effective);
@@ -212,7 +212,7 @@ function renderKPIs(effective, prevPeriod) {
     <div class="kpi-card">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-value">${k.value}</div>
-      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs perÃ­odo anterior</span></div>
+      <div class="kpi-footer">${deltaBadge(k.delta)}<span>vs período anterior</span></div>
     </div>`).join('');
 }
 

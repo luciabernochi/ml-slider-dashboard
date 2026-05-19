@@ -1,38 +1,38 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Main Sliders — Dashboard Ejecutivo</title>
+  <title>Main Sliders â€” Dashboard Ejecutivo</title>
   <link rel="stylesheet" href="../assets/css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
 
-<!-- ─── Nav ─────────────────────────────────────────────────────────────────── -->
+<!-- â”€â”€â”€ Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <nav class="top-nav">
-  <div class="nav-brand"><span>◆</span> ML Home Dashboard</div>
+  <div class="nav-brand"><span>â—†</span> ML Home Dashboard</div>
   <a class="nav-link" href="../summary.html">Summary Home</a>
   <a class="nav-link" href="tabs.html">Tabs</a>
   <a class="nav-link active" href="main-sliders.html">Main Sliders</a>
   <a class="nav-link" href="quick-access.html">Quick Access</a>
   <a class="nav-link" href="rabbit-hole.html">Rabbit Hole</a>
-  <a class="nav-link" href="../index.html">Summary Placements</a>
+  <a class="nav-link" href="../index.html">Índice</a>
 </nav>
 
-<!-- ─── Page ─────────────────────────────────────────────────────────────────── -->
+<!-- â”€â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <div class="page-wrapper">
 
   <!-- Header -->
   <div class="page-header">
     <div>
       <div class="page-title">Main Sliders</div>
-      <div class="page-subtitle" id="subtitle">Métricas semanales · últimas 13 semanas</div>
+      <div class="page-subtitle" id="subtitle">MÃ©tricas semanales Â· Ãºltimas 13 semanas</div>
     </div>
     <div id="freshness-badge" class="freshness">
       <span class="freshness-dot" id="freshness-dot"></span>
-      <span id="freshness-text">Cargando…</span>
+      <span id="freshness-text">Cargandoâ€¦</span>
     </div>
   </div>
 
@@ -52,7 +52,7 @@
     </div>
 
     <div class="filter-group">
-      <span class="filter-label">Segmentación</span>
+      <span class="filter-label">SegmentaciÃ³n</span>
       <div class="toggle-group" id="toggle-seg">
         <button data-val="" class="active">Todos</button>
         <button data-val="NO SEGMENTADO">No Seg.</button>
@@ -71,7 +71,7 @@
     </div>
 
     <div class="filter-group" style="margin-left:auto">
-      <span class="filter-label">Gráfico</span>
+      <span class="filter-label">GrÃ¡fico</span>
       <div class="toggle-group" id="toggle-metric">
         <button data-val="prints" class="active">Impresiones</button>
         <button data-val="clicks">Clicks</button>
@@ -83,10 +83,10 @@
 
   <!-- KPI Cards -->
   <div class="kpi-grid" id="kpi-grid">
-    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
-    <div class="kpi-card"><div class="state-loading">Cargando…</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
+    <div class="kpi-card"><div class="state-loading">Cargandoâ€¦</div></div>
   </div>
 
   <!-- Chart + Table -->
@@ -97,9 +97,9 @@
       <div class="card-header">
         <span class="card-title" id="chart-title">Tendencia semanal</span>
         <div class="week-nav">
-          <button id="btn-prev" title="Semana anterior">‹</button>
-          <span id="week-label">—</span>
-          <button id="btn-next" title="Semana siguiente">›</button>
+          <button id="btn-prev" title="Semana anterior">â€¹</button>
+          <span id="week-label">â€”</span>
+          <button id="btn-next" title="Semana siguiente">â€º</button>
         </div>
       </div>
       <div class="card-body">
@@ -112,7 +112,7 @@
     <!-- Table -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Detalle por campaña</span>
+        <span class="card-title">Detalle por campaÃ±a</span>
         <span id="table-week-label" style="font-size:11px;color:var(--text-muted)"></span>
       </div>
       <div class="card-body" style="padding:0">
@@ -120,7 +120,7 @@
           <table class="data-table" id="main-table">
             <thead>
               <tr>
-                <th data-col="campaign" style="min-width:160px">Campaña</th>
+                <th data-col="campaign" style="min-width:160px">CampaÃ±a</th>
                 <th data-col="type">Tipo</th>
                 <th data-col="prints">Impresiones</th>
                 <th data-col="clicks">Clicks</th>
@@ -129,7 +129,7 @@
               </tr>
             </thead>
             <tbody id="table-body">
-              <tr><td colspan="6" class="state-loading">Cargando…</td></tr>
+              <tr><td colspan="6" class="state-loading">Cargandoâ€¦</td></tr>
             </tbody>
           </table>
         </div>
@@ -146,7 +146,7 @@ import {
 } from '../assets/js/utils.js';
 import { buildTrendChart, updateTrendChart } from '../assets/js/charts.js';
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let allData       = [];
 let trendChart    = null;
 let sortCol       = 'prints';
@@ -160,7 +160,7 @@ const state = {
   metric: 'prints',
 };
 
-// ─── Load data ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Load data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadData() {
   try {
     const res  = await fetch('../data.json');
@@ -187,7 +187,7 @@ async function loadData() {
   }
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function render() {
   const rows    = allData.filter(r => r.site === state.site);
   const filter  = { segmentation: state.segmentation || null, type: state.type || null };
@@ -205,7 +205,7 @@ function render() {
   renderWeekNav(cyWeeks);
 }
 
-// ─── KPIs ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ KPIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderKPIs(weekMap) {
   const { curr, prev } = getWeeklyKPIs(weekMap);
   const grid           = document.getElementById('kpi-grid');
@@ -234,7 +234,7 @@ function renderKPIs(weekMap) {
   `).join('');
 }
 
-// ─── Chart ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getMetricFmt(metric) {
   if (metric === 'ctr') return fmtPct;
   if (metric === 'gmv') return fmtUSD;
@@ -256,7 +256,7 @@ function renderChart(weekMap, cyWeeks, lyWeeks) {
   });
 
   const metricLabel = { prints: 'Impresiones', clicks: 'Clicks', ctr: 'CTR', gmv: 'GMV' }[metric];
-  document.getElementById('chart-title').textContent = `Tendencia — ${metricLabel} (CY vs LY)`;
+  document.getElementById('chart-title').textContent = `Tendencia â€” ${metricLabel} (CY vs LY)`;
 
   const ctx = document.getElementById('trend-chart').getContext('2d');
   if (trendChart) {
@@ -266,7 +266,7 @@ function renderChart(weekMap, cyWeeks, lyWeeks) {
   }
 }
 
-// ─── Table ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTable(rows, filter) {
   const tbody    = document.getElementById('table-body');
   const weekLbl  = document.getElementById('table-week-label');
@@ -286,7 +286,7 @@ function renderTable(rows, filter) {
     return sortAsc ? av - bv : bv - av;
   });
 
-  const typeChip = t => `<span class="chip ${(t||'').toLowerCase()}">${t || '—'}</span>`;
+  const typeChip = t => `<span class="chip ${(t||'').toLowerCase()}">${t || 'â€”'}</span>`;
 
   tbody.innerHTML = data.map(r => `
     <tr>
@@ -303,19 +303,19 @@ function renderTable(rows, filter) {
   `).join('');
 }
 
-// ─── Week Nav ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Week Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderWeekNav(cyWeeks) {
   const lbl  = document.getElementById('week-label');
   const prev = document.getElementById('btn-prev');
   const next = document.getElementById('btn-next');
   const idx  = cyWeeks.indexOf(selectedWeek);
 
-  lbl.textContent      = selectedWeek ? 'Sem. ' + fmtWeekLabel(selectedWeek) : '—';
+  lbl.textContent      = selectedWeek ? 'Sem. ' + fmtWeekLabel(selectedWeek) : 'â€”';
   prev.disabled        = idx <= 0;
   next.disabled        = idx >= cyWeeks.length - 1;
 }
 
-// ─── Events ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function bindToggle(groupId, stateKey) {
   document.getElementById(groupId).addEventListener('click', e => {
     const btn = e.target.closest('button');
@@ -370,7 +370,7 @@ document.getElementById('btn-next').addEventListener('click', () => {
   if (idx < weeks.length - 1) { selectedWeek = weeks[idx + 1]; render(); }
 });
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 loadData();
 // Auto-refresh every 5 min
 setInterval(loadData, 5 * 60 * 1000);
